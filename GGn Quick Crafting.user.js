@@ -797,7 +797,7 @@ function grab_result() {
 
         setTimeout(function (){clear_crafting_area()}, ITEM_WINDOW_DELAY);
     } else {
-        alert('Test mode is on. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
+        alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you may have to refresh after each craft.');
     }
 }
 
