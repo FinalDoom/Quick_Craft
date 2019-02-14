@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      0.5.3
+// @version      0.5.4
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '0.5.3';
+const VERSION = '0.5.4';
 
 var style = document.createElement('style');
 style.type = 'text/css';
@@ -785,7 +785,7 @@ function grab_result() {
                                ' | <b>Basic Stat Potion Book:</b> ' + hasStatPotionBook + ' | <b>Metal Bar Book:</b> '
                                + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook + '</p>');
 
-    $("#quick-crafter").append('<p style="float:right;margin-top:-25px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
+    $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
 
 
     if (hasFoodBook === false) {
