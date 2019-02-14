@@ -13,11 +13,10 @@
 const VERSION = '1.0.0b';
 const ITEM_ACCESSOR = ".item:not(.hidden)";
 
-const RETRIEVE_ITEMS = false;
-
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
  * Too little of a delay will cause more visual bugs */
+const RETRIEVE_ITEMS = false; // set to true to automatically grab crafted items.
 const BUTTON_LOCKOUT_DELAY = 4300;
 const ITEM_WINDOW_DELAY = 500;
 const GRAB_DELAY = 1000;
