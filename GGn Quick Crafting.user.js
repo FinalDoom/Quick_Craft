@@ -778,7 +778,7 @@ function grab_result() {
     var hasLuckBook = $("#crafting_recipes h3:contains('Luck Potion Crafting Recipes')").length ? true : false;
     var hasDebugBook = $("#crafting_recipes h3:contains('A fake book for testing')").length ? true : false;
 
-    $("#quick-crafter").append('<p>Recipes will appear if you have the following books:</p>');
+    $("#quick-crafter").append('<p>Recipes will appear if you have one or more of the following books:</p>');
     $("#quick-crafter").append('<p><b>Glass Book:</b> ' + hasGlassBook + ' | <b>Food Book:</b> ' + hasFoodBook +
                                ' | <b>Basic Stat Potion Book:</b> ' + hasStatPotionBook + ' | <b>Metal Bar Book:</b> '
                                + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook + '</p>');
