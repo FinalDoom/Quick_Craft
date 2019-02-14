@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      0.5.4
+// @version      0.6.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,20 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '0.5.4';
+const VERSION = '0.6.0';
+const ITEM_ACCESSOR = ".item:not(.hidden)";
+
+/* >>>BEGIN<<< User adjustable variables
+ * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
+ * Too little of a delay will cause more visual bugs */
+const BUTTON_LOCKOUT_DELAY = 4300;
+const ITEM_WINDOW_DELAY = 500;
+const GRAB_DELAY = 1000;
+
+/* Used to specify the clear button lockout time only at this time */
+var next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
+
+/* >>>END<<< user adjustable variables */
 
 var style = document.createElement('style');
 style.type = 'text/css';
@@ -30,7 +43,7 @@ function filterItems_user() {
     // Has query, get items to remove
     var removeItems = $('#items li.item').filter(function () {
         if ($(this).attr("data-item") === query) {
-            return $(this).attr("data-item") !== query;
+            return false;
         } else {
             return $(this).data("item-name").toLowerCase().indexOf(query.toLowerCase()) === -1;
         }
@@ -67,7 +80,7 @@ function set_item_properties() {
     var items = $( "li.item.ui-draggable.ui-draggable-handle" );
 
     items.each(function( index ) {
-        var itemOffset = $(this).draggable(dragConfig).offset(); // the draggaable part is the important part, but it's working.
+        var itemOffset = $(this).draggable(dragConfig);
     });
 }
 
@@ -77,7 +90,7 @@ function set_slot_properties() {
 
     slots.each(function( index ) {
         if ($(this).data("slot") !== undefined) {
-            var slotOffset = $(this).droppable(dropConfig).offset(); // the droppable part is the important part, but it's working.
+            var slotOffset = $(this).droppable(dropConfig);
         }
     });
 }
@@ -143,15 +156,18 @@ var triggerDragAndDrop = function (selectorDrag, selectorDrop) {
 };
 
 function clear_crafting_area() {
-    triggerDragAndDrop("#slot_0 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_1 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_2 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_3 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_4 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_5 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_6 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_7 li", "#items-wrapper");
-    triggerDragAndDrop("#slot_8 li", "#items-wrapper");
+    var i = 0;
+    for (i = 0; i < 3; i++) {
+        triggerDragAndDrop("#slot_0 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_1 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_2 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_3 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_4 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_5 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_6 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_7 li", "#items-wrapper");
+        triggerDragAndDrop("#slot_8 li", "#items-wrapper");
+    }
 
     $("#CraftingResult li").remove();
     set_filter('');
@@ -160,536 +176,536 @@ function clear_crafting_area() {
 /* Crafts */
 function craft_glass_shards_from_tube() {
     set_filter('test tube');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
-    setTimeout(grab_result, 1000);
+    setTimeout(grab_result, GRAB_DELAY);
 }
 
 function craft_glass_shards_from_sand() {
     set_filter('pile of sand');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
-    setTimeout(grab_result, 1000);
+    setTimeout(grab_result, GRAB_DELAY);
 }
 
 function craft_glass_test_tube() {
     set_filter('glass shards');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
-    setTimeout(grab_result, 1000);
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
+    setTimeout(grab_result, GRAB_DELAY);
 }
 
 function craft_glass_vial() {
     set_filter('glass shards');
 
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
     setTimeout(function() {
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
         setTimeout(function() {
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
             setTimeout(function() {
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
                 setTimeout(function() {
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
-                    setTimeout(grab_result, 1000);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
+                    setTimeout(grab_result, GRAB_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_glass_bowl() {
     set_filter('glass shards');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
 
     setTimeout(function() {
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
         setTimeout(function() {
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
             setTimeout(function() {
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
                 setTimeout(function() {
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
                     setTimeout(function() {
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
                         setTimeout(function() {
-                            triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
+                            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
                             setTimeout(function() {
-                                triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
-                                setTimeout(grab_result, 1400);
-                            }, 500);
-                        }, 500);
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
+                                setTimeout(grab_result, GRAB_DELAY + 400); // this needs more time
+                            }, ITEM_WINDOW_DELAY);
+                        }, ITEM_WINDOW_DELAY);
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_glass_dust_vial() {
     set_filter('pile of sand');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function() {
         set_filter('quartz dust');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_7")
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7")
         if (triggerDragAndDrop === true) {
-            setTimeout(grab_result, 1000);
+            setTimeout(grab_result, GRAB_DELAY);
         } else {
             alert('Error 23. No Quartz Dust?');
             enable_quick_craft_buttons();
             clear_crafting_area();
         }
 
-    }, 500);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_glass_dust_bowl() {
     set_filter('pile of sand');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function() {
         set_filter('jade dust');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_7")
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7")
         if (triggerDragAndDrop === true) {
-            setTimeout(grab_result, 1000);
+            setTimeout(grab_result, GRAB_DELAY);
         } else {
             alert('Error 24. No Quartz Dust?');
             enable_quick_craft_buttons();
             clear_crafting_area();
         }
 
-    }, 500);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_upload_potion_sampler() {
     set_filter('test tube');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('black elderberries');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
         set_filter('black elder leaves');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
-    }, 500);
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_small_upload_potion() {
     set_filter('vial');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('black elderberries');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
         set_filter('black elder leaves');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_upload_potion() {
     set_filter('vial');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('black elderberries');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
         set_filter('black elder leaves');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
                 setTimeout(function (){
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
                     setTimeout(function (){
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_large_upload_potion() {
     set_filter('bowl');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('00099');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
         setTimeout(function (){
             set_filter('yellow hellebore flower');
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_download_potion_sampler() {
     set_filter('test tube');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('purple angelica flowers');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
 
     setTimeout(function (){
         setTimeout(function (){
             set_filter('garlic tincture');
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5")
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5")
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_small_download_potion() {
     set_filter('vial');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('garlic tincture');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
     set_filter('purple angelica flowers');
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_download_potion() {
     set_filter('vial');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('garlic tincture');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
         set_filter('purple angelica flowers');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
                 setTimeout(function (){
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
                     setTimeout(function (){
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_large_download_potion() {
     set_filter('bowl');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('00106');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
         setTimeout(function (){
             set_filter('yellow hellebore flower');
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_garlic_tincture() {
     set_filter('test tube');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('head of garlic');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 }
 
 function craft_impure_bronze_bar() {
     set_filter('bronze ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
     set_filter('clay');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_bronze_bar() {
     set_filter('bronze ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_iron_bar() {
     set_filter('iron ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_steel_bar() {
     set_filter('iron ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 
     set_filter('lump of coal');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 }
 
 function craft_steel_bar_from_iron_bar() {
     set_filter('iron bar');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 
     set_filter('lump of coal');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 }
 
 function craft_gold_bar() {
     set_filter('gold ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_mithril_bar() {
     set_filter('mithril ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_adamantium_bar() {
     set_filter('adamantium ore');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_quartz_bar() {
     set_filter('quartz dust');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_jade_bar() {
     set_filter('jade dust');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_amethyst_bar() {
     set_filter('amethyst dust');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 }
 
 function craft_small_luck_potion() {
     set_filter('vial');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
     set_filter('black elderberries');
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_large_luck_potion() {
     set_filter('bowl');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
     set_filter('black elderberries');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_0");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_0");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_2");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_2");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
                 setTimeout(function (){
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
                     setTimeout(function (){
                         set_filter('yellow hellebore flower');
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_ruby_grained_baguette() {
     set_filter('ruby-flecked wheat');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-    }, 500);
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_emerald_grained_baguette() {
     set_filter('emerald-flecked wheat');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-    }, 500);
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_garlic_ruby_baguette() {
     set_filter('ruby-grained baguette');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
         set_filter('head of garlic');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_garlic_emerald_baguette() {
     set_filter('emerald-grained baguette');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
         set_filter('head of garlic');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_artisan_ruby_baguette() {
     set_filter('garlic ruby-baguette');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
         set_filter('yellow hellebore flower');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_artisan_emerald_baguette() {
     set_filter('garlic emerald-baguette');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
         set_filter('emerald chip');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
         setTimeout(function (){
             set_filter('yellow hellebore flower');
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_gazellian_emerald_baguette() {
     set_filter('artisan emerald-baguette');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
         set_filter('emerald chip');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-        }, 500);
-    }, 500);
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_carbon_crystalline_quartz_gem() {
     set_filter('carbon-crystalline quartz');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
         set_filter('glass shards');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_1");
-    }, 500);
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_carbon_crystalline_quartz_necklace() {
     set_filter('quartz bar');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(function (){
         set_filter('lump of coal');
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
-    }, 500);
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_exquisite_constellation_emeralds() {
     set_filter('00116');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
                 setTimeout(function (){
                     set_filter('amethyst bar');
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
                     setTimeout(function (){
                         set_filter('amethyst bar');
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_exquisite_constellation_rubies() {
     set_filter('02323');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
                 setTimeout(function (){
                     set_filter('amethyst bar');
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
                     setTimeout(function (){
                         set_filter('amethyst bar');
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_exquisite_constellation_sapphires() {
     set_filter('02549');
-    triggerDragAndDrop(".item:not(.hidden)", "#slot_3");
+    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
-        triggerDragAndDrop(".item:not(.hidden)", "#slot_5");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
         setTimeout(function (){
-            triggerDragAndDrop(".item:not(.hidden)", "#slot_6");
+            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_6");
             setTimeout(function (){
-                triggerDragAndDrop(".item:not(.hidden)", "#slot_8");
+                triggerDragAndDrop(ITEM_ACCESSOR, "#slot_8");
                 setTimeout(function (){
                     set_filter('amethyst bar');
-                    triggerDragAndDrop(".item:not(.hidden)", "#slot_4");
+                    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
                     setTimeout(function (){
                         set_filter('amethyst bar');
-                        triggerDragAndDrop(".item:not(.hidden)", "#slot_7");
-                    }, 500);
-                }, 500);
-            }, 500);
-        }, 500);
-    }, 500);
+                        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_7");
+                    }, ITEM_WINDOW_DELAY);
+                }, ITEM_WINDOW_DELAY);
+            }, ITEM_WINDOW_DELAY);
+        }, ITEM_WINDOW_DELAY);
+    }, ITEM_WINDOW_DELAY);
 }
 /* End Crafts */
 
@@ -702,14 +718,16 @@ function enable_quick_craft_buttons() {
     setTimeout(function() {
         $(".quick_craft_button").prop("disabled",false);
         $(".quick_craft_button").removeClass("disabled");
-    },4300);
+
+        next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
+    }, next_button_lockout_delay);
 
 }
 
 function grab_result() {
     triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
 
-    setTimeout(function (){clear_crafting_area()}, 500);
+    setTimeout(function (){clear_crafting_area()}, ITEM_WINDOW_DELAY);
 }
 
 (function() {
@@ -770,6 +788,11 @@ function grab_result() {
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_sapphires" class="quick_craft_button jewelry">Exquisite Constellation of Sapphires</button>');
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
+//     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
+//
+//     $("#test_filter_by_id").click(function() {
+//        set_filter('00112');
+//     });
 
     var hasFoodBook = $("#crafting_recipes h3:contains('Food Cooking Recipes')").length ? true : false;
     var hasStatPotionBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
@@ -786,7 +809,6 @@ function grab_result() {
                                + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook + '</p>');
 
     $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
-
 
     if (hasFoodBook === false) {
         $('.food').remove();
@@ -816,6 +838,7 @@ function grab_result() {
     set_slot_properties();
 
     $("#clear_button").click(function() {
+        next_button_lockout_delay = ITEM_WINDOW_DELAY;
         disable_quick_craft_buttons();
 
         clear_crafting_area();
