@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.0.0b';
+const VERSION = '1.0.1b';
 const ITEM_ACCESSOR = ".item:not(.hidden)";
 
 /* >>>BEGIN<<< User adjustable variables
@@ -271,7 +271,7 @@ function craft_glass_dust_bowl() {
         if (triggerDragAndDrop === true) {
             setTimeout(grab_result, GRAB_DELAY);
         } else {
-            alert('Error 24. No Quartz Dust?');
+            alert('Error 24. No Jade Dust?');
             enable_quick_craft_buttons();
             clear_crafting_area();
         }
