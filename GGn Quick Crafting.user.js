@@ -63,6 +63,7 @@ ingredients["ruby-grained baguette"] = "02580";
 ingredients["emerald-grained baguette"] = "02718";
 ingredients["garlic ruby-baguette"] = "02581";
 ingredients["garlic emerald-baguette"] = "02719";
+ingredients["artisan emerald-baguette"] = "02719";
 ingredients["emerald chip"] = "02551";
 ingredients["quartz bar"] = "02242";
 ingredients["carbon-crystalline quartz"] = "02537";
@@ -103,6 +104,7 @@ function build_on_hand() {
     onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").length;
     onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").length;
     onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length;
+    onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length;
     onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").length;
     onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").length;
     onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").length;
@@ -160,6 +162,17 @@ function build_craft_list() {
     craftList["dust ore glassware (bowl)"].available = Math.min(onHand["pile of sand"]
                                                                 , onHand["jade dust"]);
 
+    craftList["upload potion sampler"] = {};
+    craftList["upload potion sampler"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
+        { id: ingredients["black elder leaves"], qty: 1, "on hand": onHand["black elder leaves"] },
+        { id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
+    ];
+    craftList["upload potion sampler"].icon = "http://test.test";
+    craftList["upload potion sampler"].available = Math.min(onHand["black elder leaves"]
+                                                            , onHand["vial"]
+                                                            , onHand["black elderberries"]);
+
     craftList["small upload potion"] = {};
     craftList["small upload potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
@@ -168,6 +181,7 @@ function build_craft_list() {
     ];
     craftList["small upload potion"].icon = "http://test.test";
     craftList["small upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 2)
+                                                          , onHand["vial"]
                                                           , onHand["black elderberries"]);
 
     craftList["upload potion"] = {};
@@ -178,7 +192,8 @@ function build_craft_list() {
     ];
     craftList["upload potion"].icon = "http://test.test";
     craftList["upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 5)
-                                                    , onHand["black elderberries"]);
+                                                    , onHand["black elderberries"]
+                                                    , onHand["vial"]);
 
     craftList["large upload potion"] = {};
     craftList["large upload potion"].ingredients = [
@@ -231,7 +246,7 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
     ];
     craftList["large download-reduction potion"].icon = "http://test.test";
-    craftList["large download-reduction potion"].available = Math.min(Math.floor(onHand["download-reduction potions"] / 2)
+    craftList["large download-reduction potion"].available = Math.min(Math.floor(onHand["download-reduction potion"] / 2)
                                                                       , onHand["bowl"]
                                                                       , onHand["garlic tincture"]);
 
@@ -356,9 +371,9 @@ function build_craft_list() {
     craftList["adamantium bar"].available = Math.floor(onHand["adamantium ore"] / 2);
 
     craftList["amethyst bar"] = {};
-    craftList["amethyst bar"].ingredients = [ { id: ingredients["amethyst ore"], qty: 2, "on hand": onHand["amethyst ore"] } ];
+    craftList["amethyst bar"].ingredients = [ { id: ingredients["amethyst dust"], qty: 2, "on hand": onHand["amethyst dust"] } ];
     craftList["amethyst bar"].icon = "http://test.test";
-    craftList["amethyst bar"].available = Math.floor(onHand["amethyst ore"] / 2);
+    craftList["amethyst bar"].available = Math.floor(onHand["amethyst dust"] / 2);
 
     craftList["quartz bar"] = {};
     craftList["quartz bar"].ingredients = [ { id: ingredients["quartz dust"], qty: 2, "on hand": onHand["quartz dust"] } ];
@@ -399,11 +414,11 @@ function build_craft_list() {
 
     craftList["carbon-crystalline quartz necklace"] = {};
     craftList["carbon-crystalline quartz necklace"].ingredients = [
-        { id: ingredients["carbon-crystalline quartz gem"], qty: 1, "on hand": onHand["carbon-crystalline quartz gem"] },
+        { id: ingredients["carbon-crystalline quartz gem"], qty: 1, "on hand": onHand["carbon-crystalline quartz"] },
         { id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
     ];
     craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
-    craftList["carbon-crystalline quartz necklace"].available = Math.min(onHand["carbon-crystalline quartz gem"]
+    craftList["carbon-crystalline quartz necklace"].available = Math.min(onHand["carbon-crystalline quartz"]
                                                                          , onHand["glass shards"]);
 
     craftList["exquisite constellations of rubies"] = {};
@@ -1173,13 +1188,156 @@ function craft_exquisite_constellation_sapphires() {
 }
 /* End Crafts */
 
+function do_craft(craft_name) {
+    disable_quick_craft_buttons();
+
+    clear_crafting_area();
+
+    /* Glass */
+    if (craft_name === "shards_tube") {
+        craft_glass_shards_from_tube();
+    } else if (craft_name === "shards_sand") {
+        craft_glass_shards_from_sand();
+    }
+    else if (craft_name === "test_tube") {
+        craft_glass_test_tube();
+    }
+    else if (craft_name === "vial") {
+        craft_glass_vial();
+    }
+    else if (craft_name === "bowl") {
+        craft_glass_bowl();
+    }
+    else if (craft_name === "dust_vial") {
+        craft_glass_dust_vial();
+    }
+    else if (craft_name === "dust_bowl") {
+        craft_glass_dust_bowl();
+    }
+
+	/* Upload potions */
+    else if (craft_name === "upload_potion_sampler") {
+        craft_upload_potion_sampler();
+    }
+    else if (craft_name === "small_upload_potion") {
+        craft_small_upload_potion();
+    }
+    else if (craft_name === "upload_potion") {
+        craft_upload_potion();
+    }
+    else if (craft_name === "large_upload_potion") {
+        craft_large_upload_potion();
+    }
+
+	/* Download potions */
+    else if (craft_name === "download_potion_sampler") {
+        craft_download_potion_sampler();
+    }
+    else if (craft_name === "small_download_potion") {
+        craft_small_download_potion();
+    }
+    else if (craft_name === "download_potion") {
+        craft_download_potion();
+    }
+    else if (craft_name === "large_download_potion") {
+        craft_large_download_potion();
+    }
+    else if (craft_name === "garlic_tincture") {
+        craft_garlic_tincture();
+    }
+
+	/* Metal bars */
+    else if (craft_name === "impure_bronze_bar") {
+        craft_impure_bronze_bar();
+    }
+    else if (craft_name === "bronze_bar") {
+        craft_bronze_bar();
+    }
+    else if (craft_name === "iron_bar") {
+        craft_iron_bar();
+    }
+    else if (craft_name === "steel_bar") {
+        craft_steel_bar();
+    }
+    else if (craft_name === "steel_bar_from_iron_bar") {
+        craft_steel_bar_from_iron_bar();
+    }
+    else if (craft_name === "gold_bar") {
+        craft_gold_bar();
+    }
+    else if (craft_name === "mithril_bar") {
+        craft_mithril_bar();
+    }
+    else if (craft_name === "adamantium_bar") {
+        craft_adamantium_bar();
+    }
+    else if (craft_name === "quartz_bar") {
+        craft_quartz_bar();
+    }
+    else if (craft_name === "jade_bar") {
+        craft_jade_bar();
+    }
+    else if (craft_name === "amethyst_bar") {
+        craft_amethyst_bar();
+    }
+
+	/* Luck potions */
+    else if (craft_name === "small_luck_potion") {
+        craft_small_luck_potion();
+    }
+    else if (craft_name === "large_luck_potion") {
+        craft_large_luck_potion();
+    }
+
+	/* Food */
+    else if (craft_name === "ruby_grained_baguette") {
+        craft_ruby_grained_baguette();
+    }
+    else if (craft_name === "emerald_grained_baguette") {
+        craft_emerald_grained_baguette();
+    }
+    else if (craft_name === "garlic_ruby_baguette") {
+        craft_garlic_ruby_baguette();
+    }
+    else if (craft_name === "garlic_emerald_baguette") {
+        craft_garlic_emerald_baguette();
+    }
+    else if (craft_name === "artisan_ruby_baguette") {
+        craft_artisan_ruby_baguette();
+    }
+    else if (craft_name === "artisan_emerald_baguette") {
+        craft_artisan_emerald_baguette();
+    }
+    else if (craft_name === "gazellian_emerald_baguette") {
+        craft_gazellian_emerald_baguette();
+    }
+
+	/* Jewelry */
+    else if (craft_name === "carbon_crystalline_quartz_gem") {
+        craft_carbon_crystalline_quartz_gem();
+    }
+    else if (craft_name === "carbon_crystalline_quartz_necklace") {
+        craft_carbon_crystalline_quartz_necklace();
+    }
+    else if (craft_name === "exquisite_constellation_emeralds") {
+        craft_exquisite_constellation_emeralds();
+    }
+    else if (craft_name === "exquisite_constellation_sapphires") {
+        craft_exquisite_constellation_sapphires();
+    }
+    else if (craft_name === "exquisite_constellation_rubies") {
+        craft_exquisite_constellation_rubies();
+    }
+
+    enable_quick_craft_buttons();
+}
+
 function disable_quick_craft_buttons() {
     $(".quick_craft_button").prop("disabled",true);
     $(".quick_craft_button").addClass("disabled");
 }
 
 function enable_quick_craft_buttons() {
-    console.log('made it');
     setTimeout(function() {
         console.log('made it 2')
         $(".quick_craft_button").prop("disabled",false);
@@ -1203,6 +1361,9 @@ function grab_result() {
 }
 
 function open_crafting_submenu(craft_name) {
+    $("#current_craft_box").append(""); // add html and css here
+
+    var currentCraft = craftList[craft_name];
 }
 
 (function() {
@@ -1210,8 +1371,8 @@ function open_crafting_submenu(craft_name) {
 
     $("#crafting_recipes").before(
         '<div id="quick-crafter" style="border: 1px solid #fff;margin-bottom: 17px;display: block;clear: both;position:relative;background-color:rgba(0,0,0,.7);padding:5px;"></div>');
-
-    $("#quick-crafter").append("<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.");
+    $("#quick-crafter").append('<div id="#current_craft_box"></div>');
+    $("#quick-crafter").append('<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: red;" id="clear_button" class="quick_craft_button">Clear</button>');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="shards_tube" class="quick_craft_button">Glass Shards From Tube</button>');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="shards_sand" class="quick_craft_button glass">Glass Shards From Sand</button>');
@@ -1312,11 +1473,11 @@ function open_crafting_submenu(craft_name) {
     set_item_properties();
     set_slot_properties();
 
-    console.log(ingredients);
+    //console.log(ingredients);
     build_on_hand();
-    console.log(onHand);
+    //console.log(onHand);
     build_craft_list();
-    console.log(craftList);
+    //console.log(craftList);
 
     $("#clear_button").click(function() {
         next_button_lockout_delay = ITEM_WINDOW_DELAY;
@@ -1328,379 +1489,134 @@ function open_crafting_submenu(craft_name) {
     });
 
     $("#shards_tube").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_shards_from_tube();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("glass shards from test tube");
     });
     $("#shards_sand").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_shards_from_sand();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("glass shards from sand");
     });
     $("#test_tube").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_test_tube();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("test tube");
     });
     $("#vial").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_vial();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("vial")
     });
     $("#bowl").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_bowl();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("bowl");
     });
     $("#dust_vial").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_dust_vial();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("dust ore glassware (vial)");
     });
     $("#dust_bowl").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_glass_dust_bowl();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("dust ore glassware (bowl)");
     });
 
     $("#upload_potion_sampler").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_upload_potion_sampler();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("upload potion sampler");
     });
     $("#small_upload_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_small_upload_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("small upload potion");
     });
     $("#upload_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_upload_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("upload potion");
     });
     $("#large_upload_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_large_upload_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("large upload potion");
     });
 
     $("#download_potion_sampler").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_download_potion_sampler();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("download-reduction potion sampler");
     });
     $("#small_download_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_small_download_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("small download-reduction potion");
     });
     $("#download_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_download_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("download-reduction potion");
     });
     $("#large_download_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_large_download_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("large download-reduction potion");
     });
 
     $("#garlic_tincture").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_garlic_tincture();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("garlic tincture");
     });
 
     $("#impure_bronze_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_impure_bronze_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("impure bronze bar");
     });
     $("#bronze_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_bronze_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("bronze bar");
     });
     $("#iron_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_iron_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("iron bar");
     });
     $("#steel_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_steel_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("steel bar from iron ore");
     });
     $("#steel_bar_from_iron_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_steel_bar_from_iron_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("steel bar from iron bar");
     });
     $("#gold_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_gold_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("gold bar");
     });
     $("#mithril_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_mithril_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("mithril bar");
     });
     $("#adamantium_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_adamantium_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("adamantium bar");
     });
     $("#quartz_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_quartz_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("quartz bar");
     });
     $("#jade_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_jade_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("jade bar");
     });
     $("#amethyst_bar").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_amethyst_bar();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("amethyst bar");
     });
 
     $("#small_luck_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_small_luck_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("small luck potion");
     });
     $("#large_luck_potion").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_large_luck_potion();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("large luck potion");
     });
 
     $("#ruby_grained_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_ruby_grained_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("ruby-grained baguette");
     });
     $("#emerald_grained_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_emerald_grained_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("emerald-grained baguette");
     });
     $("#garlic_ruby_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_garlic_ruby_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("garlic ruby-baguette");
     });
     $("#garlic_emerald_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_garlic_emerald_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("garlic emerald-baguette");
     });
     $("#artisan_ruby_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_artisan_ruby_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("artisan ruby-baguette");
     });
     $("#artisan_emerald_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_artisan_emerald_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("artisan emerald-baguette");
     });
     $("#gazellian_emerald_baguette").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_gazellian_emerald_baguette();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("gazellian emerald-baguette");
     });
 
     $("#carbon_crystalline_quartz_gem").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_carbon_crystalline_quartz_gem();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("carbon-crystalline quartz gem");
     });
     $("#carbon_crystalline_quartz_necklace").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_carbon_crystalline_quartz_necklace();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("carbon-crystalline quartz necklace");
     });
     $("#exquisite_constellation_emeralds").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_exquisite_constellation_emeralds();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("exquisite constellations of emeralds");
     });
     $("#exquisite_constellation_sapphires").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_exquisite_constellation_sapphires();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("exquisite constellations of sapphires");
     });
     $("#exquisite_constellation_rubies").click(function() {
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        craft_exquisite_constellation_rubies();
-
-        enable_quick_craft_buttons();
+        open_crafting_submenu("exquisite constellations of rubies");
     });
+
 })();
