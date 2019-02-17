@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1b
+// @version      1.0.2b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,16 +10,17 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.0.1b';
+const VERSION = '1.0.2b';
 const ITEM_ACCESSOR = ".item:not(.hidden)";
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
  * Too little of a delay will cause more visual bugs */
-const RETRIEVE_ITEMS = false; // set to true to automatically grab crafted items.
+
+const RETRIEVE_ITEMS = false; // set to true to automatically retrieve craft recipes
 const BUTTON_LOCKOUT_DELAY = 4300;
-const ITEM_WINDOW_DELAY = 500;
-const GRAB_DELAY = 1000;
+const ITEM_WINDOW_DELAY = 700;
+const GRAB_DELAY = 1200;
 
 /* >>>END<<< user adjustable variables */
 
@@ -30,6 +31,334 @@ var style = document.createElement('style');
 style.type = 'text/css';
 style.innerHTML = '.disabled { background-color: #333 !important; color: #666 !important; }';
 document.getElementsByTagName('head')[0].appendChild(style);
+
+var onHand = {};
+onHand["glass shards"] = 0;
+onHand["test tube"] = 0;
+onHand["vial"] = 0;
+onHand["bowl"] = 0;
+onHand["pile of sand"] = 0;
+onHand["black elder leaves"] = 0;
+onHand["black elderberries"] = 0;
+onHand["yellow hellebore flower"] = 0;
+onHand["upload potion"] = 0;
+onHand["purple angelica flowers"] = 0;
+onHand["garlic tincture"] = 0;
+onHand["download-reduction potion"] = 0;
+onHand["head of garlic"] = 0;
+onHand["bronze alloy mix"] = 0;
+onHand["clay"] = 0;
+onHand["iron ore"] = 0;
+onHand["lump of coal"] = 0;
+onHand["iron bar"] = 0;
+onHand["gold ore"] = 0;
+onHand["adamantium ore"] = 0;
+onHand["mithril ore"] = 0;
+onHand["quartz dust"] = 0;
+onHand["jade dust"] = 0;
+onHand["amethyst dust"] = 0;
+onHand["ruby-flecked wheat"] = 0;
+onHand["emerald-flecked wheat"] = 0;
+onHand["ruby-grained baguette"] = 0;
+onHand["emerald-grained baguette"] = 0;
+onHand["garlic ruby-baguette"] = 0;
+onHand["garlic emerald-baguette"] = 0;
+onHand["emerald chip"] = 0;
+onHand["quartz bar"] = 0;
+onHand["carbon-crystalline quartz"] = 0;
+onHand["ruby"] = 0;
+onHand["sapphire"] = 0;
+onHand["emerald"] = 0;
+onHand["amethyst bar"] = 0;
+
+var ingredients = {};
+ingredients["glass shards"] = "01988";
+ingredients["test tube"] = "00125";
+ingredients["vial"] = "00124";
+ingredients["bowl"] = "00126";
+ingredients["pile of sand"] = "01987";
+ingredients["black elder leaves"] = "00115";
+ingredients["black elderberries"] = "00114";
+ingredients["yellow hellebore flower"] = "00113";
+ingredients["upload potion"] = "00099";
+ingredients["purple angelica flowers"] = "00111";
+ingredients["garlic tincture"] = "00127";
+ingredients["download-reduction potion"] = "00106";
+ingredients["head of garlic"] = "00112";
+ingredients["bronze alloy mix"] = "02225";
+ingredients["clay"] = "02234";
+ingredients["iron ore"] = "02236";
+ingredients["lump of coal"] = "02233";
+ingredients["iron bar"] = "02237";
+ingredients["gold ore"] = "02227";
+ingredients["adamantium ore"] = "02229";
+ingredients["mithril ore"] = "02228";
+ingredients["quartz dust"] = "02230";
+ingredients["jade dust"] = "02231";
+ingredients["amethyst dust"] = "02232";
+ingredients["ruby-flecked wheat"] = "02579";
+ingredients["emerald-flecked wheat"] = "02717";
+ingredients["ruby-grained baguette"] = "02580";
+ingredients["emerald-grained baguette"] = "02718";
+ingredients["garlic ruby-baguette"] = "02581";
+ingredients["garlic emerald-baguette"] = "02719";
+ingredients["emerald chip"] = "02551";
+ingredients["quartz bar"] = "02242";
+ingredients["carbon-crystalline quartz"] = "02537";
+ingredients["ruby"] = "02323";
+ingredients["sapphire"] = "02549";
+ingredients["emerald"] = "00116";
+ingredients["amethyst bar"] = "00244";
+
+var craftList = {};
+
+function build_craft_list() {
+    craftList = {};
+
+    craftList["glass shards from test tube"].ingredients = [ { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] } ];
+    craftList["glass shards from test tube"].icon = "http://test.test";
+    craftList["glass shards from test tube"].available = 0;
+
+    craftList["glass shards from sand"].ingredients = [ { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] } ];
+    craftList["glass shards from sand"].icon = "http://test.test";
+    craftList["glass shards from sand"].available = 0;
+
+    craftList["test tube"].ingredients = [ { id: ingredients["glass shards"], qty: 2, "on hand": onHand["glass shards"] } ];
+    craftList["test tube"].icon = "http://test.test";
+    craftList["test tube"].available = 0;
+
+    craftList["vial"].ingredients = [ { id: ingredients["glass shards"], qty: 5, "on hand": onHand["glass shards"] } ];
+    craftList["vial"].icon = "http://test.test";
+    craftList["vial"].available = 0;
+
+    craftList["bowl"].ingredients = [ { id: ingredients["glass shards"], qty: 8, "on hand": onHand["glass shards"] } ];
+    craftList["bowl"].icon = "http://test.test";
+    craftList["bowl"].available = 0;
+
+    craftList["dust ore glassware (vial)"].ingredients = [
+        { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
+        { id: ingredients["quartz dust"], qty: 1, "on hand": onHand["quartz dust"] }
+    ];
+    craftList["dust ore glassware (vial)"].icon = "http://test.test";
+    craftList["dust ore glassware (vial)"].available = 0;
+
+    craftList["dust ore glassware (bowl)"].ingredients = [
+        { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
+        { id: ingredients["jade dust"], qty: 1, "on hand": onHand["jade dust"] }
+    ];
+    craftList["dust ore glassware (bowl)"].icon = "http://test.test";
+    craftList["dust ore glassware (bowl)"].available = 0;
+
+    craftList["small upload potion"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
+        { id: ingredients["black elder leaves"], qty: 2, "on hand": onHand["black elder leaves"] },
+        { id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
+    ];
+    craftList["small upload potion"].icon = "http://test.test";
+    craftList["small upload potion"].available = 0;
+
+    craftList["upload potion"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
+        { id: ingredients["black elder leaves"], qty: 5, "on hand": onHand["black elder leaves"] },
+        { id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
+    ];
+    craftList["upload potion"].icon = "http://test.test";
+    craftList["upload potion"].available = 0;
+
+    craftList["large upload potion"].ingredients = [
+        { id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
+        { id: ingredients["upload potion"], qty: 2, "on hand": onHand["upload potion"] },
+        { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
+    ];
+    craftList["large upload potion"].icon = "http://test.test";
+    craftList["large upload potion"].available = 0;
+
+    craftList["download-reduction potion sampler"].ingredients = [
+        { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
+        { id: ingredients["purple angelica flowers"], qty: 1, "on hand": onHand["purple angelica flowers"] },
+        { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
+    ];
+    craftList["download-reduction potion sampler"].icon = "http://test.test";
+    craftList["download-reduction potion sampler"].available = 0;
+
+    craftList["small download-reduction potion"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
+        { id: ingredients["purple angelica flowers"], qty: 2, "on hand": onHand["purple angelica flowers"] },
+        { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
+    ];
+    craftList["small download-reduction potion"].icon = "http://test.test";
+    craftList["small download-reduction potion"].available = 0;
+
+    craftList["download-reduction potion"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
+        { id: ingredients["purple angelica flowers"], qty: 5, "on hand": onHand["purple angelica flowers"] },
+        { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
+    ];
+    craftList["download-reduction potion"].icon = "http://test.test";
+    craftList["download-reduction potion"].available = 0;
+
+    craftList["large download-reduction potion"].ingredients = [
+        { id: ingredients["bowl"], qty: 1, "on hand": onHand["test tube"] },
+        { id: ingredients["download-reduction potion"], qty: 2, "on hand": onHand["download-reduction potion"] },
+        { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
+    ];
+    craftList["large download-reduction potion"].icon = "http://test.test";
+    craftList["large download-reduction potion"].available = 0;
+
+    craftList["garlic tincture"].ingredients = [
+        { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
+        { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
+    ];
+    craftList["garlic tincture"].icon = "http://test.test";
+    craftList["garlic tincture"].available = 0;
+
+    craftList["small luck potion"].ingredients = [
+        { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
+        { id: ingredients["black elderberries"], qty: 2, "on hand": onHand["black elderberries"] },
+    ];
+    craftList["small luck potion"].icon = "http://test.test";
+    craftList["small luck potion"].available = 0;
+
+    craftList["large luck potion"].ingredients = [
+        { id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
+        { id: ingredients["black elderberries"], qty: 5, "on hand": onHand["black elderberries"] },
+        { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
+    ];
+    craftList["large luck potion"].icon = "http://test.test";
+    craftList["large luck potion"].available = 0;
+
+    craftList["ruby-grained baguette"].ingredients = [ { id: ingredients["ruby-flecked wheat"], qty: 2, "on hand": onHand["ruby-flecked wheat"] } ];
+    craftList["ruby-grained baguette"].icon = "http://test.test";
+    craftList["ruby-grained baguette"].available = 0;
+
+    craftList["emerald-grained baguette"].ingredients = [ { id: ingredients["emerald-flecked wheat"], qty: 2, "on hand": onHand["emerald-flecked wheat"] } ];
+    craftList["emerald-grained baguette"].icon = "http://test.test";
+    craftList["emerald-grained baguette"].available = 0;
+
+    craftList["garlic ruby-baguette"].ingredients = [
+        { id: ingredients["ruby-grained baguette"], qty: 1, "on hand": onHand["ruby-grained baguette"] },
+        { id: ingredients["head of garlic"], qty: 2, "on hand": onHand["head of garlic"] },
+    ];
+    craftList["garlic ruby-baguette"].icon = "http://test.test";
+    craftList["garlic ruby-baguette"].available = 0;
+
+    craftList["garlic emerald-baguette"].ingredients = [
+        { id: ingredients["emerald-grained baguette"], qty: 1, "on hand": onHand["emerald-grained baguette"] },
+        { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
+    ];
+    craftList["garlic emerald-baguette"].icon = "http://test.test";
+    craftList["garlic emerald-baguette"].available = 0;
+
+    craftList["artisan emerald-baguette"].ingredients = [
+        { id: ingredients["garlic emerald-baguette"], qty: 1, "on hand": onHand["garlic emerald-baguette"] },
+        { id: ingredients["emerald chip"], qty: 1, "on hand": onHand["emerald chip"] },
+        { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] },
+    ];
+    craftList["artisan emerald-baguette"].icon = "http://test.test";
+    craftList["artisan emerald-baguette"].available = 0;
+
+    craftList["artisan ruby-baguette"].ingredients = [
+        { id: ingredients["garlic ruby-baguette"], qty: 1, "on hand": onHand["garlic ruby-baguette"] },
+        { id: ingredients["yellow hellebore flower"], qty: 2, "on hand": onHand["yellow hellebore flower"] },
+    ];
+    craftList["artisan ruby-baguette"].icon = "http://test.test";
+    craftList["artisan ruby-baguette"].available = 0;
+
+    craftList["gazellian emerald-baguette"].ingredients = [
+        { id: ingredients["artisan emerald-baguette"], qty: 1, "on hand": onHand["artisan emerald-baguette"] },
+        { id: ingredients["emerald chip"], qty: 2, "on hand": onHand["emerald chip"] }
+    ];
+    craftList["gazellian emerald-baguette"].icon = "http://test.test";
+    craftList["gazellian emerald-baguette"].available = 0;
+
+    craftList["impure bronze bar"].ingredients = [
+        { id: ingredients["bronze alloy mix"], qty: 1, "on hand": onHand["bronze alloy mix"] },
+        { id: ingredients["clay"], qty: 1, "on hand": onHand["clay"] },
+    ];
+    craftList["impure bronze bar"].icon = "http://test.test";
+    craftList["impure bronze bar"].available = 0;
+
+    craftList["bronze bar"].ingredients = [ { id: ingredients["bronze alloy mix"], qty: 2, "on hand": onHand["bronze alloy mix"] } ];
+    craftList["bronze bar"].icon = "http://test.test";
+    craftList["bronze bar"].available = 0;
+
+    craftList["iron bar"].ingredients = [ { id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] } ];
+    craftList["iron bar"].icon = "http://test.test";
+    craftList["iron bar"].available = 0;
+
+    craftList["gold bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
+    craftList["gold bar"].icon = "http://test.test";
+    craftList["gold bar"].available = 0;
+
+    craftList["mithril bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
+    craftList["mithril bar"].icon = "http://test.test";
+    craftList["mithril bar"].available = 0;
+
+    craftList["adamantium bar"].ingredients = [ { id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
+    craftList["adamantium bar"].icon = "http://test.test";
+    craftList["adamantium bar"].available = 0;
+
+    craftList["amethyst bar"].ingredients = [ { id: ingredients["amethyst ore"], qty: 2, "on hand": onHand["amethyst ore"] } ];
+    craftList["amethyst bar"].icon = "http://test.test";
+    craftList["amethyst bar"].available = 0;
+
+    craftList["quartz bar"].ingredients = [ { id: ingredients["quartz dust"], qty: 2, "on hand": onHand["quartz dust"] } ];
+    craftList["quartz bar"].icon = "http://test.test";
+    craftList["quartz bar"].available = 0;
+
+    craftList["jade bar"].ingredients = [ { id: ingredients["jade dust"], qty: 2, "on hand": onHand["jade dust"] } ];
+    craftList["jade bar"].icon = "http://test.test";
+    craftList["jade bar"].available = 0;
+
+    craftList["steel bar from iron ore"].ingredients = [
+        { id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] },
+        { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
+    ];
+    craftList["steel bar from iron ore"].icon = "http://test.test";
+    craftList["steel bar from iron ore"].available = 0;
+
+    craftList["steel bar from iron bar"].ingredients = [
+        { id: ingredients["iron bar"], qty: 1, "on hand": onHand["iron bar"] },
+        { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
+    ];
+    craftList["steel bar from iron bar"].icon = "http://test.test";
+    craftList["steel bar from iron bar"].available = 0;
+
+    craftList["carbon-crystalline quartz gem"].ingredients = [
+        { id: ingredients["quartz bar"], qty: 1, "on hand": onHand["quartz bar"] },
+        { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
+    ];
+    craftList["carbon-crystalline quartz gem"].icon = "http://test.test";
+    craftList["carbon-crystalline quartz gem"].available = 0;
+
+    craftList["carbon-crystalline quartz necklace"].ingredients = [
+        { id: ingredients["carbon-crystalline quartz gem"], qty: 1, "on hand": onHand["carbon-crystalline quartz gem"] },
+        { id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
+    ];
+    craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
+    craftList["carbon-crystalline quartz necklace"].available = 0;
+
+    craftList["exquisite constellations of rubies"].ingredients = [
+        { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
+        { id: ingredients["ruby"], qty: 4, "on hand": onHand["ruby"] },
+    ];
+    craftList["exquisite constellations of rubies"].icon = "http://test.test";
+    craftList["exquisite constellations of rubies"].available = 0;
+
+    craftList["exquisite constellations of sapphires"].ingredients = [
+        { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
+        { id: ingredients["sapphire"], qty: 4, "on hand": onHand["sapphire"] },
+    ];
+    craftList["exquisite constellations of sapphires"].icon = "http://test.test";
+    craftList["exquisite constellations of sapphires"].available = 0;
+
+    craftList["exquisite constellations of emeralds"].ingredients = [
+        { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
+        { id: ingredients["emerald"], qty: 4, "on hand": onHand["emerald"] },
+    ];
+    craftList["exquisite constellations of emeralds"].icon = "http://test.test";
+    craftList["exquisite constellations of emeralds"].available = 0;
+}
 
 // slightly modified from the crafting.js script to filter on itemId if presented from this script
 function filterItems_user() {
@@ -616,13 +945,10 @@ function craft_garlic_emerald_baguette() {
 
     setTimeout(function (){
         set_filter('head of garlic');
-        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
-        setTimeout(function (){
-            triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
+        setTimeout(grab_result, GRAB_DELAY);
 
-            setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
     }, ITEM_WINDOW_DELAY);
 }
 
@@ -796,8 +1122,11 @@ function grab_result() {
 
         setTimeout(function (){clear_crafting_area()}, ITEM_WINDOW_DELAY);
     } else {
-        alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you may have to refresh after each craft.');
+        alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
     }
+}
+
+function open_crafting_submenu(craft_name) {
 }
 
 (function() {
