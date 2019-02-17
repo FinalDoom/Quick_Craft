@@ -176,7 +176,7 @@ function build_craft_list() {
     ];
     craftList["upload potion sampler"].icon = "http://test.test";
     craftList["upload potion sampler"].available = Math.min(onHand["black elder leaves"]
-                                                            , onHand["vial"]
+                                                            , onHand["test tube"]
                                                             , onHand["black elderberries"]);
 
     craftList["small upload potion"] = {};
