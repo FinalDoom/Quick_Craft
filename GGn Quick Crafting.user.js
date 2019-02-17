@@ -18,7 +18,7 @@ const ITEM_ACCESSOR = ".item:not(.hidden)";
  * Too little of a delay will cause more visual bugs */
 
 const RETRIEVE_ITEMS = false; // set to true to automatically retrieve craft recipes
-const BUTTON_LOCKOUT_DELAY = 4300;
+const BUTTON_LOCKOUT_DELAY = 5000;
 const ITEM_WINDOW_DELAY = 700;
 const GRAB_DELAY = 1200;
 
@@ -1204,12 +1204,12 @@ function do_craft(craft_name) {
     clear_crafting_area();
 
     /* Glass */
-    if (craft_name === "shards_tube") {
+    if (craft_name === "glass shards from test tube") {
         craft_glass_shards_from_tube();
-    } else if (craft_name === "shards_sand") {
+    } else if (craft_name === "glass shards from sand") {
         craft_glass_shards_from_sand();
     }
-    else if (craft_name === "test_tube") {
+    else if (craft_name === "test tube") {
         craft_glass_test_tube();
     }
     else if (craft_name === "vial") {
@@ -1218,124 +1218,124 @@ function do_craft(craft_name) {
     else if (craft_name === "bowl") {
         craft_glass_bowl();
     }
-    else if (craft_name === "dust_vial") {
+    else if (craft_name === "dust ore glassware (vial)") {
         craft_glass_dust_vial();
     }
-    else if (craft_name === "dust_bowl") {
+    else if (craft_name === "dust ore glassware (bowl)") {
         craft_glass_dust_bowl();
     }
 
 	/* Upload potions */
-    else if (craft_name === "upload_potion_sampler") {
+    else if (craft_name === "upload potion sampler") {
         craft_upload_potion_sampler();
     }
-    else if (craft_name === "small_upload_potion") {
+    else if (craft_name === "small upload potion") {
         craft_small_upload_potion();
     }
-    else if (craft_name === "upload_potion") {
+    else if (craft_name === "upload potion") {
         craft_upload_potion();
     }
-    else if (craft_name === "large_upload_potion") {
+    else if (craft_name === "large upload potion") {
         craft_large_upload_potion();
     }
 
 	/* Download potions */
-    else if (craft_name === "download_potion_sampler") {
+    else if (craft_name === "download-reduction potion_sampler") {
         craft_download_potion_sampler();
     }
-    else if (craft_name === "small_download_potion") {
+    else if (craft_name === "small download-reduction potion") {
         craft_small_download_potion();
     }
-    else if (craft_name === "download_potion") {
+    else if (craft_name === "download-reduction potion") {
         craft_download_potion();
     }
-    else if (craft_name === "large_download_potion") {
+    else if (craft_name === "large download-reduction potion") {
         craft_large_download_potion();
     }
-    else if (craft_name === "garlic_tincture") {
+    else if (craft_name === "garlic tincture") {
         craft_garlic_tincture();
     }
 
 	/* Metal bars */
-    else if (craft_name === "impure_bronze_bar") {
+    else if (craft_name === "impure bronze bar") {
         craft_impure_bronze_bar();
     }
-    else if (craft_name === "bronze_bar") {
+    else if (craft_name === "bronze bar") {
         craft_bronze_bar();
     }
-    else if (craft_name === "iron_bar") {
+    else if (craft_name === "iron bar") {
         craft_iron_bar();
     }
-    else if (craft_name === "steel_bar") {
+    else if (craft_name === "steel bar from iron ore") {
         craft_steel_bar();
     }
-    else if (craft_name === "steel_bar_from_iron_bar") {
+    else if (craft_name === "steel bar from iron bar") {
         craft_steel_bar_from_iron_bar();
     }
-    else if (craft_name === "gold_bar") {
+    else if (craft_name === "gold bar") {
         craft_gold_bar();
     }
-    else if (craft_name === "mithril_bar") {
+    else if (craft_name === "mithril bar") {
         craft_mithril_bar();
     }
-    else if (craft_name === "adamantium_bar") {
+    else if (craft_name === "adamantium bar") {
         craft_adamantium_bar();
     }
-    else if (craft_name === "quartz_bar") {
+    else if (craft_name === "quartz bar") {
         craft_quartz_bar();
     }
-    else if (craft_name === "jade_bar") {
+    else if (craft_name === "jade bar") {
         craft_jade_bar();
     }
-    else if (craft_name === "amethyst_bar") {
+    else if (craft_name === "amethyst bar") {
         craft_amethyst_bar();
     }
 
 	/* Luck potions */
-    else if (craft_name === "small_luck_potion") {
+    else if (craft_name === "small luck potion") {
         craft_small_luck_potion();
     }
-    else if (craft_name === "large_luck_potion") {
+    else if (craft_name === "large luck potion") {
         craft_large_luck_potion();
     }
 
 	/* Food */
-    else if (craft_name === "ruby_grained_baguette") {
+    else if (craft_name === "ruby-grained baguette") {
         craft_ruby_grained_baguette();
     }
-    else if (craft_name === "emerald_grained_baguette") {
+    else if (craft_name === "emerald-grained baguette") {
         craft_emerald_grained_baguette();
     }
-    else if (craft_name === "garlic_ruby_baguette") {
+    else if (craft_name === "garlic ruby-baguette") {
         craft_garlic_ruby_baguette();
     }
-    else if (craft_name === "garlic_emerald_baguette") {
+    else if (craft_name === "garlic emerald-baguette") {
         craft_garlic_emerald_baguette();
     }
-    else if (craft_name === "artisan_ruby_baguette") {
+    else if (craft_name === "artisan ruby-baguette") {
         craft_artisan_ruby_baguette();
     }
-    else if (craft_name === "artisan_emerald_baguette") {
+    else if (craft_name === "artisan emerald-baguette") {
         craft_artisan_emerald_baguette();
     }
-    else if (craft_name === "gazellian_emerald_baguette") {
+    else if (craft_name === "gazellian emerald-baguette") {
         craft_gazellian_emerald_baguette();
     }
 
 	/* Jewelry */
-    else if (craft_name === "carbon_crystalline_quartz_gem") {
+    else if (craft_name === "carbon-crystalline quartz gem") {
         craft_carbon_crystalline_quartz_gem();
     }
-    else if (craft_name === "carbon_crystalline_quartz_necklace") {
+    else if (craft_name === "carbon-crystalline quartz necklace") {
         craft_carbon_crystalline_quartz_necklace();
     }
-    else if (craft_name === "exquisite_constellation_emeralds") {
+    else if (craft_name === "exquisite constellation emeralds") {
         craft_exquisite_constellation_emeralds();
     }
-    else if (craft_name === "exquisite_constellation_sapphires") {
+    else if (craft_name === "exquisite constellation sapphires") {
         craft_exquisite_constellation_sapphires();
     }
-    else if (craft_name === "exquisite_constellation_rubies") {
+    else if (craft_name === "exquisite constellation rubies") {
         craft_exquisite_constellation_rubies();
     }
 
