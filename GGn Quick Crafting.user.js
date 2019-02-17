@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2b
+// @version      1.0.3b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.0.2b';
+const VERSION = '1.0.3b';
 const ITEM_ACCESSOR = ".item:not(.hidden)";
 
 /* >>>BEGIN<<< User adjustable variables
@@ -31,45 +31,6 @@ var style = document.createElement('style');
 style.type = 'text/css';
 style.innerHTML = '.disabled { background-color: #333 !important; color: #666 !important; }';
 document.getElementsByTagName('head')[0].appendChild(style);
-
-var onHand = {};
-onHand["glass shards"] = 0;
-onHand["test tube"] = 0;
-onHand["vial"] = 0;
-onHand["bowl"] = 0;
-onHand["pile of sand"] = 0;
-onHand["black elder leaves"] = 0;
-onHand["black elderberries"] = 0;
-onHand["yellow hellebore flower"] = 0;
-onHand["upload potion"] = 0;
-onHand["purple angelica flowers"] = 0;
-onHand["garlic tincture"] = 0;
-onHand["download-reduction potion"] = 0;
-onHand["head of garlic"] = 0;
-onHand["bronze alloy mix"] = 0;
-onHand["clay"] = 0;
-onHand["iron ore"] = 0;
-onHand["lump of coal"] = 0;
-onHand["iron bar"] = 0;
-onHand["gold ore"] = 0;
-onHand["adamantium ore"] = 0;
-onHand["mithril ore"] = 0;
-onHand["quartz dust"] = 0;
-onHand["jade dust"] = 0;
-onHand["amethyst dust"] = 0;
-onHand["ruby-flecked wheat"] = 0;
-onHand["emerald-flecked wheat"] = 0;
-onHand["ruby-grained baguette"] = 0;
-onHand["emerald-grained baguette"] = 0;
-onHand["garlic ruby-baguette"] = 0;
-onHand["garlic emerald-baguette"] = 0;
-onHand["emerald chip"] = 0;
-onHand["quartz bar"] = 0;
-onHand["carbon-crystalline quartz"] = 0;
-onHand["ruby"] = 0;
-onHand["sapphire"] = 0;
-onHand["emerald"] = 0;
-onHand["amethyst bar"] = 0;
 
 var ingredients = {};
 ingredients["glass shards"] = "01988";
@@ -110,31 +71,78 @@ ingredients["sapphire"] = "02549";
 ingredients["emerald"] = "00116";
 ingredients["amethyst bar"] = "00244";
 
+var onHand = {};
+function build_on_hand() {
+    onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "]").length;
+    onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "]").length;
+    onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "]").length;
+    onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "]").length;
+    onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "]").length;
+    onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "]").length;
+    onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "]").length;
+    onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "]").length;
+    onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "]").length;
+    onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "]").length;
+    onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").length;
+    onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").length;
+    onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").length;
+    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze allow mix"] + "]").length;
+    onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").length;
+    onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").length;
+    onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").length;
+    onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "]").length;
+    onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "]").length;
+    onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "]").length;
+    onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "]").length;
+    onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "]").length;
+    onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "]").length;
+    onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "]").length;
+    onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "]").length;
+    onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "]").length;
+    onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "]").length;
+    onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").length;
+    onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").length;
+    onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length;
+    onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").length;
+    onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").length;
+    onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").length;
+    onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "]").length;
+    onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").length;
+    onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length;
+    onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length;
+}
+
 var craftList = {};
 
 function build_craft_list() {
     craftList = {};
 
+    craftList["glass shards from test tube"] = {};
     craftList["glass shards from test tube"].ingredients = [ { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] } ];
     craftList["glass shards from test tube"].icon = "http://test.test";
     craftList["glass shards from test tube"].available = 0;
 
+    craftList["glass shards from sand"] = {};
     craftList["glass shards from sand"].ingredients = [ { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] } ];
     craftList["glass shards from sand"].icon = "http://test.test";
     craftList["glass shards from sand"].available = 0;
 
+    craftList["test tube"] = {};
     craftList["test tube"].ingredients = [ { id: ingredients["glass shards"], qty: 2, "on hand": onHand["glass shards"] } ];
     craftList["test tube"].icon = "http://test.test";
     craftList["test tube"].available = 0;
 
+    craftList["vial"] = {};
     craftList["vial"].ingredients = [ { id: ingredients["glass shards"], qty: 5, "on hand": onHand["glass shards"] } ];
     craftList["vial"].icon = "http://test.test";
     craftList["vial"].available = 0;
 
+    craftList["bowl"] = {};
     craftList["bowl"].ingredients = [ { id: ingredients["glass shards"], qty: 8, "on hand": onHand["glass shards"] } ];
     craftList["bowl"].icon = "http://test.test";
     craftList["bowl"].available = 0;
 
+    craftList["dust ore glassware (vial)"] = {};
     craftList["dust ore glassware (vial)"].ingredients = [
         { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
         { id: ingredients["quartz dust"], qty: 1, "on hand": onHand["quartz dust"] }
@@ -142,6 +150,7 @@ function build_craft_list() {
     craftList["dust ore glassware (vial)"].icon = "http://test.test";
     craftList["dust ore glassware (vial)"].available = 0;
 
+    craftList["dust ore glassware (bowl)"] = {};
     craftList["dust ore glassware (bowl)"].ingredients = [
         { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
         { id: ingredients["jade dust"], qty: 1, "on hand": onHand["jade dust"] }
@@ -149,6 +158,7 @@ function build_craft_list() {
     craftList["dust ore glassware (bowl)"].icon = "http://test.test";
     craftList["dust ore glassware (bowl)"].available = 0;
 
+    craftList["small upload potion"] = {};
     craftList["small upload potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
         { id: ingredients["black elder leaves"], qty: 2, "on hand": onHand["black elder leaves"] },
@@ -157,6 +167,7 @@ function build_craft_list() {
     craftList["small upload potion"].icon = "http://test.test";
     craftList["small upload potion"].available = 0;
 
+    craftList["upload potion"] = {};
     craftList["upload potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
         { id: ingredients["black elder leaves"], qty: 5, "on hand": onHand["black elder leaves"] },
@@ -165,6 +176,7 @@ function build_craft_list() {
     craftList["upload potion"].icon = "http://test.test";
     craftList["upload potion"].available = 0;
 
+    craftList["large upload potion"] = {};
     craftList["large upload potion"].ingredients = [
         { id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
         { id: ingredients["upload potion"], qty: 2, "on hand": onHand["upload potion"] },
@@ -173,6 +185,7 @@ function build_craft_list() {
     craftList["large upload potion"].icon = "http://test.test";
     craftList["large upload potion"].available = 0;
 
+    craftList["download-reduction potion sampler"] = {};
     craftList["download-reduction potion sampler"].ingredients = [
         { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
         { id: ingredients["purple angelica flowers"], qty: 1, "on hand": onHand["purple angelica flowers"] },
@@ -181,6 +194,7 @@ function build_craft_list() {
     craftList["download-reduction potion sampler"].icon = "http://test.test";
     craftList["download-reduction potion sampler"].available = 0;
 
+    craftList["small download-reduction potion"] = {};
     craftList["small download-reduction potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
         { id: ingredients["purple angelica flowers"], qty: 2, "on hand": onHand["purple angelica flowers"] },
@@ -189,6 +203,7 @@ function build_craft_list() {
     craftList["small download-reduction potion"].icon = "http://test.test";
     craftList["small download-reduction potion"].available = 0;
 
+    craftList["download-reduction potion"] = {};
     craftList["download-reduction potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
         { id: ingredients["purple angelica flowers"], qty: 5, "on hand": onHand["purple angelica flowers"] },
@@ -197,6 +212,7 @@ function build_craft_list() {
     craftList["download-reduction potion"].icon = "http://test.test";
     craftList["download-reduction potion"].available = 0;
 
+    craftList["large download-reduction potion"] = {};
     craftList["large download-reduction potion"].ingredients = [
         { id: ingredients["bowl"], qty: 1, "on hand": onHand["test tube"] },
         { id: ingredients["download-reduction potion"], qty: 2, "on hand": onHand["download-reduction potion"] },
@@ -205,6 +221,7 @@ function build_craft_list() {
     craftList["large download-reduction potion"].icon = "http://test.test";
     craftList["large download-reduction potion"].available = 0;
 
+    craftList["garlic tincture"] = {};
     craftList["garlic tincture"].ingredients = [
         { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
         { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
@@ -212,6 +229,7 @@ function build_craft_list() {
     craftList["garlic tincture"].icon = "http://test.test";
     craftList["garlic tincture"].available = 0;
 
+    craftList["small luck potion"] = {};
     craftList["small luck potion"].ingredients = [
         { id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
         { id: ingredients["black elderberries"], qty: 2, "on hand": onHand["black elderberries"] },
@@ -219,6 +237,7 @@ function build_craft_list() {
     craftList["small luck potion"].icon = "http://test.test";
     craftList["small luck potion"].available = 0;
 
+    craftList["large luck potion"] = {};
     craftList["large luck potion"].ingredients = [
         { id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
         { id: ingredients["black elderberries"], qty: 5, "on hand": onHand["black elderberries"] },
@@ -227,14 +246,17 @@ function build_craft_list() {
     craftList["large luck potion"].icon = "http://test.test";
     craftList["large luck potion"].available = 0;
 
+    craftList["ruby-grained baguette"] = {};
     craftList["ruby-grained baguette"].ingredients = [ { id: ingredients["ruby-flecked wheat"], qty: 2, "on hand": onHand["ruby-flecked wheat"] } ];
     craftList["ruby-grained baguette"].icon = "http://test.test";
     craftList["ruby-grained baguette"].available = 0;
 
+    craftList["emerald-grained baguette"] = {};
     craftList["emerald-grained baguette"].ingredients = [ { id: ingredients["emerald-flecked wheat"], qty: 2, "on hand": onHand["emerald-flecked wheat"] } ];
     craftList["emerald-grained baguette"].icon = "http://test.test";
     craftList["emerald-grained baguette"].available = 0;
 
+    craftList["garlic ruby-baguette"] = {};
     craftList["garlic ruby-baguette"].ingredients = [
         { id: ingredients["ruby-grained baguette"], qty: 1, "on hand": onHand["ruby-grained baguette"] },
         { id: ingredients["head of garlic"], qty: 2, "on hand": onHand["head of garlic"] },
@@ -242,6 +264,7 @@ function build_craft_list() {
     craftList["garlic ruby-baguette"].icon = "http://test.test";
     craftList["garlic ruby-baguette"].available = 0;
 
+    craftList["garlic emerald-baguette"] = {};
     craftList["garlic emerald-baguette"].ingredients = [
         { id: ingredients["emerald-grained baguette"], qty: 1, "on hand": onHand["emerald-grained baguette"] },
         { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
@@ -249,6 +272,7 @@ function build_craft_list() {
     craftList["garlic emerald-baguette"].icon = "http://test.test";
     craftList["garlic emerald-baguette"].available = 0;
 
+    craftList["artisan emerald-baguette"] = {};
     craftList["artisan emerald-baguette"].ingredients = [
         { id: ingredients["garlic emerald-baguette"], qty: 1, "on hand": onHand["garlic emerald-baguette"] },
         { id: ingredients["emerald chip"], qty: 1, "on hand": onHand["emerald chip"] },
@@ -257,6 +281,7 @@ function build_craft_list() {
     craftList["artisan emerald-baguette"].icon = "http://test.test";
     craftList["artisan emerald-baguette"].available = 0;
 
+    craftList["artisan ruby-baguette"] = {};
     craftList["artisan ruby-baguette"].ingredients = [
         { id: ingredients["garlic ruby-baguette"], qty: 1, "on hand": onHand["garlic ruby-baguette"] },
         { id: ingredients["yellow hellebore flower"], qty: 2, "on hand": onHand["yellow hellebore flower"] },
@@ -264,6 +289,7 @@ function build_craft_list() {
     craftList["artisan ruby-baguette"].icon = "http://test.test";
     craftList["artisan ruby-baguette"].available = 0;
 
+    craftList["gazellian emerald-baguette"] = {};
     craftList["gazellian emerald-baguette"].ingredients = [
         { id: ingredients["artisan emerald-baguette"], qty: 1, "on hand": onHand["artisan emerald-baguette"] },
         { id: ingredients["emerald chip"], qty: 2, "on hand": onHand["emerald chip"] }
@@ -271,6 +297,7 @@ function build_craft_list() {
     craftList["gazellian emerald-baguette"].icon = "http://test.test";
     craftList["gazellian emerald-baguette"].available = 0;
 
+    craftList["impure bronze bar"] = {};
     craftList["impure bronze bar"].ingredients = [
         { id: ingredients["bronze alloy mix"], qty: 1, "on hand": onHand["bronze alloy mix"] },
         { id: ingredients["clay"], qty: 1, "on hand": onHand["clay"] },
@@ -278,38 +305,47 @@ function build_craft_list() {
     craftList["impure bronze bar"].icon = "http://test.test";
     craftList["impure bronze bar"].available = 0;
 
+    craftList["bronze bar"] = {};
     craftList["bronze bar"].ingredients = [ { id: ingredients["bronze alloy mix"], qty: 2, "on hand": onHand["bronze alloy mix"] } ];
     craftList["bronze bar"].icon = "http://test.test";
     craftList["bronze bar"].available = 0;
 
+    craftList["iron bar"] = {};
     craftList["iron bar"].ingredients = [ { id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] } ];
     craftList["iron bar"].icon = "http://test.test";
     craftList["iron bar"].available = 0;
 
+    craftList["gold bar"] = {};
     craftList["gold bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
     craftList["gold bar"].icon = "http://test.test";
     craftList["gold bar"].available = 0;
 
+    craftList["mithril bar"] = {};
     craftList["mithril bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
     craftList["mithril bar"].icon = "http://test.test";
     craftList["mithril bar"].available = 0;
 
+    craftList["adamantium bar"] = {};
     craftList["adamantium bar"].ingredients = [ { id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
     craftList["adamantium bar"].icon = "http://test.test";
     craftList["adamantium bar"].available = 0;
 
+    craftList["amethyst bar"] = {};
     craftList["amethyst bar"].ingredients = [ { id: ingredients["amethyst ore"], qty: 2, "on hand": onHand["amethyst ore"] } ];
     craftList["amethyst bar"].icon = "http://test.test";
     craftList["amethyst bar"].available = 0;
 
+    craftList["quartz bar"] = {};
     craftList["quartz bar"].ingredients = [ { id: ingredients["quartz dust"], qty: 2, "on hand": onHand["quartz dust"] } ];
     craftList["quartz bar"].icon = "http://test.test";
     craftList["quartz bar"].available = 0;
 
+    craftList["jade bar"] = {};
     craftList["jade bar"].ingredients = [ { id: ingredients["jade dust"], qty: 2, "on hand": onHand["jade dust"] } ];
     craftList["jade bar"].icon = "http://test.test";
     craftList["jade bar"].available = 0;
 
+    craftList["steel bar from iron ore"] = {};
     craftList["steel bar from iron ore"].ingredients = [
         { id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] },
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
@@ -317,6 +353,7 @@ function build_craft_list() {
     craftList["steel bar from iron ore"].icon = "http://test.test";
     craftList["steel bar from iron ore"].available = 0;
 
+    craftList["steel bar from iron bar"] = {};
     craftList["steel bar from iron bar"].ingredients = [
         { id: ingredients["iron bar"], qty: 1, "on hand": onHand["iron bar"] },
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
@@ -324,6 +361,7 @@ function build_craft_list() {
     craftList["steel bar from iron bar"].icon = "http://test.test";
     craftList["steel bar from iron bar"].available = 0;
 
+    craftList["carbon-crystalline quartz gem"] = {};
     craftList["carbon-crystalline quartz gem"].ingredients = [
         { id: ingredients["quartz bar"], qty: 1, "on hand": onHand["quartz bar"] },
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
@@ -331,6 +369,7 @@ function build_craft_list() {
     craftList["carbon-crystalline quartz gem"].icon = "http://test.test";
     craftList["carbon-crystalline quartz gem"].available = 0;
 
+    craftList["carbon-crystalline quartz necklace"] = {};
     craftList["carbon-crystalline quartz necklace"].ingredients = [
         { id: ingredients["carbon-crystalline quartz gem"], qty: 1, "on hand": onHand["carbon-crystalline quartz gem"] },
         { id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
@@ -338,6 +377,7 @@ function build_craft_list() {
     craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
     craftList["carbon-crystalline quartz necklace"].available = 0;
 
+    craftList["exquisite constellations of rubies"] = {};
     craftList["exquisite constellations of rubies"].ingredients = [
         { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { id: ingredients["ruby"], qty: 4, "on hand": onHand["ruby"] },
@@ -345,6 +385,7 @@ function build_craft_list() {
     craftList["exquisite constellations of rubies"].icon = "http://test.test";
     craftList["exquisite constellations of rubies"].available = 0;
 
+    craftList["exquisite constellations of sapphires"] = {};
     craftList["exquisite constellations of sapphires"].ingredients = [
         { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { id: ingredients["sapphire"], qty: 4, "on hand": onHand["sapphire"] },
@@ -352,6 +393,7 @@ function build_craft_list() {
     craftList["exquisite constellations of sapphires"].icon = "http://test.test";
     craftList["exquisite constellations of sapphires"].available = 0;
 
+    craftList["exquisite constellations of emeralds"] = {};
     craftList["exquisite constellations of emeralds"].ingredients = [
         { id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { id: ingredients["emerald"], qty: 4, "on hand": onHand["emerald"] },
@@ -1121,6 +1163,8 @@ function grab_result() {
         triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
 
         setTimeout(function (){clear_crafting_area()}, ITEM_WINDOW_DELAY);
+
+        build_craft_list();
     } else {
         alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
     }
@@ -1236,6 +1280,12 @@ function open_crafting_submenu(craft_name) {
     set_item_properties();
     set_slot_properties();
 
+    console.log(ingredients);
+    build_on_hand();
+    console.log(onHand);
+    build_craft_list();
+    console.log(craftList);
+
     $("#clear_button").click(function() {
         next_button_lockout_delay = ITEM_WINDOW_DELAY;
         disable_quick_craft_buttons();
@@ -1248,12 +1298,16 @@ function open_crafting_submenu(craft_name) {
     $("#shards_tube").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_glass_shards_from_tube();
 
         enable_quick_craft_buttons();
     });
     $("#shards_sand").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_glass_shards_from_sand();
 
@@ -1262,12 +1316,16 @@ function open_crafting_submenu(craft_name) {
     $("#test_tube").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_glass_test_tube();
 
         enable_quick_craft_buttons();
     });
     $("#vial").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_glass_vial();
 
@@ -1276,6 +1334,8 @@ function open_crafting_submenu(craft_name) {
     $("#bowl").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_glass_bowl();
 
         enable_quick_craft_buttons();
@@ -1283,12 +1343,16 @@ function open_crafting_submenu(craft_name) {
     $("#dust_vial").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_glass_dust_vial();
 
         enable_quick_craft_buttons();
     });
     $("#dust_bowl").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_glass_dust_bowl();
 
@@ -1298,12 +1362,16 @@ function open_crafting_submenu(craft_name) {
     $("#upload_potion_sampler").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_upload_potion_sampler();
 
         enable_quick_craft_buttons();
     });
     $("#small_upload_potion").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_small_upload_potion();
 
@@ -1312,12 +1380,16 @@ function open_crafting_submenu(craft_name) {
     $("#upload_potion").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_upload_potion();
 
         enable_quick_craft_buttons();
     });
     $("#large_upload_potion").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_large_upload_potion();
 
@@ -1327,12 +1399,16 @@ function open_crafting_submenu(craft_name) {
     $("#download_potion_sampler").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_download_potion_sampler();
 
         enable_quick_craft_buttons();
     });
     $("#small_download_potion").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_small_download_potion();
 
@@ -1341,12 +1417,16 @@ function open_crafting_submenu(craft_name) {
     $("#download_potion").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_download_potion();
 
         enable_quick_craft_buttons();
     });
     $("#large_download_potion").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_large_download_potion();
 
@@ -1356,6 +1436,8 @@ function open_crafting_submenu(craft_name) {
     $("#garlic_tincture").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_garlic_tincture();
 
         enable_quick_craft_buttons();
@@ -1364,12 +1446,16 @@ function open_crafting_submenu(craft_name) {
     $("#impure_bronze_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_impure_bronze_bar();
 
         enable_quick_craft_buttons();
     });
     $("#bronze_bar").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_bronze_bar();
 
@@ -1378,12 +1464,16 @@ function open_crafting_submenu(craft_name) {
     $("#iron_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_iron_bar();
 
         enable_quick_craft_buttons();
     });
     $("#steel_bar").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_steel_bar();
 
@@ -1392,12 +1482,16 @@ function open_crafting_submenu(craft_name) {
     $("#steel_bar_from_iron_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_steel_bar_from_iron_bar();
 
         enable_quick_craft_buttons();
     });
     $("#gold_bar").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_gold_bar();
 
@@ -1406,12 +1500,16 @@ function open_crafting_submenu(craft_name) {
     $("#mithril_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_mithril_bar();
 
         enable_quick_craft_buttons();
     });
     $("#adamantium_bar").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_adamantium_bar();
 
@@ -1420,6 +1518,8 @@ function open_crafting_submenu(craft_name) {
     $("#quartz_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_quartz_bar();
 
         enable_quick_craft_buttons();
@@ -1427,12 +1527,16 @@ function open_crafting_submenu(craft_name) {
     $("#jade_bar").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_jade_bar();
 
         enable_quick_craft_buttons();
     });
     $("#amethyst_bar").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_amethyst_bar();
 
@@ -1442,12 +1546,16 @@ function open_crafting_submenu(craft_name) {
     $("#small_luck_potion").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_small_luck_potion();
 
         enable_quick_craft_buttons();
     });
     $("#large_luck_potion").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_large_luck_potion();
 
@@ -1457,12 +1565,16 @@ function open_crafting_submenu(craft_name) {
     $("#ruby_grained_baguette").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_ruby_grained_baguette();
 
         enable_quick_craft_buttons();
     });
     $("#emerald_grained_baguette").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_emerald_grained_baguette();
 
@@ -1471,12 +1583,16 @@ function open_crafting_submenu(craft_name) {
     $("#garlic_ruby_baguette").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_garlic_ruby_baguette();
 
         enable_quick_craft_buttons();
     });
     $("#garlic_emerald_baguette").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_garlic_emerald_baguette();
 
@@ -1485,6 +1601,8 @@ function open_crafting_submenu(craft_name) {
     $("#artisan_ruby_baguette").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_artisan_ruby_baguette();
 
         enable_quick_craft_buttons();
@@ -1492,12 +1610,16 @@ function open_crafting_submenu(craft_name) {
     $("#artisan_emerald_baguette").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_artisan_emerald_baguette();
 
         enable_quick_craft_buttons();
     });
     $("#gazellian_emerald_baguette").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_gazellian_emerald_baguette();
 
@@ -1507,12 +1629,16 @@ function open_crafting_submenu(craft_name) {
     $("#carbon_crystalline_quartz_gem").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_carbon_crystalline_quartz_gem();
 
         enable_quick_craft_buttons();
     });
     $("#carbon_crystalline_quartz_necklace").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_carbon_crystalline_quartz_necklace();
 
@@ -1521,6 +1647,8 @@ function open_crafting_submenu(craft_name) {
     $("#exquisite_constellation_emeralds").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_exquisite_constellation_emeralds();
 
         enable_quick_craft_buttons();
@@ -1528,12 +1656,16 @@ function open_crafting_submenu(craft_name) {
     $("#exquisite_constellation_sapphires").click(function() {
         disable_quick_craft_buttons();
 
+        clear_crafting_area();
+
         craft_exquisite_constellation_sapphires();
 
         enable_quick_craft_buttons();
     });
     $("#exquisite_constellation_rubies").click(function() {
         disable_quick_craft_buttons();
+
+        clear_crafting_area();
 
         craft_exquisite_constellation_rubies();
 
