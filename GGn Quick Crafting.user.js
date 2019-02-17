@@ -17,7 +17,7 @@ const ITEM_ACCESSOR = ".item:not(.hidden)";
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
  * Too little of a delay will cause more visual bugs */
 
-const RETRIEVE_ITEMS = false; // set to true to automatically retrieve craft recipes
+const RETRIEVE_ITEMS = true; // set to true to automatically retrieve craft recipes
 const BUTTON_LOCKOUT_DELAY = 5000;
 const ITEM_WINDOW_DELAY = 700;
 const GRAB_DELAY = 1200;
@@ -170,7 +170,7 @@ function build_craft_list() {
 
     craftList["upload potion sampler"] = {};
     craftList["upload potion sampler"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
+        { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
         { name: "black elder leaves", id: ingredients["black elder leaves"], qty: 1, "on hand": onHand["black elder leaves"] },
         { name: "black edlerberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
     ];
