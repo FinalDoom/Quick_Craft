@@ -172,7 +172,7 @@ function build_craft_list() {
     craftList["upload potion sampler"].ingredients = [
         { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
         { name: "black elder leaves", id: ingredients["black elder leaves"], qty: 1, "on hand": onHand["black elder leaves"] },
-        { name: "black edlerberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
+        { name: "black elderberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
     ];
     craftList["upload potion sampler"].icon = "http://test.test";
     craftList["upload potion sampler"].available = Math.min(onHand["black elder leaves"]
