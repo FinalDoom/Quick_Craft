@@ -50,18 +50,23 @@ function wait(ms) {
 function filterItems_user(query) {
     console.log('filter items', query);
     query = encodeURIComponent(query);
+    console.log(query);
 
     // Show all
     $('#items li.item').each(function () {
+        console.log('made it');
         $(this).removeClass('hidden').removeAttr('style');
     });
 
     // Has query, get items to remove
     var removeItems = $('#items li.item').filter(function () {
-        if ($(this).attr("data-item") === query) {
-            return false;
-        } else {
-            return $(this).data("item-name").toLowerCase().indexOf(query.toLowerCase()) === -1;
+        console.log('made it again', $(this));
+        if ($(this).length) {
+            if ($(this).attr("data-item") === query) {
+                return false;
+            } else {
+                return $(this).attr("data-item-name").toLowerCase().indexOf(query.toLowerCase()) === -1;
+            }
         }
     });
 
@@ -71,10 +76,11 @@ function filterItems_user(query) {
     });
 
     // Scroll to the top
-    $('#items-wrapper').scrollTop(0);
+    //$('#items-wrapper').scrollTop(0);
 }
 
 function set_filter(filter_value) {
+    $('#search_query').val(filter_value);
     filterItems_user(filter_value);
 }
 
@@ -727,10 +733,12 @@ function clear_crafting_area() {
 /* Crafts */
 function craft_glass_shards_from_tube() {
     set_filter('test tube');
-    triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
+    setTimeout(function() {
+        triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
-    setTimeout(grab_result, GRAB_DELAY);
-    setTimeout(clear_crafting_area, GRAB_DELAY + 900);
+        setTimeout(grab_result, GRAB_DELAY);
+        setTimeout(clear_crafting_area, GRAB_DELAY + 900);
+    }, 500);
 }
 
 function craft_glass_shards_from_sand() {
@@ -1526,18 +1534,20 @@ function open_crafting_submenu(craft_name) {
 
             var craftNumber = $("#craft_number_select").children("option:selected").val();
 
-            //do_craft(craft_name)
-
             if (craftNumber > 1) {
                 console.log('called next craft');
                 // https://stackoverflow.com/a/3583740/3150365
-                var i = craftNumber;
+               var i = craftNumber;
                 (function myLoop (i) {
                     setTimeout(function () {
-                        do_craft(craft_name);     //  your code here
+                        setTimeout(function() {
+                            do_craft(craft_name);     //  your code here
+                        }, 500);
                         if (--i) myLoop(i); //  decrement i and call myLoop again if i > 0
                     }, 5500)
                 })(craftNumber);// - 1);              //  pass the number of iterations as an argument
+            } else {
+                do_craft(craft_name);
             }
 
             enable_quick_craft_buttons();
