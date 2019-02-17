@@ -120,27 +120,27 @@ function build_craft_list() {
     craftList["glass shards from test tube"] = {};
     craftList["glass shards from test tube"].ingredients = [ { id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] } ];
     craftList["glass shards from test tube"].icon = "http://test.test";
-    craftList["glass shards from test tube"].available = 0;
+    craftList["glass shards from test tube"].available = onHand["test tube"];
 
     craftList["glass shards from sand"] = {};
     craftList["glass shards from sand"].ingredients = [ { id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] } ];
     craftList["glass shards from sand"].icon = "http://test.test";
-    craftList["glass shards from sand"].available = 0;
+    craftList["glass shards from sand"].available = onHand["pile of sand"];
 
     craftList["test tube"] = {};
     craftList["test tube"].ingredients = [ { id: ingredients["glass shards"], qty: 2, "on hand": onHand["glass shards"] } ];
     craftList["test tube"].icon = "http://test.test";
-    craftList["test tube"].available = 0;
+    craftList["test tube"].available = Math.floor(onHand["glass shards"] / 2);
 
     craftList["vial"] = {};
     craftList["vial"].ingredients = [ { id: ingredients["glass shards"], qty: 5, "on hand": onHand["glass shards"] } ];
     craftList["vial"].icon = "http://test.test";
-    craftList["vial"].available = 0;
+    craftList["vial"].available = Math.floor(onHand["glass shards"] / 5);
 
     craftList["bowl"] = {};
     craftList["bowl"].ingredients = [ { id: ingredients["glass shards"], qty: 8, "on hand": onHand["glass shards"] } ];
     craftList["bowl"].icon = "http://test.test";
-    craftList["bowl"].available = 0;
+    craftList["bowl"].available = Math.floor(onHand["glass shards"] / 8);
 
     craftList["dust ore glassware (vial)"] = {};
     craftList["dust ore glassware (vial)"].ingredients = [
@@ -148,7 +148,8 @@ function build_craft_list() {
         { id: ingredients["quartz dust"], qty: 1, "on hand": onHand["quartz dust"] }
     ];
     craftList["dust ore glassware (vial)"].icon = "http://test.test";
-    craftList["dust ore glassware (vial)"].available = 0;
+    craftList["dust ore glassware (vial)"].available = Math.min(onHand["pile of sand"]
+                                                                , onHand["quartz dust"]);
 
     craftList["dust ore glassware (bowl)"] = {};
     craftList["dust ore glassware (bowl)"].ingredients = [
@@ -156,7 +157,8 @@ function build_craft_list() {
         { id: ingredients["jade dust"], qty: 1, "on hand": onHand["jade dust"] }
     ];
     craftList["dust ore glassware (bowl)"].icon = "http://test.test";
-    craftList["dust ore glassware (bowl)"].available = 0;
+    craftList["dust ore glassware (bowl)"].available = Math.min(onHand["pile of sand"]
+                                                                , onHand["jade dust"]);
 
     craftList["small upload potion"] = {};
     craftList["small upload potion"].ingredients = [
@@ -165,7 +167,8 @@ function build_craft_list() {
         { id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
     ];
     craftList["small upload potion"].icon = "http://test.test";
-    craftList["small upload potion"].available = 0;
+    craftList["small upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 2)
+                                                          , onHand["black elderberries"]);
 
     craftList["upload potion"] = {};
     craftList["upload potion"].ingredients = [
@@ -174,7 +177,8 @@ function build_craft_list() {
         { id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
     ];
     craftList["upload potion"].icon = "http://test.test";
-    craftList["upload potion"].available = 0;
+    craftList["upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 5)
+                                                    , onHand["black elderberries"]);
 
     craftList["large upload potion"] = {};
     craftList["large upload potion"].ingredients = [
@@ -183,7 +187,9 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
     ];
     craftList["large upload potion"].icon = "http://test.test";
-    craftList["large upload potion"].available = 0;
+    craftList["large upload potion"].available = Math.min(Math.floor(onHand["upload potion"] / 2)
+                                                          , onHand["bowl"]
+                                                          , onHand["yellow hellebore flower"]);
 
     craftList["download-reduction potion sampler"] = {};
     craftList["download-reduction potion sampler"].ingredients = [
@@ -192,7 +198,9 @@ function build_craft_list() {
         { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
     ];
     craftList["download-reduction potion sampler"].icon = "http://test.test";
-    craftList["download-reduction potion sampler"].available = 0;
+    craftList["download-reduction potion sampler"].available = Math.min(onHand["test tube"]
+                                                                        , onHand["purple angelica flowers"]
+                                                                        , onHand["garlic tincture"]);
 
     craftList["small download-reduction potion"] = {};
     craftList["small download-reduction potion"].ingredients = [
@@ -201,7 +209,9 @@ function build_craft_list() {
         { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
     ];
     craftList["small download-reduction potion"].icon = "http://test.test";
-    craftList["small download-reduction potion"].available = 0;
+    craftList["small download-reduction potion"].available = Math.min(Math.floor(onHand["purple angelica flowers"] / 2)
+                                                                      , onHand["vial"]
+                                                                      , onHand["garlic tincture"]);
 
     craftList["download-reduction potion"] = {};
     craftList["download-reduction potion"].ingredients = [
@@ -210,7 +220,9 @@ function build_craft_list() {
         { id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
     ];
     craftList["download-reduction potion"].icon = "http://test.test";
-    craftList["download-reduction potion"].available = 0;
+    craftList["download-reduction potion"].available = Math.min(Math.floor(onHand["purple angelica flowers"] / 5)
+                                                                      , onHand["vial"]
+                                                                      , onHand["garlic tincture"]);
 
     craftList["large download-reduction potion"] = {};
     craftList["large download-reduction potion"].ingredients = [
@@ -219,7 +231,9 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
     ];
     craftList["large download-reduction potion"].icon = "http://test.test";
-    craftList["large download-reduction potion"].available = 0;
+    craftList["large download-reduction potion"].available = Math.min(Math.floor(onHand["download-reduction potions"] / 2)
+                                                                      , onHand["bowl"]
+                                                                      , onHand["garlic tincture"]);
 
     craftList["garlic tincture"] = {};
     craftList["garlic tincture"].ingredients = [
@@ -227,7 +241,8 @@ function build_craft_list() {
         { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
     ];
     craftList["garlic tincture"].icon = "http://test.test";
-    craftList["garlic tincture"].available = 0;
+    craftList["garlic tincture"].available = Math.min(onHand["test tube"]
+                                                      , onHand["head of garlic"]);
 
     craftList["small luck potion"] = {};
     craftList["small luck potion"].ingredients = [
@@ -235,7 +250,8 @@ function build_craft_list() {
         { id: ingredients["black elderberries"], qty: 2, "on hand": onHand["black elderberries"] },
     ];
     craftList["small luck potion"].icon = "http://test.test";
-    craftList["small luck potion"].available = 0;
+    craftList["small luck potion"].available = Math.min(Math.floor(onHand["black elderberries"] / 2)
+                                                                   , onHand["vial"]);
 
     craftList["large luck potion"] = {};
     craftList["large luck potion"].ingredients = [
@@ -244,17 +260,19 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
     ];
     craftList["large luck potion"].icon = "http://test.test";
-    craftList["large luck potion"].available = 0;
+    craftList["large luck potion"].available = Math.min(Math.floor(onHand["black elderberries"] / 5)
+                                                        , onHand["bowl"]
+                                                        , onHand["yellow hellebore flower"]);
 
     craftList["ruby-grained baguette"] = {};
     craftList["ruby-grained baguette"].ingredients = [ { id: ingredients["ruby-flecked wheat"], qty: 2, "on hand": onHand["ruby-flecked wheat"] } ];
     craftList["ruby-grained baguette"].icon = "http://test.test";
-    craftList["ruby-grained baguette"].available = 0;
+    craftList["ruby-grained baguette"].available = Math.floor(onHand["ruby-flecked wheat"] / 2);
 
     craftList["emerald-grained baguette"] = {};
     craftList["emerald-grained baguette"].ingredients = [ { id: ingredients["emerald-flecked wheat"], qty: 2, "on hand": onHand["emerald-flecked wheat"] } ];
     craftList["emerald-grained baguette"].icon = "http://test.test";
-    craftList["emerald-grained baguette"].available = 0;
+    craftList["emerald-grained baguette"].available = Math.floor(onHand["emerald-flecked wheat"] / 2);
 
     craftList["garlic ruby-baguette"] = {};
     craftList["garlic ruby-baguette"].ingredients = [
@@ -262,7 +280,8 @@ function build_craft_list() {
         { id: ingredients["head of garlic"], qty: 2, "on hand": onHand["head of garlic"] },
     ];
     craftList["garlic ruby-baguette"].icon = "http://test.test";
-    craftList["garlic ruby-baguette"].available = 0;
+    craftList["garlic ruby-baguette"].available = Math.min(Math.floor(onHand["head of garlic"] / 2)
+                                                        , onHand["ruby-grained baguette"]);
 
     craftList["garlic emerald-baguette"] = {};
     craftList["garlic emerald-baguette"].ingredients = [
@@ -270,7 +289,8 @@ function build_craft_list() {
         { id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
     ];
     craftList["garlic emerald-baguette"].icon = "http://test.test";
-    craftList["garlic emerald-baguette"].available = 0;
+    craftList["garlic emerald-baguette"].available = Math.min(onHand["head of garlic"]
+                                                        , onHand["emerald-grained baguette"]);
 
     craftList["artisan emerald-baguette"] = {};
     craftList["artisan emerald-baguette"].ingredients = [
@@ -279,7 +299,9 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] },
     ];
     craftList["artisan emerald-baguette"].icon = "http://test.test";
-    craftList["artisan emerald-baguette"].available = 0;
+    craftList["artisan emerald-baguette"].available = Math.min(onHand["garlic emerald-baguette"]
+                                                        , onHand["emerald chip"]
+                                                        , onHand["yellow hellebore flower"]);
 
     craftList["artisan ruby-baguette"] = {};
     craftList["artisan ruby-baguette"].ingredients = [
@@ -287,7 +309,8 @@ function build_craft_list() {
         { id: ingredients["yellow hellebore flower"], qty: 2, "on hand": onHand["yellow hellebore flower"] },
     ];
     craftList["artisan ruby-baguette"].icon = "http://test.test";
-    craftList["artisan ruby-baguette"].available = 0;
+    craftList["artisan ruby-baguette"].available = Math.min(Math.floor(onHand["yellow hellebore flower"] / 5)
+                                                            , onHand["garlic ruby-baguette"]);
 
     craftList["gazellian emerald-baguette"] = {};
     craftList["gazellian emerald-baguette"].ingredients = [
@@ -295,7 +318,8 @@ function build_craft_list() {
         { id: ingredients["emerald chip"], qty: 2, "on hand": onHand["emerald chip"] }
     ];
     craftList["gazellian emerald-baguette"].icon = "http://test.test";
-    craftList["gazellian emerald-baguette"].available = 0;
+    craftList["gazellian emerald-baguette"].available = Math.min(Math.floor(onHand["emerald chip"] / 2)
+                                                                 , onHand["artisan emerald-baguette"]);
 
     craftList["impure bronze bar"] = {};
     craftList["impure bronze bar"].ingredients = [
@@ -303,47 +327,48 @@ function build_craft_list() {
         { id: ingredients["clay"], qty: 1, "on hand": onHand["clay"] },
     ];
     craftList["impure bronze bar"].icon = "http://test.test";
-    craftList["impure bronze bar"].available = 0;
+    craftList["impure bronze bar"].available = Math.min(onHand["bronze alloy mix"]
+                                                        , onHand["clay"]);
 
     craftList["bronze bar"] = {};
     craftList["bronze bar"].ingredients = [ { id: ingredients["bronze alloy mix"], qty: 2, "on hand": onHand["bronze alloy mix"] } ];
     craftList["bronze bar"].icon = "http://test.test";
-    craftList["bronze bar"].available = 0;
+    craftList["bronze bar"].available = Math.floor(onHand["bronze alloy mix"] / 2);
 
     craftList["iron bar"] = {};
     craftList["iron bar"].ingredients = [ { id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] } ];
     craftList["iron bar"].icon = "http://test.test";
-    craftList["iron bar"].available = 0;
+    craftList["iron bar"].available = Math.floor(onHand["iron ore"] / 2);
 
     craftList["gold bar"] = {};
     craftList["gold bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
     craftList["gold bar"].icon = "http://test.test";
-    craftList["gold bar"].available = 0;
+    craftList["gold bar"].available = Math.floor(onHand["gold ore"] / 2);
 
     craftList["mithril bar"] = {};
-    craftList["mithril bar"].ingredients = [ { id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
+    craftList["mithril bar"].ingredients = [ { id: ingredients["mithril ore"], qty: 2, "on hand": onHand["mithril ore"] } ];
     craftList["mithril bar"].icon = "http://test.test";
-    craftList["mithril bar"].available = 0;
+    craftList["mithril bar"].available = Math.floor(onHand["mithril ore"] / 2);
 
     craftList["adamantium bar"] = {};
     craftList["adamantium bar"].ingredients = [ { id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
     craftList["adamantium bar"].icon = "http://test.test";
-    craftList["adamantium bar"].available = 0;
+    craftList["adamantium bar"].available = Math.floor(onHand["adamantium ore"] / 2);
 
     craftList["amethyst bar"] = {};
     craftList["amethyst bar"].ingredients = [ { id: ingredients["amethyst ore"], qty: 2, "on hand": onHand["amethyst ore"] } ];
     craftList["amethyst bar"].icon = "http://test.test";
-    craftList["amethyst bar"].available = 0;
+    craftList["amethyst bar"].available = Math.floor(onHand["amethyst ore"] / 2);
 
     craftList["quartz bar"] = {};
     craftList["quartz bar"].ingredients = [ { id: ingredients["quartz dust"], qty: 2, "on hand": onHand["quartz dust"] } ];
     craftList["quartz bar"].icon = "http://test.test";
-    craftList["quartz bar"].available = 0;
+    craftList["quartz bar"].available = Math.floor(onHand["quartz dust"] / 2);
 
     craftList["jade bar"] = {};
     craftList["jade bar"].ingredients = [ { id: ingredients["jade dust"], qty: 2, "on hand": onHand["jade dust"] } ];
     craftList["jade bar"].icon = "http://test.test";
-    craftList["jade bar"].available = 0;
+    craftList["jade bar"].available = Math.floor(onHand["jade dust"] / 2);
 
     craftList["steel bar from iron ore"] = {};
     craftList["steel bar from iron ore"].ingredients = [
@@ -351,7 +376,8 @@ function build_craft_list() {
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
     ];
     craftList["steel bar from iron ore"].icon = "http://test.test";
-    craftList["steel bar from iron ore"].available = 0;
+    craftList["steel bar from iron ore"].available = Math.min(Math.floor(onHand["iron ore"] / 2)
+                                                              , onHand["lump of coal"]);
 
     craftList["steel bar from iron bar"] = {};
     craftList["steel bar from iron bar"].ingredients = [
@@ -359,7 +385,8 @@ function build_craft_list() {
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
     ];
     craftList["steel bar from iron bar"].icon = "http://test.test";
-    craftList["steel bar from iron bar"].available = 0;
+    craftList["steel bar from iron bar"].available = Math.min(onHand["iron bar"]
+                                                              , onHand["lump of coal"]);
 
     craftList["carbon-crystalline quartz gem"] = {};
     craftList["carbon-crystalline quartz gem"].ingredients = [
@@ -367,7 +394,8 @@ function build_craft_list() {
         { id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
     ];
     craftList["carbon-crystalline quartz gem"].icon = "http://test.test";
-    craftList["carbon-crystalline quartz gem"].available = 0;
+    craftList["carbon-crystalline quartz gem"].available = Math.min(onHand["quartz bar"]
+                                                                    , onHand["lump of coal"]);
 
     craftList["carbon-crystalline quartz necklace"] = {};
     craftList["carbon-crystalline quartz necklace"].ingredients = [
@@ -375,7 +403,8 @@ function build_craft_list() {
         { id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
     ];
     craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
-    craftList["carbon-crystalline quartz necklace"].available = 0;
+    craftList["carbon-crystalline quartz necklace"].available = Math.min(onHand["carbon-crystalline quartz gem"]
+                                                                         , onHand["glass shards"]);
 
     craftList["exquisite constellations of rubies"] = {};
     craftList["exquisite constellations of rubies"].ingredients = [
@@ -383,7 +412,8 @@ function build_craft_list() {
         { id: ingredients["ruby"], qty: 4, "on hand": onHand["ruby"] },
     ];
     craftList["exquisite constellations of rubies"].icon = "http://test.test";
-    craftList["exquisite constellations of rubies"].available = 0;
+    craftList["exquisite constellations of rubies"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+                                                                         , Math.floor(onHand["ruby"] / 4));
 
     craftList["exquisite constellations of sapphires"] = {};
     craftList["exquisite constellations of sapphires"].ingredients = [
@@ -391,7 +421,8 @@ function build_craft_list() {
         { id: ingredients["sapphire"], qty: 4, "on hand": onHand["sapphire"] },
     ];
     craftList["exquisite constellations of sapphires"].icon = "http://test.test";
-    craftList["exquisite constellations of sapphires"].available = 0;
+    craftList["exquisite constellations of sapphires"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+                                                                            , Math.floor(onHand["sapphire"] / 4));
 
     craftList["exquisite constellations of emeralds"] = {};
     craftList["exquisite constellations of emeralds"].ingredients = [
@@ -399,7 +430,8 @@ function build_craft_list() {
         { id: ingredients["emerald"], qty: 4, "on hand": onHand["emerald"] },
     ];
     craftList["exquisite constellations of emeralds"].icon = "http://test.test";
-    craftList["exquisite constellations of emeralds"].available = 0;
+    craftList["exquisite constellations of emeralds"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+                                                                           , Math.floor(onHand["emerald"] / 4));
 }
 
 // slightly modified from the crafting.js script to filter on itemId if presented from this script
