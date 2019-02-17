@@ -38,6 +38,48 @@ function titleCase(str) {
   }).join(' ');
 }
 
+function wait(ms) {
+    var start = Date.now(),
+        now = start;
+    while (now - start < ms) {
+      now = Date.now();
+    }
+}
+
+// slightly modified from the crafting.js script to filter on itemId if presented from this script
+function filterItems_user(query) {
+    console.log('filter items', query);
+    query = encodeURIComponent(query);
+
+    // Show all
+    $('#items li.item').each(function () {
+        $(this).removeClass('hidden').removeAttr('style');
+    });
+
+    // Has query, get items to remove
+    var removeItems = $('#items li.item').filter(function () {
+        if ($(this).attr("data-item") === query) {
+            return false;
+        } else {
+            return $(this).data("item-name").toLowerCase().indexOf(query.toLowerCase()) === -1;
+        }
+    });
+
+    // Hide items
+    removeItems.each(function () {
+        $(this).addClass('hidden');
+    });
+
+    // Scroll to the top
+    $('#items-wrapper').scrollTop(0);
+}
+
+function set_filter(filter_value) {
+    filterItems_user(filter_value);
+}
+
+var itemToGrab = "";
+
 var ingredients = {};
 ingredients["glass shards"] = "01988";
 ingredients["test tube"] = "00125";
@@ -455,34 +497,6 @@ function build_craft_list() {
                                                                            , Math.floor(onHand["emerald"] / 4));
 }
 
-// slightly modified from the crafting.js script to filter on itemId if presented from this script
-function filterItems_user() {
-    var query = $('#search_query').val();
-    query = encodeURIComponent(query);
-
-    // Show all
-    $('#items li.item').each(function () {
-        $(this).removeClass('hidden').removeAttr('style');
-    });
-
-    // Has query, get items to remove
-    var removeItems = $('#items li.item').filter(function () {
-        if ($(this).attr("data-item") === query) {
-            return false;
-        } else {
-            return $(this).data("item-name").toLowerCase().indexOf(query.toLowerCase()) === -1;
-        }
-    });
-
-    // Hide items
-    removeItems.each(function () {
-        $(this).addClass('hidden');
-    });
-
-    // Scroll to the top
-    $('#items-wrapper').scrollTop(0);
-}
-
 var dropConfig = {
     drop: function(event, ui) {
         // this is needed
@@ -520,12 +534,8 @@ function set_slot_properties() {
     });
 }
 
-function set_filter(filter_value) {
-    $('#search_query').val(filter_value);
-    filterItems_user();
-}
-
 var triggerDragAndDrop = function (selectorDrag, selectorDrop) {
+    console.log('clicking...', selectorDrag, selectorDrop);
 
     // function for triggering mouse events
     var fireMouseEvent = function (type, elem, centerX, centerY) {
@@ -580,6 +590,120 @@ var triggerDragAndDrop = function (selectorDrag, selectorDrop) {
     return true;
 };
 
+// function set_filter(itemName) {
+//     if (itemName === "glass shards") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "]").first().getPath();
+//     }
+//     else if (itemName === "test tube") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["test tube"] + "]").first().getPath();
+//     }
+//     else if (itemName === "vial") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["vial"] + "]").first().getPath();
+//     }
+//     else if (itemName === "bowl") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["bowl"] + "]").first().getPath();
+//     }
+//     else if (itemName === "pile of sand") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "]").first().getPath();
+//     }
+//     else if (itemName === "black elder leaves") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "]").first().getPath();
+//     }
+//     else if (itemName === "black elderberries") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "]").first().getPath();
+//     }
+//     else if (itemName === "yellow hellebore flower") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "]").first().getPath();
+//     }
+//     else if (itemName === "upload potion") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "]").first().getPath();
+//     }
+//     else if (itemName === "purple angelica flowers") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "]").first().getPath();
+//     }
+//     else if (itemName === "garlic tincture") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").first().getPath();
+//     }
+//     else if (itemName === "download-reduction potion") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").first().getPath();
+//     }
+//     else if (itemName === "head of garlic") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").first().getPath();
+//     }
+//     else if (itemName === "bronze alloy mix") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "]").first().getPath();
+//     }
+//     else if (itemName === "clay") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").first().getPath();
+//     }
+//     else if (itemName === "iron ore") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").first().getPath();
+//     }
+//     else if (itemName === "lump of coal") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").first().getPath();
+//     }
+//     else if (itemName === "iron bar") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "]").first().getPath();
+//     }
+//     else if (itemName === "gold ore") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "]").first().getPath();
+//     }
+//     else if (itemName === "adamantium ore") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "]").first().getPath();
+//     }
+//     else if (itemName === "mithril ore") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "]").first().getPath();
+//     }
+//     else if (itemName === "quartz dust") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "]").first().getPath();
+//     }
+//     else if (itemName === "jade dust") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "]").first().getPath();
+//     }
+//     else if (itemName === "amethyst dust") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "]").first().getPath();
+//     }
+//     else if (itemName === "ruby-flecked wheat") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "]").first().getPath();
+//     }
+//     else if (itemName === "emerald-flecked wheat") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "]").first().getPath();
+//     }
+//     else if (itemName === "ruby-grained baguette") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "]").first().getPath();
+//     }
+//     else if (itemName === "emerald-grained baguette") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").first().getPath();
+//     }
+//     else if (itemName === "garlic ruby-baguette") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").first().getPath();
+//     }
+//     else if (itemName === "garlic emerald-baguette") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").first().getPath();
+//     }
+//     else if (itemName === "artisan emerald-baguette") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "]").first().getPath();
+//     }
+//     else if (itemName === "emerald chip") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").first().getPath();
+//     }
+//     else if (itemName === "quartz bar") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").first().getPath();
+//     }
+//     else if (itemName === "carbon-crystalline quartz") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").first().getPath();
+//     }
+//     else if (itemName === "ruby") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["ruby"] + "]").first().getPath();
+//     }
+//     else if (itemName === "sapphire") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").first().getPath();
+//     }
+//     else if (itemName === "emerald") {
+//         itemToGrab = jQuery("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").first().getPath();
+//     }
+// }
+
 function clear_crafting_area() {
     $("#crafting-submenu").remove();
 
@@ -606,6 +730,7 @@ function craft_glass_shards_from_tube() {
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
 
     setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(clear_crafting_area, GRAB_DELAY + 900);
 }
 
 function craft_glass_shards_from_sand() {
@@ -763,7 +888,7 @@ function craft_upload_potion() {
 function craft_large_upload_potion() {
     set_filter('bowl');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
-    set_filter('00099');
+    set_filter('upload potion');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
@@ -836,7 +961,7 @@ function craft_download_potion() {
 function craft_large_download_potion() {
     set_filter('bowl');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_4");
-    set_filter('00106');
+    set_filter('download-reduction potion');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_5");
 
     setTimeout(function (){
@@ -1123,7 +1248,7 @@ function craft_carbon_crystalline_quartz_necklace() {
 }
 
 function craft_exquisite_constellation_emeralds() {
-    set_filter('00116');
+    set_filter('emerald');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
@@ -1148,7 +1273,7 @@ function craft_exquisite_constellation_emeralds() {
 }
 
 function craft_exquisite_constellation_rubies() {
-    set_filter('02323');
+    set_filter('ruby');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
@@ -1172,7 +1297,7 @@ function craft_exquisite_constellation_rubies() {
 }
 
 function craft_exquisite_constellation_sapphires() {
-    set_filter('02549');
+    set_filter('sapphire');
     triggerDragAndDrop(ITEM_ACCESSOR, "#slot_3");
 
     setTimeout(function (){
@@ -1198,10 +1323,6 @@ function craft_exquisite_constellation_sapphires() {
 
 function do_craft(craft_name) {
     console.log('crafting', craft_name);
-
-    disable_quick_craft_buttons();
-
-    clear_crafting_area();
 
     /* Glass */
     if (craft_name === "glass shards from test tube") {
@@ -1360,8 +1481,6 @@ function grab_result() {
     if (RETRIEVE_ITEMS === true) {
         triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
 
-        setTimeout(function (){clear_crafting_area()}, ITEM_WINDOW_DELAY);
-
         build_craft_list();
     } else {
         alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
@@ -1403,20 +1522,25 @@ function open_crafting_submenu(craft_name) {
 
         var craftButton = $("<button>");
         craftButton.on("click", function() {
+            disable_quick_craft_buttons();
+
             var craftNumber = $("#craft_number_select").children("option:selected").val();
 
-            do_craft(craft_name)
+            //do_craft(craft_name)
 
             if (craftNumber > 1) {
+                console.log('called next craft');
                 // https://stackoverflow.com/a/3583740/3150365
                 var i = craftNumber;
                 (function myLoop (i) {
                     setTimeout(function () {
                         do_craft(craft_name);     //  your code here
-                        if (--i) myLoop(i);       //  decrement i and call myLoop again if i > 0
-                    }, 4000)
-                })(craftNumber - 1);              //  pass the number of iterations as an argument
+                        if (--i) myLoop(i); //  decrement i and call myLoop again if i > 0
+                    }, 5500)
+                })(craftNumber);// - 1);              //  pass the number of iterations as an argument
             }
+
+            enable_quick_craft_buttons();
         });
 
         craftButton.html('Craft');
@@ -1488,11 +1612,12 @@ function close_crafting_submenu() {
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_sapphires" class="quick_craft_button jewelry">Exquisite Constellation of Sapphires</button>');
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
-//     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
-//
-//     $("#test_filter_by_id").click(function() {
-//        set_filter('00112');
-//     });
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
+
+    $("#test_filter_by_id").click(function() {
+        set_filter('test tube');
+        console.log(itemToGrab);
+    });
 
     var hasFoodBook = $("#crafting_recipes h3:contains('Food Cooking Recipes')").length ? true : false;
     var hasStatPotionBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
