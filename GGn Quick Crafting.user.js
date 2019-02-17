@@ -221,8 +221,8 @@ function build_craft_list() {
     ];
     craftList["download-reduction potion"].icon = "http://test.test";
     craftList["download-reduction potion"].available = Math.min(Math.floor(onHand["purple angelica flowers"] / 5)
-                                                                      , onHand["vial"]
-                                                                      , onHand["garlic tincture"]);
+                                                                , onHand["vial"]
+                                                                , onHand["garlic tincture"]);
 
     craftList["large download-reduction potion"] = {};
     craftList["large download-reduction potion"].ingredients = [
@@ -251,7 +251,7 @@ function build_craft_list() {
     ];
     craftList["small luck potion"].icon = "http://test.test";
     craftList["small luck potion"].available = Math.min(Math.floor(onHand["black elderberries"] / 2)
-                                                                   , onHand["vial"]);
+                                                        , onHand["vial"]);
 
     craftList["large luck potion"] = {};
     craftList["large luck potion"].ingredients = [
@@ -281,7 +281,7 @@ function build_craft_list() {
     ];
     craftList["garlic ruby-baguette"].icon = "http://test.test";
     craftList["garlic ruby-baguette"].available = Math.min(Math.floor(onHand["head of garlic"] / 2)
-                                                        , onHand["ruby-grained baguette"]);
+                                                           , onHand["ruby-grained baguette"]);
 
     craftList["garlic emerald-baguette"] = {};
     craftList["garlic emerald-baguette"].ingredients = [
@@ -290,7 +290,7 @@ function build_craft_list() {
     ];
     craftList["garlic emerald-baguette"].icon = "http://test.test";
     craftList["garlic emerald-baguette"].available = Math.min(onHand["head of garlic"]
-                                                        , onHand["emerald-grained baguette"]);
+                                                              , onHand["emerald-grained baguette"]);
 
     craftList["artisan emerald-baguette"] = {};
     craftList["artisan emerald-baguette"].ingredients = [
@@ -300,8 +300,8 @@ function build_craft_list() {
     ];
     craftList["artisan emerald-baguette"].icon = "http://test.test";
     craftList["artisan emerald-baguette"].available = Math.min(onHand["garlic emerald-baguette"]
-                                                        , onHand["emerald chip"]
-                                                        , onHand["yellow hellebore flower"]);
+                                                               , onHand["emerald chip"]
+                                                               , onHand["yellow hellebore flower"]);
 
     craftList["artisan ruby-baguette"] = {};
     craftList["artisan ruby-baguette"].ingredients = [
