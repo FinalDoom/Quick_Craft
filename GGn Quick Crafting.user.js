@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.6.5b
+// @version      1.6.0b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.6.5b';
+const VERSION = '1.6.0b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -1364,23 +1364,23 @@ function close_crafting_submenu() {
     $("#crafting_recipes").before(
         '<div id="quick-crafter" style="border: 1px solid #fff;margin-bottom: 17px;display: block;clear: both;position:relative;background-color:rgba(0,0,0,.7);padding:5px;"></div>');
 
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
+//     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
 
-    var test = false;
-    $("#test_filter_by_id").click(function() {
-        if (test === false) {
-            clear_crafting_area();
-            setTimeout(function() {
-                console.log(getElement(ingredients["test tube"]));
-                triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
-            }, 1500);
-            test = true;
-        } else {
-            grab_result();
-            clear_crafting_area();
-            test = false;
-        }
-    });
+//     var test = false;
+//     $("#test_filter_by_id").click(function() {
+//         if (test === false) {
+//             clear_crafting_area();
+//             setTimeout(function() {
+//                 console.log(getElement(ingredients["test tube"]));
+//                 triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
+//             }, 1500);
+//             test = true;
+//         } else {
+//             grab_result();
+//             clear_crafting_area();
+//             test = false;
+//         }
+//     });
 
     $("#quick-crafter").append('<div id="current_craft_box"></div>');
     $("#quick-crafter").append('<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.');
