@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.6.0b';
+const VERSION = '1.7.0b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -228,7 +228,7 @@ function build_craft_list() {
 
     craftList["small download-reduction potion"] = {};
     craftList["small download-reduction potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
+        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
         { name: "purple angelica flowers", id: ingredients["purple angelica flowers"], qty: 2, "on hand": onHand["purple angelica flowers"] },
         { name: "garlic tincture", id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
     ];
@@ -239,7 +239,7 @@ function build_craft_list() {
 
     craftList["download-reduction potion"] = {};
     craftList["download-reduction potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["test tube"] },
+        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
         { name: "purple angelica flowers", id: ingredients["purple angelica flowers"], qty: 5, "on hand": onHand["purple angelica flowers"] },
         { name: "garlic tincture", id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
     ];
@@ -250,7 +250,7 @@ function build_craft_list() {
 
     craftList["large download-reduction potion"] = {};
     craftList["large download-reduction potion"].ingredients = [
-        { name: "bowl", id: ingredients["bowl"], qty: 1, "on hand": onHand["test tube"] },
+        { name: "bowl", id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
         { name: "download-reduction potion", id: ingredients["download-reduction potion"], qty: 2, "on hand": onHand["download-reduction potion"] },
         { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
     ];
@@ -570,27 +570,39 @@ function grab_result() {
     if (RETRIEVE_ITEMS === true) {
         triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
 
-        clear_crafting_area();
-        //build_craft_list();
+        clear_crafting_area(true);
+        build_craft_list();
     } else {
         alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
     }
 }
 
-function clear_crafting_area() {
+function clear_crafting_area(afterSuccessfulCraft) {
     //$("#crafting-submenu").remove();
 
     var i = 0;
     for (i = 0; i < 3; i++) {
-        triggerDragAndDrop("#slot_0 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_1 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_2 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_3 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_4 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_5 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_6 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_7 li", "#items-wrapper");
-        triggerDragAndDrop("#slot_8 li", "#items-wrapper");
+        if (afterSuccessfulCraft !== true) {
+            triggerDragAndDrop("#slot_0 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_1 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_2 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_3 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_4 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_5 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_6 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_7 li", "#items-wrapper");
+            triggerDragAndDrop("#slot_8 li", "#items-wrapper");
+        } else {
+            $("#slot_0 li").remove();
+            $("#slot_1 li").remove();
+            $("#slot_2 li").remove();
+            $("#slot_3 li").remove();
+            $("#slot_4 li").remove();
+            $("#slot_5 li").remove();
+            $("#slot_6 li").remove();
+            $("#slot_7 li").remove();
+            $("#slot_8 li").remove();
+        }
     }
 
     $("#CraftingResult li").remove();
