@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.3b
+// @version      1.7.4b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.3b';
+const VERSION = '1.7.4b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -96,7 +96,7 @@ function build_on_hand() {
     onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").length;
     onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").length;
     onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").length;
-    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze allow mix"] + "]").length;
+    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "]").length;
     onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").length;
     onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").length;
     onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").length;
@@ -1496,7 +1496,7 @@ function close_crafting_submenu() {
     //console.log(ingredients);
     build_on_hand();
     build_craft_list();
-    //console.log(craftList);
+    console.log(craftList);
 
     $("#clear_button").click(function() {
         next_button_lockout_delay = 300;
