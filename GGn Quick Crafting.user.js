@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.7b
+// @version      1.7.8b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.7b';
+const VERSION = '1.7.8b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -575,6 +575,7 @@ function grab_result() {
         triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
 
         clear_crafting_area(true);
+        build_on_hand();
         build_craft_list();
     } else {
         alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
@@ -1323,11 +1324,8 @@ function open_crafting_submenu(craft_name) {
 
         $("#crafting-submenu").append('</select>');
 
-        console.log('testing1234');
-
         var craftButton = $("<button>");
         craftButton.on("click", function() {
-            console.log('testing5678');
             disable_quick_craft_buttons();
 
             var craftNumber = $("#craft_number_select").children("option:selected").val();
@@ -1498,7 +1496,6 @@ function close_crafting_submenu() {
     //console.log(ingredients);
     build_on_hand();
     build_craft_list();
-    console.log(craftList);
 
     $("#clear_button").click(function() {
         next_button_lockout_delay = 300;
