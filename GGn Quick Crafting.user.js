@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.6b
+// @version      1.7.7b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,16 +10,18 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.6b';
+const VERSION = '1.7.7b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
- * Too little of a delay will cause more visual bugs */
+ * Too little of a delay will cause more bugs */
 
 const RETRIEVE_ITEMS = true; // set to true to automatically retrieve craft recipes
-const BUTTON_LOCKOUT_DELAY = 10000;
+const BUTTON_LOCKOUT_DELAY = 11500;
 const ITEM_WINDOW_DELAY = 500;
-const GRAB_DELAY = 2000;
+const CRAFT_TIME = 4200;
+const GRAB_TIME = 7000;
+const NEXT_CRAFT_TIME = 2000;
 
 /* >>>END<<< user adjustable variables */
 
@@ -1336,17 +1338,17 @@ function open_crafting_submenu(craft_name) {
                         console.log('craft');
                         do_craft(craft_name);
                         resolve();
-                    }, 4200));
+                    }, CRAFT_TIME));
                     await new Promise(resolve => setTimeout(function() {
                         console.log('grab');
                         grab_result();
                         resolve();
-                    }, 7000));
+                    }, GRAB_TIME));
                     await new Promise(resolve => setTimeout(function() {
                         console.log('clear');
                         clear_crafting_area();
                         resolve();
-                    }, 2000));
+                    }, NEXT_CRAFT_TIME));
                 }
             })();
 
