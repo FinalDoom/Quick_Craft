@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.4b
+// @version      1.7.5b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.4b';
+const VERSION = '1.7.5b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -57,7 +57,7 @@ ingredients["download-reduction potion"] = "00106";
 ingredients["head of garlic"] = "00112";
 ingredients["bronze alloy mix"] = "02225";
 ingredients["clay"] = "02234";
-ingredients["iron ore"] = "02236";
+ingredients["iron ore"] = "02226";
 ingredients["lump of coal"] = "02233";
 ingredients["iron bar"] = "02237";
 ingredients["gold ore"] = "02227";
