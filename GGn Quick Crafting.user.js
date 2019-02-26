@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.8b
+// @version      1.7.9b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,22 +10,22 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.8b';
+const VERSION = '1.7.9b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
  * Too little of a delay will cause more bugs */
 
 const RETRIEVE_ITEMS = true; // set to true to automatically retrieve craft recipes
-const BUTTON_LOCKOUT_DELAY = 11500;
-const ITEM_WINDOW_DELAY = 500;
-const CRAFT_TIME = 4200;
-const GRAB_TIME = 7000;
+const BUTTON_LOCKOUT_DELAY = 12000;
+const ITEM_WINDOW_DELAY = 550;
+const CRAFT_TIME = 4700;
+const GRAB_TIME = 7500;
 const NEXT_CRAFT_TIME = 2000;
 
 /* >>>END<<< user adjustable variables */
 
-/* Used to specify the clear button lockout time only at this time */
+/* Used for dynamic button lockouts (i.e.: multicraft) */
 var next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
 
 var style = document.createElement('style');
@@ -529,7 +529,7 @@ var triggerDragAndDrop = function (selectorDrag, selectorDrop) {
     }
 
     if (selectorDrag === '#CraftingResult li' && elemDrag === null) {
-        alert('Craft unable to be made. Do you have the materials and appropriate forge/enchantment/cooking fire?');
+        alert('Craft unable to be made. The server may be responding slowly. Do you have the appropriate forge/enchantment/cooking fire?');
         return false;
     }
 
@@ -832,30 +832,30 @@ function craft_large_download_potion() {
 
 function craft_garlic_tincture() {
     triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_5");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+        triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_5");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_impure_bronze_bar() {
     triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["clay"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+        triggerDragAndDrop(getElement(ingredients["clay"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_bronze_bar() {
     triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+        triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_iron_bar() {
     triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+        triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_steel_bar() {
@@ -874,51 +874,52 @@ function craft_steel_bar() {
 
 function craft_steel_bar_from_iron_bar() {
     triggerDragAndDrop(getElement(ingredients["iron bar"]), "#slot_1");
-    triggerDragAndDrop(getElement(ingredients["lump of coal"]), "#slot_4");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["lump of coal"]), "#slot_4");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_gold_bar() {
     triggerDragAndDrop(getElement(ingredients["gold ore"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["gold ore"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["gold ore"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_mithril_bar() {
     triggerDragAndDrop(getElement(ingredients["mithril ore"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["mithril ore"]), "#slot_1");
 
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["mithril ore"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_adamantium_bar() {
     triggerDragAndDrop(getElement(ingredients["adamantium ore"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["adamantium ore"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["adamantium ore"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_quartz_bar() {
     triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_jade_bar() {
     triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_amethyst_bar() {
     triggerDragAndDrop(getElement(ingredients["amethyst dust"]), "#slot_0");
-    triggerDragAndDrop(getElement(ingredients["amethyst dust"]), "#slot_1");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setTimeout(function() {
+            triggerDragAndDrop(getElement(ingredients["amethyst dust"]), "#slot_1");
+    }, ITEM_WINDOW_DELAY);
 }
 
 function craft_small_luck_potion() {
@@ -1275,18 +1276,22 @@ function do_craft(craft_name) {
 }
 
 function disable_quick_craft_buttons() {
-    $(".quick_craft_button").prop("disabled",true);
-    $(".quick_craft_button").addClass("disabled");
+    $("#crafting-submenu button").prop("disabled",true);
+    $("#crafting-submenu button").addClass("disabled");
 }
 
 function enable_quick_craft_buttons() {
     setTimeout(function() {
-        $(".quick_craft_button").prop("disabled",false);
-        $(".quick_craft_button").removeClass("disabled");
+        $("#crafting-submenu button").prop("disabled",false);
+        $("#crafting-submenu button").removeClass("disabled");
+
+        disable_craft_button = false;
 
         next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
     }, next_button_lockout_delay);
 }
+
+var disable_craft_button = false;
 
 function open_crafting_submenu(craft_name) {
     //clear_crafting_area();
@@ -1326,9 +1331,14 @@ function open_crafting_submenu(craft_name) {
 
         var craftButton = $("<button>");
         craftButton.on("click", function() {
-            disable_quick_craft_buttons();
-
             var craftNumber = $("#craft_number_select").children("option:selected").val();
+
+            disable_craft_button = true;
+
+            next_button_lockout_delay = BUTTON_LOCKOUT_DELAY * Number(craftNumber);
+
+            disable_quick_craft_buttons();
+            enable_quick_craft_buttons();
 
             (async function loop() {
                 for (let i = 0; i < craftNumber; i++) {
@@ -1349,22 +1359,16 @@ function open_crafting_submenu(craft_name) {
                     }, NEXT_CRAFT_TIME));
                 }
             })();
-
-//                 // https://stackoverflow.com/a/3583740/3150365
-//                 (function myLoop (i) {
-//                     setTimeout(function () {
-//                         do_craft(craft_name); // your code here
-//                         if (--i) myLoop(i);   //  decrement i and call myLoop again if i > 0
-//                     }, 15000)
-//                 })(craftNumber - 1);          //  pass the number of iterations as an argument
-
-            enable_quick_craft_buttons();
         });
 
         craftButton.html('Craft');
         craftButton.prop('style', 'margin-left: 5px');
 
         $("#crafting-submenu").append(craftButton);
+
+        if (disable_craft_button === true) {
+            disable_quick_craft_buttons();
+        }
     }
 }
 
