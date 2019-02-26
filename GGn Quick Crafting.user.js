@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.2b
+// @version      1.7.3b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.2b';
+const VERSION = '1.7.3b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -122,6 +122,8 @@ function build_on_hand() {
     onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length;
     onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length;
 }
+
+console.log(onHand);
 
 var craftList = {};
 
@@ -257,7 +259,7 @@ function build_craft_list() {
     craftList["large download-reduction potion"].icon = "http://test.test";
     craftList["large download-reduction potion"].available = Math.min(Math.floor(onHand["download-reduction potion"] / 2)
                                                                       , onHand["bowl"]
-                                                                      , onHand["garlic tincture"]);
+                                                                      , onHand["yellow hellebore flower"]);
 
     craftList["garlic tincture"] = {};
     craftList["garlic tincture"].ingredients = [
