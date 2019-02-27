@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.9b
+// @version      1.7.10b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.9b';
+const VERSION = '1.7.10b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -81,7 +81,7 @@ ingredients["carbon-crystalline quartz"] = "02537";
 ingredients["ruby"] = "02323";
 ingredients["sapphire"] = "02549";
 ingredients["emerald"] = "00116";
-ingredients["amethyst bar"] = "00244";
+ingredients["amethyst bar"] = "02244";
 
 var onHand = {};
 function build_on_hand() {
@@ -369,17 +369,17 @@ function build_craft_list() {
     craftList["iron bar"].available = Math.floor(onHand["iron ore"] / 2);
 
     craftList["gold bar"] = {};
-    craftList["gold bar"].ingredients = [ { name: "gold bar", id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
+    craftList["gold bar"].ingredients = [ { name: "gold ore", id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
     craftList["gold bar"].icon = "http://test.test";
     craftList["gold bar"].available = Math.floor(onHand["gold ore"] / 2);
 
     craftList["mithril bar"] = {};
-    craftList["mithril bar"].ingredients = [ { name: "mithril bar", id: ingredients["mithril ore"], qty: 2, "on hand": onHand["mithril ore"] } ];
+    craftList["mithril bar"].ingredients = [ { name: "mithril ore", id: ingredients["mithril ore"], qty: 2, "on hand": onHand["mithril ore"] } ];
     craftList["mithril bar"].icon = "http://test.test";
     craftList["mithril bar"].available = Math.floor(onHand["mithril ore"] / 2);
 
     craftList["adamantium bar"] = {};
-    craftList["adamantium bar"].ingredients = [ { name: "adamantium bar", id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
+    craftList["adamantium bar"].ingredients = [ { name: "adamantium ore", id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
     craftList["adamantium bar"].icon = "http://test.test";
     craftList["adamantium bar"].available = Math.floor(onHand["adamantium ore"] / 2);
 
@@ -1468,8 +1468,7 @@ function close_crafting_submenu() {
                                ' | <b>Basic Stat Potion Book:</b> ' + hasStatPotionBook + ' | <b>Metal Bar Book:</b> '
                                + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook + '</p>');
 
-    $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
-
+     $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
     if (hasFoodBook === false) {
         $('.food').remove();
     }
