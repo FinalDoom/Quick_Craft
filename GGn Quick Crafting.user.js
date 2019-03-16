@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.10b
+// @version      1.7.11b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.10b';
+const VERSION = '1.7.11b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -82,6 +82,8 @@ ingredients["ruby"] = "02323";
 ingredients["sapphire"] = "02549";
 ingredients["emerald"] = "00116";
 ingredients["amethyst bar"] = "02244";
+ingredients["dwarven gem"] = "02508";
+ingredients["flux"] = "02653";
 
 var onHand = {};
 function build_on_hand() {
@@ -123,6 +125,8 @@ function build_on_hand() {
     onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").length;
     onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length;
     onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length;
+    onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "]").length;
+    onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "]").length;
 }
 
 console.log(onHand);
@@ -460,6 +464,14 @@ function build_craft_list() {
     craftList["exquisite constellations of emeralds"].icon = "http://test.test";
     craftList["exquisite constellations of emeralds"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
                                                                            , Math.floor(onHand["emerald"] / 4));
+
+    craftList["melt dwarven gem"] = {};
+    craftList["melt dwarven gem"].ingredients = [
+        { name: "flux", id: ingredients["flux"], qty: 1, "on hand": onHand["flux"] },
+        { name: "dwarven gem", id: ingredients["dwarven gem"], qty: 1, "on hand": onHand["dwarven gem"] },
+    ];
+    craftList["melt dwarven gem"].icon = "http://test.test";
+    craftList["melt dwarven gem"].available = Math.min(onHand["flux"], onHand["dwarven gem"]);
 }
 
 var dropConfig = {
@@ -1131,6 +1143,14 @@ function craft_exquisite_constellation_sapphires() {
         }, ITEM_WINDOW_DELAY);
     }, ITEM_WINDOW_DELAY);
 }
+
+function melt_dwarven_gem() {
+    triggerDragAndDrop(getElement(ingredients["flux"]), "#slot_7");
+
+    setTimeout(function (){
+        triggerDragAndDrop(getElement(ingredients["dwarven gem"]), "#slot_4");
+    }, ITEM_WINDOW_DELAY);
+}
 /* End Crafts */
 
 function do_craft(craft_name) {
@@ -1270,6 +1290,11 @@ function do_craft(craft_name) {
     }
     else if (craft_name === "exquisite constellation rubies") {
         craft_exquisite_constellation_rubies();
+    }
+
+    /* Misc/Recast */
+    else if (craft_name === "melt dwarven gem") {
+        melt_dwarven_gem();
     }
 
     enable_quick_craft_buttons();
@@ -1452,6 +1477,8 @@ function close_crafting_submenu() {
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_rubies" class="quick_craft_button jewelry">Exquisite Constellation of Rubies</button>');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_sapphires" class="quick_craft_button jewelry">Exquisite Constellation of Sapphires</button>');
     $("#quick-crafter").append('<br />');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: gray;" id="melt_dwarven_gem" class="quick_craft_button recast">Melt Dwarven gem</button>');
+    $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
 
     var hasFoodBook = $("#crafting_recipes h3:contains('Food Cooking Recipes')").length ? true : false;
@@ -1461,12 +1488,14 @@ function close_crafting_submenu() {
     var hasGlassBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
     var hasLuckBook = $("#crafting_recipes h3:contains('Luck Potion Crafting Recipes')").length ? true : false;
     var hasDebugBook = $("#crafting_recipes h3:contains('A fake book for testing')").length ? true : false;
+    var hasRecastBook = $("#crafting_recipes h3:contains('Recast Blacksmith Crafting Book')").length ? true : false;
 
     $("#quick-crafter").append('<span>Recipes will appear if you have one or more of the following books:</span>');
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<span><b>Glass Book:</span> ' + hasGlassBook + ' | <b>Food Book:</b> ' + hasFoodBook +
                                ' | <b>Basic Stat Potion Book:</b> ' + hasStatPotionBook + ' | <b>Metal Bar Book:</b> '
-                               + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook + '</p>');
+                               + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook
+                               + ' | <b>Recast Blacksmith Book:</b> ' + hasRecastBook + '</p>');
 
      $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
     if (hasFoodBook === false) {
@@ -1493,6 +1522,10 @@ function close_crafting_submenu() {
         $('.glass').remove();
     }
 
+    if (hasRecastBook === false) {
+        $('.recast').remove();
+    }
+
     set_item_properties();
     set_slot_properties();
 
@@ -1507,6 +1540,10 @@ function close_crafting_submenu() {
         clear_crafting_area();
 
         enable_quick_craft_buttons();
+    });
+
+    $("#melt_dwarven_gem").click(function() {
+        open_crafting_submenu("melt dwarven gem");
     });
 
     $("#shards_tube").click(function() {
