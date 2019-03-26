@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.11b
+// @version      1.7.12b
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
@@ -10,7 +10,7 @@
 // @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.7.11b';
+const VERSION = '1.7.12b';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -1193,7 +1193,7 @@ function do_craft(craft_name) {
     }
 
 	/* Download potions */
-    else if (craft_name === "download-reduction potion_sampler") {
+    else if (craft_name === "download-reduction potion sampler") {
         craft_download_potion_sampler();
     }
     else if (craft_name === "small download-reduction potion") {
