@@ -85,48 +85,127 @@ ingredients["amethyst bar"] = "02244";
 ingredients["dwarven gem"] = "02508";
 ingredients["flux"] = "02653";
 
-var onHand = {};
+var onHand = {}; // .item_count").text()
 function build_on_hand() {
-    onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "]").length;
-    onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "]").length;
-    onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "]").length;
-    onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "]").length;
-    onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "]").length;
-    onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "]").length;
-    onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "]").length;
-    onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "]").length;
-    onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "]").length;
-    onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "]").length;
-    onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").length;
-    onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").length;
-    onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").length;
-    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "]").length;
-    onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").length;
-    onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").length;
-    onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").length;
-    onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "]").length;
-    onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "]").length;
-    onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "]").length;
-    onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "]").length;
-    onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "]").length;
-    onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "]").length;
-    onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "]").length;
-    onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "]").length;
-    onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "]").length;
-    onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "]").length;
-    onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").length;
-    onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").length;
-    onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length;
-    onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "]").length;
-    onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").length;
-    onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").length;
-    onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").length;
-    onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "]").length;
-    onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").length;
-    onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length;
-    onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length;
-    onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "]").length;
-    onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "]").length;
+    onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "] .item_count").text();
+    if (onHand["glass shards"] === "") { onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "]").length; }
+
+    onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "] .item_count").text();
+    if (onHand["test tube"] === "") { onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "]").length; }
+
+    onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "] .item_count").text();
+    if (onHand["vial"] === "") { onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "]").length; }
+
+    onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "] .item_count").text();
+    if (onHand["bowl"] === "") { onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "]").length; }
+
+    onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "] .item_count").text();
+    if (onHand["pile of sand"] === "") { onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "]").length; }
+
+    onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "] .item_count").text();
+    if (onHand["black elder leaves"] === "") { onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "]").length; }
+
+    onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "] .item_count").text();
+    if (onHand["black elderberries"] === "") { onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "]").length; }
+
+    onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "] .item_count").text();
+    if (onHand["yellow hellebore flower"] === "") { onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "]").length; }
+
+    onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "] .item_count").text();
+    if (onHand["upload potion"] === "") { onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "]").length; }
+
+    onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "] .item_count").text();
+    if (onHand["purple angelica flowers"] === "") { onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "]").length; }
+
+    onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "] .item_count").text();
+    if (onHand["garlic tincture"] === "") { onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").length; }
+
+    onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "] .item_count").text();
+    if (onHand["download-reduction potion"] === "") { onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").length; }
+
+    onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "] .item_count").text();
+    if (onHand["head of garlic"] === "") { onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").length; }
+
+    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "] .item_count").text();
+    if (onHand["bronze alloy mix"] === "") { onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "]").length; }
+
+    onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "] .item_count").text();
+    if (onHand["clay"] === "") { onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").length; }
+
+    onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "] .item_count").text();
+    if (onHand["iron ore"] === "") { onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").length; }
+
+    onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "] .item_count").text();
+    if (onHand["lump of coal"] === "") { onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").length; }
+
+    onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "] .item_count").text();
+    if (onHand["iron bar"] === "") { onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "]").length; }
+
+    onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "] .item_count").text();
+    if (onHand["gold ore"] === "") { onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "]").length; }
+
+    onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "] .item_count").text();
+    if (onHand["adamantium ore"] === "") { onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "]").length; }
+
+    onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "] .item_count").text();
+    if (onHand["mithril ore"] === "") { onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "]").length; }
+
+    onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "] .item_count").text();
+    if (onHand["quartz dust"] === "") { onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "]").length; }
+
+    onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "] .item_count").text();
+    if (onHand["jade dust"] === "") { onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "]").length; }
+
+    onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "] .item_count").text();
+    if (onHand["amethyst dust"] === "") { onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "]").length; }
+
+    onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "] .item_count").text();
+    if (onHand["ruby-flecked wheat"] === "") { onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "]").length; }
+
+    onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "] .item_count").text();
+    if (onHand["emerald-flecked wheat"] === "") { onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "]").length; }
+
+    onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "] .item_count").text();
+    if (onHand["ruby-grained baguette"] === "") { onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "]").length; }
+
+    onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "] .item_count").text();
+    if (onHand["emerald-grained baguette"] === "") { onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").length; }
+
+    onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "] .item_count").text();
+    if (onHand["garlic ruby-baguette"] === "") { onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").length; }
+
+    onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "] .item_count").text();
+    if (onHand["garlic emerald-baguette"] === "") { onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length; }
+
+    onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "] .item_count").text();
+    if (onHand["artisan emerald-baguette"] === "") { onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "]").length; }
+
+    onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "] .item_count").text();
+    if (onHand["emerald chip"] === "") { onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").length; }
+
+    onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "] .item_count").text();
+    if (onHand["quartz bar"] === "") { onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").length; }
+
+    onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "] .item_count").text();
+    if (onHand["carbon-crystalline quartz"] === "") { onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").length; }
+
+    onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "] .item_count").text();
+    if (onHand["ruby"] === "") { onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "]").length; }
+
+    onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "] .item_count").text();
+    if (onHand["sapphire"] === "") { onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").length; }
+
+    onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "] .item_count").text();
+    if (onHand["emerald"] === "") { onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length; }
+
+    onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "] .item_count").text();
+    if (onHand["amethyst bar"] === "") { onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length; }
+
+    onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "] .item_count").text();
+    if (onHand["flux"] === "") { onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "]").length; }
+
+    onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "] .item_count").text();
+    if (onHand["dwarven gem"] === "") { onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "]").length; }
 }
 
 console.log(onHand);
