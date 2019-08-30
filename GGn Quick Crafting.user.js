@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.1.1
+// @version      2.1.2
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.1.1';
+const VERSION = '2.1.2';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -1638,19 +1638,19 @@ function close_crafting_submenu() {
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: gray;" id="melt_dwarven_gem" class="quick_craft_button recast">Melt Dwarven gem</button>');
     $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="golden_throne" class="quick_craft_button staffcard">The Golden Throne</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="biggest_banhammer" class="quick_craft_button staffcard">Biggest Banhammer</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="staff_beauty_parlor" class="quick_craft_button staffcard">Staff Beauty Parlor</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="random_staff_card" class="quick_craft_button staffcard">Random Lvl2 Staff Card</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="realm_of_staff" class="quick_craft_button staffcard">Realm of Staff</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="portal_gun" class="quick_craft_button portalcard">Portal Gun</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="ricks_portal_gun" class="quick_craft_button portalcard">Rick\'s Portal Gun</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="space_wormhole" class="quick_craft_button portalcard">Space Wormhole</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="interdimensional_portal" class="quick_craft_button portalcard">Interdimensional Portal</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="super_mushroom" class="quick_craft_button mariocard">Super Mushroom</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="fire_flower" class="quick_craft_button mariocard">Fire Flower</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="penguin_suit" class="quick_craft_button mariocard">Penguin Suit</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="goal_pole" class="quick_craft_button mariocard">Goal Pole</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="golden_throne" class="quick_craft_button staffcard">The Golden Throne</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="biggest_banhammer" class="quick_craft_button staffcard">Biggest Banhammer</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="staff_beauty_parlor" class="quick_craft_button staffcard">Staff Beauty Parlor</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="random_staff_card" class="quick_craft_button staffcard">Random Lvl2 Staff Card</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="realm_of_staff" class="quick_craft_button staffcard">Realm of Staff</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="portal_gun" class="quick_craft_button portalcard">Portal Gun</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="ricks_portal_gun" class="quick_craft_button portalcard">Rick\'s Portal Gun</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="space_wormhole" class="quick_craft_button portalcard">Space Wormhole</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="interdimensional_portal" class="quick_craft_button portalcard">Interdimensional Portal</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="super_mushroom" class="quick_craft_button mariocard">Super Mushroom</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="fire_flower" class="quick_craft_button mariocard">Fire Flower</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="penguin_suit" class="quick_craft_button mariocard">Penguin Suit</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="goal_pole" class="quick_craft_button mariocard">Goal Pole</button>');
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
 
