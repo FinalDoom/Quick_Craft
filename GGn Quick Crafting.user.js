@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.0.1
+// @version      2.0.2
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.0.1';
+const VERSION = '2.0.2';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -32,8 +32,6 @@ slots[5] = blankSlot;
 slots[6] = blankSlot;
 slots[7] = blankSlot;
 slots[8] = blankSlot;
-
-noty({type:'information', text: 'GGn Quick Crafter loaded'});
 
 function getUrlVars(url) {
     var vars = {};
@@ -618,9 +616,10 @@ function setIngredientSlot (ingredientId, slot) {
 function take_craft(craft_name) {
     $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
         if (data === "{}") {
-            noty({type:'success', text: craftName + ' was crafted successfully.'});
+            noty({type:'success', text: craft_name + ' was crafted successfully.'});
         } else {
-            alert('Crafting ' + craft_name + ' failed. Response from server: ', data)
+            noty({type:'error', text: craft_name + ' failed.'});
+            alert('Crafting failed. Response from server: ', data)
         }
     });
 }
