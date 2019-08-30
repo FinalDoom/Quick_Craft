@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.1.0
+// @version      2.1.1
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.1.0';
+const VERSION = '2.1.1';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -333,8 +333,8 @@ function build_on_hand() {
     onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "] .item_count").text();
     if (onHand["Companion Cube"] === "") { onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "]").length}
 
-    onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Coveter Mining Ship"] + "] .item_count").text();
-    if (onHand["Coveter Mining Ship"] === "") { onHand["Coveter Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Coveter Mining Ship"] + "]").length}
+    onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Covetor Mining Ship"] + "] .item_count").text();
+    if (onHand["Covetor Mining Ship"] === "") { onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Covetor Mining Ship"] + "]").length}
 
     onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "] .item_count").text();
     if (onHand["GLaDOS"] === "") { onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "]").length}
