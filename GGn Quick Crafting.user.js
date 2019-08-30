@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.0.1
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.0';
+const VERSION = '2.0.1';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -33,6 +33,8 @@ slots[6] = blankSlot;
 slots[7] = blankSlot;
 slots[8] = blankSlot;
 
+noty({type:'information', text: 'GGn Quick Crafter loaded'});
+
 function getUrlVars(url) {
     var vars = {};
     var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -53,10 +55,6 @@ function getSlots() {
 
 var authKey = getUrlVars(document.getElementsByTagName('link')[4].href).authkey;
 var urlBase = "https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=CUSTOMRECIPE&auth=" + authKey;
-
-console.log('testing the new url base:', urlBase);
-//console.log((slots.toString()).replace(",",""));
-console.log(getSlots());
 
 /* Used for dynamic button lockouts (i.e.: multicraft) */
 var next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
@@ -617,12 +615,12 @@ function setIngredientSlot (ingredientId, slot) {
     }
 };
 
-function take_craft() {
+function take_craft(craft_name) {
     $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
         if (data === "{}") {
-            // add a toast
+            noty({type:'success', text: craftName + ' was crafted successfully.'});
         } else {
-            alert('Craft failed. Response from server: ', data)
+            alert('Crafting ' + craft_name + ' failed. Response from server: ', data)
         }
     });
 }
@@ -1117,7 +1115,7 @@ function open_crafting_submenu(craft_name) {
                     await new Promise(resolve => setTimeout(function() {
                         console.log('craft');
                         do_craft(craft_name);
-                        take_craft();
+                        take_craft(craft_name);
                         resolve();
                     }, CRAFT_TIME));
                 }
