@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.0.3
+// @version      2.1.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.0.3';
+const VERSION = '2.1.0';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -113,6 +113,51 @@ ingredients["emerald"] = "00116";
 ingredients["amethyst bar"] = "02244";
 ingredients["dwarven gem"] = "02508";
 ingredients["flux"] = "02653";
+
+// Cards
+ingredients["Bowser"] = "02395";
+ingredients["Goomba"] = "02396";
+ingredients["Koopa Troopa"] = "02397";
+ingredients["Luigi"] = "02391";
+ingredients["Mario"] = "02390";
+ingredients["Princess Peach"] = "02392";
+ingredients["Toad"] = "02393";
+ingredients["Wario"] = "02398";
+ingredients["Yoshi"] = "02394";
+ingredients["Fire Flower"] = "02402";
+ingredients["Penguin Suit"] = "02403";
+ingredients["Super Mushroom"] = "02401";
+ingredients["Goal Pole"] = "02404";
+ingredients["A Scared Morty"] = "02377";
+ingredients["Cake"] = "02373";
+ingredients["Chimera Schematic"] = "02382";
+ingredients["Companion Cube"] = "02375";
+ingredients["Covetor Mining Ship"] = "02383";
+ingredients["GLaDOS"] = "02374";
+ingredients["Mr Poopy Butthole"] = "02379";
+ingredients["Nyx class Supercarrier"] = "02381";
+ingredients["Rick Sanchez"] = "02378";
+ingredients["Portal Gun"] = "02376";
+ingredients["Ricks Portal Gun"] = "02380";
+ingredients["Space Wormhole"] = "02384";
+ingredients["Interdimensional Portal"] = "02385";
+ingredients["A Red Hot Flamed"] = "02359";
+ingredients["A Wild Artifaxx"] = "02358";
+ingredients["Alpaca Out of Nowhere!"] = "02361";
+ingredients["lepik le prick"] = "02368";
+ingredients["LinkinsRepeater Bone Hard Card"] = "02400";
+ingredients["MuffledSilence's Headphones"] = "02388";
+ingredients["Neos Ratio Cheats"] = "02366";
+ingredients["Nikos Transformation"] = "02367";
+ingredients["Stump's Banhammer"] = "02365";
+ingredients["The Golden Daedy"] = "02357";
+ingredients["thewhales Kiss"] = "02364";
+ingredients["Ze do Caixao Coffin Joe Card"] = "02410";
+ingredients["Random Staff Card"] = "02438";
+ingredients["The Golden Throne"] = "02369";
+ingredients["Staff Beauty Parlor"] = "02371";
+ingredients["Biggest Banhammer"] = "02370";
+ingredients["Realm of Staff"] = "02372";
 
 var onHand = {}; // .item_count").text()
 function build_on_hand() {
@@ -235,9 +280,137 @@ function build_on_hand() {
 
     onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "] .item_count").text();
     if (onHand["dwarven gem"] === "") { onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "]").length; }
-}
 
-console.log(onHand);
+    // Cards
+    onHand["Bowser"] = $("#items-wrapper .item[data-item=" + ingredients["Bowser"] + "] .item_count").text();
+    if (onHand["Bowser"] === "") { onHand["Bowser"] = $("#items-wrapper .item[data-item=" + ingredients["Bowser"] + "]").length}
+
+    onHand["Goomba"] = $("#items-wrapper .item[data-item=" + ingredients["Goomba"] + "] .item_count").text();
+    if (onHand["Goomba"] === "") { onHand["Goomba"] = $("#items-wrapper .item[data-item=" + ingredients["Goomba"] + "]").length}
+
+    onHand["Koopa Troopa"] = $("#items-wrapper .item[data-item=" + ingredients["Koopa Troopa"] + "] .item_count").text();
+    if (onHand["Koopa Troopa"] === "") { onHand["Koopa Troopa"] = $("#items-wrapper .item[data-item=" + ingredients["Koopa Troopa"] + "]").length}
+
+    onHand["Luigi"] = $("#items-wrapper .item[data-item=" + ingredients["Luigi"] + "] .item_count").text();
+    if (onHand["Luigi"] === "") { onHand["Luigi"] = $("#items-wrapper .item[data-item=" + ingredients["Luigi"] + "]").length}
+
+    onHand["Mario"] = $("#items-wrapper .item[data-item=" + ingredients["Mario"] + "] .item_count").text();
+    if (onHand["Mario"] === "") { onHand["Mario"] = $("#items-wrapper .item[data-item=" + ingredients["Mario"] + "]").length}
+
+    onHand["Princess Peach"] = $("#items-wrapper .item[data-item=" + ingredients["Princess Peach"] + "] .item_count").text();
+    if (onHand["Princess Peach"] === "") { onHand["Princess Peach"] = $("#items-wrapper .item[data-item=" + ingredients["Princess Peach"] + "]").length}
+
+    onHand["Toad"] = $("#items-wrapper .item[data-item=" + ingredients["Toad"] + "] .item_count").text();
+    if (onHand["Toad"] === "") { onHand["Toad"] = $("#items-wrapper .item[data-item=" + ingredients["Toad"] + "]").length}
+
+    onHand["Wario"] = $("#items-wrapper .item[data-item=" + ingredients["Wario"] + "] .item_count").text();
+    if (onHand["Wario"] === "") { onHand["Wario"] = $("#items-wrapper .item[data-item=" + ingredients["Wario"] + "]").length}
+
+    onHand["Yoshi"] = $("#items-wrapper .item[data-item=" + ingredients["Yoshi"] + "] .item_count").text();
+    if (onHand["Yoshi"] === "") { onHand["Yoshi"] = $("#items-wrapper .item[data-item=" + ingredients["Yoshi"] + "]").length}
+
+    onHand["Fire Flower"] = $("#items-wrapper .item[data-item=" + ingredients["Fire Flower"] + "] .item_count").text();
+    if (onHand["Fire Flower"] === "") { onHand["Fire Flower"] = $("#items-wrapper .item[data-item=" + ingredients["Fire Flower"] + "]").length}
+
+    onHand["Penguin Suit"] = $("#items-wrapper .item[data-item=" + ingredients["Penguin Suit"] + "] .item_count").text();
+    if (onHand["Penguin Suit"] === "") { onHand["Penguin Suit"] = $("#items-wrapper .item[data-item=" + ingredients["Penguin Suit"] + "]").length}
+
+    onHand["Super Mushroom"] = $("#items-wrapper .item[data-item=" + ingredients["Super Mushroom"] + "] .item_count").text();
+    if (onHand["Super Mushroom"] === "") { onHand["Super Mushroom"] = $("#items-wrapper .item[data-item=" + ingredients["Super Mushroom"] + "]").length}
+
+    onHand["Goal Pole"] = $("#items-wrapper .item[data-item=" + ingredients["Goal Pole"] + "] .item_count").text();
+    if (onHand["Goal Pole"] === "") { onHand["Goal Pole"] = $("#items-wrapper .item[data-item=" + ingredients["Goal Pole"] + "]").length}
+
+    onHand["A Scared Morty"] = $("#items-wrapper .item[data-item=" + ingredients["A Scared Morty"] + "] .item_count").text();
+    if (onHand["A Scared Morty"] === "") { onHand["A Scared Morty"] = $("#items-wrapper .item[data-item=" + ingredients["A Scared Morty"] + "]").length}
+
+    onHand["Cake"] = $("#items-wrapper .item[data-item=" + ingredients["Cake"] + "] .item_count").text();
+    if (onHand["Cake"] === "") { onHand["Cake"] = $("#items-wrapper .item[data-item=" + ingredients["Cake"] + "]").length}
+
+    onHand["Chimera Schematic"] = $("#items-wrapper .item[data-item=" + ingredients["Chimera Schematic"] + "] .item_count").text();
+    if (onHand["Chimera Schematic"] === "") { onHand["Chimera Schematic"] = $("#items-wrapper .item[data-item=" + ingredients["Chimera Schematic"] + "]").length}
+
+    onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "] .item_count").text();
+    if (onHand["Companion Cube"] === "") { onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "]").length}
+
+    onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Coveter Mining Ship"] + "] .item_count").text();
+    if (onHand["Coveter Mining Ship"] === "") { onHand["Coveter Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Coveter Mining Ship"] + "]").length}
+
+    onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "] .item_count").text();
+    if (onHand["GLaDOS"] === "") { onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "]").length}
+
+    onHand["Mr Poopy Butthole"] = $("#items-wrapper .item[data-item=" + ingredients["Mr Poopy Butthole"] + "] .item_count").text();
+    if (onHand["Mr Poopy Butthole"] === "") { onHand["Mr Poopy Butthole"] = $("#items-wrapper .item[data-item=" + ingredients["Mr Poopy Butthole"] + "]").length}
+
+    onHand["Nyx class Supercarrier"] = $("#items-wrapper .item[data-item=" + ingredients["Nyx class Supercarrier"] + "] .item_count").text();
+    if (onHand["Nyx class Supercarrier"] === "") { onHand["Nyx class Supercarrier"] = $("#items-wrapper .item[data-item=" + ingredients["Nyx class Supercarrier"] + "]").length}
+
+    onHand["Rick Sanchez"] = $("#items-wrapper .item[data-item=" + ingredients["Rick Sanchez"] + "] .item_count").text();
+    if (onHand["Rick Sanchez"] === "") { onHand["Rick Sanchez"] = $("#items-wrapper .item[data-item=" + ingredients["Rick Sanchez"] + "]").length}
+
+    onHand["Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Portal Gun"] + "] .item_count").text();
+    if (onHand["Portal Gun"] === "") { onHand["Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Portal Gun"] + "]").length}
+
+    onHand["Ricks Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Ricks Portal Gun"] + "] .item_count").text();
+    if (onHand["Ricks Portal Gun"] === "") { onHand["Ricks Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Ricks Portal Gun"] + "]").length}
+
+    onHand["Space Wormhole"] = $("#items-wrapper .item[data-item=" + ingredients["Space Wormhole"] + "] .item_count").text();
+    if (onHand["Space Wormhole"] === "") { onHand["Space Wormhole"] = $("#items-wrapper .item[data-item=" + ingredients["Space Wormhole"] + "]").length}
+
+    onHand["Interdimensional Portal"] = $("#items-wrapper .item[data-item=" + ingredients["Interdimensional Portal"] + "] .item_count").text();
+    if (onHand["Interdimensional Portal"] === "") { onHand["Interdimensional Portal"] = $("#items-wrapper .item[data-item=" + ingredients["Interdimensional Portal"] + "]").length}
+
+    onHand["A Red Hot Flamed"] = $("#items-wrapper .item[data-item=" + ingredients["A Red Hot Flamed"] + "] .item_count").text();
+    if (onHand["A Red Hot Flamed"] === "") { onHand["A Red Hot Flamed"] = $("#items-wrapper .item[data-item=" + ingredients["A Red Hot Flamed"] + "]").length}
+
+    onHand["A Wild Artifaxx"] = $("#items-wrapper .item[data-item=" + ingredients["A Wild Artifaxx"] + "] .item_count").text();
+    if (onHand["A Wild Artifaxx"] === "") { onHand["A Wild Artifaxx"] = $("#items-wrapper .item[data-item=" + ingredients["A Wild Artifaxx"] + "]").length}
+
+    onHand["Alpaca Out of Nowhere!"] = $("#items-wrapper .item[data-item=" + ingredients["Alpaca Out of Nowhere!"] + "] .item_count").text();
+    if (onHand["Alpaca Out of Nowhere!"] === "") { onHand["Alpaca Out of Nowhere!"] = $("#items-wrapper .item[data-item=" + ingredients["Alpaca Out of Nowhere!"] + "]").length}
+
+    onHand["lepik le prick"] = $("#items-wrapper .item[data-item=" + ingredients["lepik le prick"] + "] .item_count").text();
+    if (onHand["lepik le prick"] === "") { onHand["lepik le prick"] = $("#items-wrapper .item[data-item=" + ingredients["lepik le prick"] + "]").length}
+
+    onHand["LinkinsRepeater Bone Hard Card"] = $("#items-wrapper .item[data-item=" + ingredients["LinkinsRepeater Bone Hard Card"] + "] .item_count").text();
+    if (onHand["LinkinsRepeater Bone Hard Card"] === "") { onHand["LinkinsRepeater Bone Hard Card"] = $("#items-wrapper .item[data-item=" + ingredients["LinkinsRepeater Bone Hard Card"] + "]").length}
+
+    onHand["MuffledSilence's Headphones"] = $("#items-wrapper .item[data-item=" + ingredients["MuffledSilence's Headphones"] + "] .item_count").text();
+    if (onHand["MuffledSilence's Headphones"] === "") { onHand["MuffledSilence's Headphones"] = $("#items-wrapper .item[data-item=" + ingredients["MuffledSilence's Headphones"] + "]").length}
+
+    onHand["Neos Ratio Cheats"] = $("#items-wrapper .item[data-item=" + ingredients["Neos Ratio Cheats"] + "] .item_count").text();
+    if (onHand["Neos Ratio Cheats"] === "") { onHand["Neos Ratio Cheats"] = $("#items-wrapper .item[data-item=" + ingredients["Neos Ratio Cheats"] + "]").length}
+
+    onHand["Nikos Transformation"] = $("#items-wrapper .item[data-item=" + ingredients["Nikos Transformation"] + "] .item_count").text();
+    if (onHand["Nikos Transformation"] === "") { onHand["Nikos Transformation"] = $("#items-wrapper .item[data-item=" + ingredients["Nikos Transformation"] + "]").length}
+
+    onHand["Stump's Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Stump's Banhammer"] + "] .item_count").text();
+    if (onHand["Stump's Banhammer"] === "") { onHand["Stump's Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Stump's Banhammer"] + "]").length}
+
+    onHand["The Golden Daedy"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Daedy"] + "] .item_count").text();
+    if (onHand["The Golden Daedy"] === "") { onHand["The Golden Daedy"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Daedy"] + "]").length}
+
+    onHand["thewhales Kiss"] = $("#items-wrapper .item[data-item=" + ingredients["thewhales Kiss"] + "] .item_count").text();
+    if (onHand["thewhales Kiss"] === "") { onHand["thewhales Kiss"] = $("#items-wrapper .item[data-item=" + ingredients["thewhales Kiss"] + "]").length}
+
+    onHand["Ze do Caixao Coffin Joe Card"] = $("#items-wrapper .item[data-item=" + ingredients["Ze do Caixao Coffin Joe Card"] + "] .item_count").text();
+    if (onHand["Ze do Caixao Coffin Joe Card"] === "") { onHand["Ze do Caixao Coffin Joe Card"] = $("#items-wrapper .item[data-item=" + ingredients["Ze do Caixao Coffin Joe Card"] + "]").length}
+
+    onHand["Random Staff Card"] = $("#items-wrapper .item[data-item=" + ingredients["Random Staff Card"] + "] .item_count").text();
+    if (onHand["Random Staff Card"] === "") { onHand["Random Staff Card"] = $("#items-wrapper .item[data-item=" + ingredients["Random Staff Card"] + "]").length}
+
+    onHand["The Golden Throne"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Throne"] + "] .item_count").text();
+    if (onHand["The Golden Throne"] === "") { onHand["The Golden Throne"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Throne"] + "]").length}
+
+    onHand["Staff Beauty Parlor"] = $("#items-wrapper .item[data-item=" + ingredients["Staff Beauty Parlor"] + "] .item_count").text();
+    if (onHand["Staff Beauty Parlor"] === "") { onHand["Staff Beauty Parlor"] = $("#items-wrapper .item[data-item=" + ingredients["Staff Beauty Parlor"] + "]").length}
+
+    onHand["Biggest Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Biggest Banhammer"] + "] .item_count").text();
+    if (onHand["Biggest Banhammer"] === "") { onHand["Biggest Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Biggest Banhammer"] + "]").length}
+
+    onHand["Realm of Staff"] = $("#items-wrapper .item[data-item=" + ingredients["Realm of Staff"] + "] .item_count").text();
+    if (onHand["Realm of Staff"] === "") { onHand["Realm of Staff"] = $("#items-wrapper .item[data-item=" + ingredients["Realm of Staff"] + "]").length}
+}
 
 var craftList = {};
 
@@ -580,6 +753,124 @@ function build_craft_list() {
     ];
     craftList["melt dwarven gem"].icon = "http://test.test";
     craftList["melt dwarven gem"].available = Math.min(onHand["flux"], onHand["dwarven gem"]);
+
+    // Cards
+    craftList["The Golden Throne"] = {};
+    craftList["The Golden Throne"].ingredients = [
+        { name: "A Wild Artifaxx", id: ingredients["A Wild Artifaxx"], qty: 1, "on hand": onHand["A Wild Artifaxx"] },
+        { name: "A Red Hot Flamed", id: ingredients["A Red Hot Flamed"], qty: 1, "on hand": onHand["A Red Hot Flamed"] },
+        { name: "The Golden Daedy", id: ingredients["The Golden Daedy"], qty: 1, "on hand": onHand["The Golden Daedy"] },
+    ];
+    craftList["The Golden Throne"].icon = "http://test.test";
+    craftList["The Golden Throne"].available = Math.min(onHand["A Wild Artifaxx"], onHand["A Red Hot Flamed"], onHand["The Golden Daedy"]);
+
+    craftList["Biggest Banhammer"] = {};
+    craftList["Biggest Banhammer"].ingredients = [
+        { name: "Stump's Banhammer", id: ingredients["Stump's Banhammer"], qty: 1, "on hand": onHand["Stump's Banhammer"] },
+        { name: "thewhales Kiss", id: ingredients["thewhales Kiss"], qty: 1, "on hand": onHand["thewhales Kiss"] },
+        { name: "Neos Ratio Cheats", id: ingredients["Neos Ratio Cheats"], qty: 1, "on hand": onHand["Neos Ratio Cheats"] },
+    ];
+    craftList["Biggest Banhammer"].icon = "http://test.test";
+    craftList["Biggest Banhammer"].available = Math.min(onHand["Stump's Banhammer"], onHand["thewhales Kiss"], onHand["Neos Ratio Cheats"]);
+
+    craftList["Staff Beauty Parlor"] = {};
+    craftList["Staff Beauty Parlor"].ingredients = [
+        { name: "Alpaca Out of Nowhere!", id: ingredients["Alpaca Out of Nowhere!"], qty: 1, "on hand": onHand["Alpaca Out of Nowhere!"] },
+        { name: "Nikos Transformation", id: ingredients["Nikos Transformation"], qty: 1, "on hand": onHand["Nikos Transformation"] },
+        { name: "lepik le prick", id: ingredients["lepik le prick"], qty: 1, "on hand": onHand["lepik le prick"] },
+    ];
+    craftList["Staff Beauty Parlor"].icon = "http://test.test";
+    craftList["Staff Beauty Parlor"].available = Math.min(onHand["Alpaca Out of Nowhere!"], onHand["Nikos Transformation"], onHand["lepik le prick"]);
+
+    craftList["Random Staff Card"] = {};
+    craftList["Random Staff Card"].ingredients = [
+        { name: "LinkinsRepeater Bone Hard Card", id: ingredients["LinkinsRepeater Bone Hard Card"], qty: 1, "on hand": onHand["LinkinsRepeater Bone Hard Card"] },
+        { name: "MuffledSilence's Headphones", id: ingredients["MuffledSilence's Headphones"], qty: 1, "on hand": onHand["MuffledSilence's Headphones"] },
+        { name: "Ze do Caixao Coffin Joe Card", id: ingredients["Ze do Caixao Coffin Joe Card"], qty: 1, "on hand": onHand["Ze do Caixao Coffin Joe Card"] },
+    ];
+    craftList["Random Staff Card"].icon = "http://test.test";
+    craftList["Random Staff Card"].available = Math.min(onHand["LinkinsRepeater Bone Hard Card"], onHand["MuffledSilence's Headphones"], onHand["Ze do Caixao Coffin Joe Card"]);
+
+    craftList["Realm of Staff"] = {};
+    craftList["Realm of Staff"].ingredients = [
+        { name: "The Golden Throne", id: ingredients["The Golden Throne"], qty: 1, "on hand": onHand["The Golden Throne"] },
+        { name: "Biggest Banhammer", id: ingredients["Biggest Banhammer"], qty: 1, "on hand": onHand["Biggest Banhammer"] },
+        { name: "Staff Beauty Parlor", id: ingredients["Staff Beauty Parlor"], qty: 1, "on hand": onHand["Staff Beauty Parlor"] },
+    ];
+    craftList["Realm of Staff"].icon = "http://test.test";
+    craftList["Realm of Staff"].available = Math.min(onHand["The Golden Throne"], onHand["Biggest Banhammer"], onHand["Staff Beauty Parlor"]);
+
+    craftList["Super Mushroom"] = {};
+    craftList["Super Mushroom"].ingredients = [
+        { name: "Mario", id: ingredients["Mario"], qty: 1, "on hand": onHand["Mario"] },
+        { name: "Princess Peach", id: ingredients["Princess Peach"], qty: 1, "on hand": onHand["Princess Peach"] },
+        { name: "Toad", id: ingredients["Toad"], qty: 1, "on hand": onHand["Toad"] },
+    ];
+    craftList["Super Mushroom"].icon = "http://test.test";
+    craftList["Super Mushroom"].available = Math.min(onHand["Princess Peach"], onHand["Mario"], onHand["Toad"]);
+
+    craftList["Fire Flower"] = {};
+    craftList["Fire Flower"].ingredients = [
+        { name: "Luigi", id: ingredients["Luigi"], qty: 1, "on hand": onHand["Luigi"] },
+        { name: "Koopa Troopa", id: ingredients["Koopa Troopa"], qty: 1, "on hand": onHand["Koopa Troopa"] },
+        { name: "Yoshi", id: ingredients["Yoshi"], qty: 1, "on hand": onHand["Yoshi"] },
+    ];
+    craftList["Fire Flower"].icon = "http://test.test";
+    craftList["Fire Flower"].available = Math.min(onHand["Luigi"], onHand["Koopa Troopa"], onHand["Yoshi"]);
+
+    craftList["Penguin Suit"] = {};
+    craftList["Penguin Suit"].ingredients = [
+        { name: "Bowser", id: ingredients["Bowser"], qty: 1, "on hand": onHand["Bowser"] },
+        { name: "Wario", id: ingredients["Wario"], qty: 1, "on hand": onHand["Wario"] },
+        { name: "Goomba", id: ingredients["Goomba"], qty: 1, "on hand": onHand["Goomba"] },
+    ];
+    craftList["Penguin Suit"].icon = "http://test.test";
+    craftList["Penguin Suit"].available = Math.min(onHand["Bowser"], onHand["Wario"], onHand["Goomba"]);
+
+    craftList["Goal Pole"] = {};
+    craftList["Goal Pole"].ingredients = [
+        { name: "Penguin Suit", id: ingredients["Penguin Suit"], qty: 1, "on hand": onHand["Penguin Suit"] },
+        { name: "Fire Flower", id: ingredients["Fire Flower"], qty: 1, "on hand": onHand["Fire Flower"] },
+        { name: "Super Mushroom", id: ingredients["Super Mushroom"], qty: 1, "on hand": onHand["Super Mushroom"] },
+    ];
+    craftList["Goal Pole"].icon = "http://test.test";
+    craftList["Goal Pole"].available = Math.min(onHand["Penguin Suit"], onHand["Fire Flower"], onHand["Super Mushroom"]);
+
+    craftList["Portal Gun"] = {};
+    craftList["Portal Gun"].ingredients = [
+        { name: "Cake", id: ingredients["Cake"], qty: 1, "on hand": onHand["Cake"] },
+        { name: "GLaDOS", id: ingredients["GLaDOS"], qty: 1, "on hand": onHand["GLaDOS"] },
+        { name: "Companion Cube", id: ingredients["Companion Cube"], qty: 1, "on hand": onHand["Companion Cube"] },
+    ];
+    craftList["Portal Gun"].icon = "http://test.test";
+    craftList["Portal Gun"].available = Math.min(onHand["Cake"], onHand["GLaDOS"], onHand["Companion Cube"]);
+
+    craftList["Ricks Portal Gun"] = {};
+    craftList["Ricks Portal Gun"].ingredients = [
+        { name: "Rick Sanchez", id: ingredients["Rick Sanchez"], qty: 1, "on hand": onHand["Rick Sanchez"] },
+        { name: "A Scared Morty", id: ingredients["A Scared Morty"], qty: 1, "on hand": onHand["A Scared Morty"] },
+        { name: "Mr Poopy Butthole", id: ingredients["Mr Poopy Butthole"], qty: 1, "on hand": onHand["Mr Poopy Butthole"] },
+    ];
+    craftList["Ricks Portal Gun"].icon = "http://test.test";
+    craftList["Ricks Portal Gun"].available = Math.min(onHand["Rick Sanchez"], onHand["A Scared Morty"], onHand["Mr Poopy Butthole"]);
+
+    craftList["Space Wormhole"] = {};
+    craftList["Space Wormhole"].ingredients = [
+        { name: "Nyx class Supercarrier", id: ingredients["Nyx class Supercarrier"], qty: 1, "on hand": onHand["Nyx class Supercarrier"] },
+        { name: "Covetor Mining Ship", id: ingredients["Covetor Mining Ship"], qty: 1, "on hand": onHand["Covetor Mining Ship"] },
+        { name: "Chimera Schematic", id: ingredients["Chimera Schematic"], qty: 1, "on hand": onHand["Chimera Schematic"] },
+    ];
+    craftList["Space Wormhole"].icon = "http://test.test";
+    craftList["Space Wormhole"].available = Math.min(onHand["Nyx class Supercarrier"], onHand["Covetor Mining Ship"], onHand["Chimera Schematic"]);
+
+    craftList["Interdimensional Portal"] = {};
+    craftList["Interdimensional Portal"].ingredients = [
+        { name: "Portal Gun", id: ingredients["Portal Gun"], qty: 1, "on hand": onHand["Portal Gun"] },
+        { name: "Ricks Portal Gun", id: ingredients["Ricks Portal Gun"], qty: 1, "on hand": onHand["Ricks Portal Gun"] },
+        { name: "Space Wormhole", id: ingredients["Space Wormhole"], qty: 1, "on hand": onHand["Space Wormhole"] },
+    ];
+    craftList["Interdimensional Portal"].icon = "http://test.test";
+    craftList["Interdimensional Portal"].available = Math.min(onHand["Space Wormhole"], onHand["Ricks Portal Gun"], onHand["Portal Gun"]);
 }
 
 function setIngredientSlot (ingredientId, slot) {
@@ -627,7 +918,7 @@ function reset_slots() {
 
 function take_craft(craft_name) {
     $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
-        console.log(data);
+        //console.log(data);
 
         if (data === "{}") {
             noty({type:'success', text: craft_name + ' was crafted successfully.'});
@@ -909,10 +1200,89 @@ function melt_dwarven_gem() {
     setIngredientSlot(ingredients["flux"], "#slot_7");
     setIngredientSlot(ingredients["dwarven gem"], "#slot_4");
 }
+
+// Cards
+function craft_golden_throne() {
+    setIngredientSlot(ingredients["A Wild Artifaxx"], "#slot_3");
+    setIngredientSlot(ingredients["A Red Hot Flamed"], "#slot_4");
+    setIngredientSlot(ingredients["The Golden Daedy"], "#slot_5");
+}
+
+function craft_biggest_banhammer() {
+    setIngredientSlot(ingredients["Stump's Banhammer"], "#slot_3");
+    setIngredientSlot(ingredients["thewhales Kiss"], "#slot_4");
+    setIngredientSlot(ingredients["Neos Ratio Cheats"], "#slot_5");
+}
+
+function craft_staff_beauty_parlor() {
+    setIngredientSlot(ingredients["Alpaca Out of Nowhere!"], "#slot_3");
+    setIngredientSlot(ingredients["Nikos Transformation"], "#slot_4");
+    setIngredientSlot(ingredients["lepik le prick"], "#slot_5");
+}
+
+function craft_random_staff_card() {
+    setIngredientSlot(ingredients["LinkinsRepeater Bone Hard Card"], "#slot_3");
+    setIngredientSlot(ingredients["MuffledSilence's Headphones"], "#slot_4");
+    setIngredientSlot(ingredients["Ze do Caixao Coffin Joe Card"], "#slot_5");
+}
+
+function craft_realm_of_staff() {
+    setIngredientSlot(ingredients["The Golden Throne"], "#slot_3");
+    setIngredientSlot(ingredients["Biggest Banhammer"], "#slot_4");
+    setIngredientSlot(ingredients["Staff Beauty Parlor"], "#slot_5");
+}
+
+function craft_super_mushroom() {
+    setIngredientSlot(ingredients["Mario"], "#slot_3");
+    setIngredientSlot(ingredients["Princess Peach"], "#slot_4");
+    setIngredientSlot(ingredients["Toad"], "#slot_5");
+}
+
+function craft_fire_flower() {
+    setIngredientSlot(ingredients["Luigi"], "#slot_3");
+    setIngredientSlot(ingredients["Koopa Troopa"], "#slot_4");
+    setIngredientSlot(ingredients["Yoshi"], "#slot_5");
+}
+
+function craft_penguin_suit() {
+    setIngredientSlot(ingredients["Bowser"], "#slot_3");
+    setIngredientSlot(ingredients["Goomba"], "#slot_4");
+    setIngredientSlot(ingredients["Wario"], "#slot_5");
+}
+
+function craft_goal_pole() {
+    setIngredientSlot(ingredients["Super Mushroom"], "#slot_3");
+    setIngredientSlot(ingredients["Fire Flower"], "#slot_4");
+    setIngredientSlot(ingredients["Penguin Suit"], "#slot_5");
+}
+
+function craft_portal_gun() {
+    setIngredientSlot(ingredients["Cake"], "#slot_3");
+    setIngredientSlot(ingredients["GLaDOS"], "#slot_4");
+    setIngredientSlot(ingredients["Companion Cube"], "#slot_5");
+}
+
+function craft_ricks_portal_gun() {
+    setIngredientSlot(ingredients["Rick Sanchez"], "#slot_3");
+    setIngredientSlot(ingredients["A Scared Morty"], "#slot_4");
+    setIngredientSlot(ingredients["Mr Poopy Butthole"], "#slot_5");
+}
+
+function craft_space_wormhole() {
+    setIngredientSlot(ingredients["Nyx Class Supercarrier"], "#slot_3");
+    setIngredientSlot(ingredients["Covetor Mining Ship"], "#slot_4");
+    setIngredientSlot(ingredients["Chimera Schematic"], "#slot_5");
+}
+
+function craft_interdimensional_portal() {
+    setIngredientSlot(ingredients["Portal Gun"], "#slot_3");
+    setIngredientSlot(ingredients["Ricks Portal Gun"], "#slot_4");
+    setIngredientSlot(ingredients["Space Wormhole"], "#slot_5");
+}
 /* End Crafts */
 
 function do_craft(craft_name) {
-    console.log('crafting', craft_name);
+    //console.log('crafting', craft_name);
 
     /* Glass */
     if (craft_name === "glass shards from test tube") {
@@ -1055,6 +1425,47 @@ function do_craft(craft_name) {
         melt_dwarven_gem();
     }
 
+    /* Cards */
+    else if (craft_name === "The Golden Throne") {
+        craft_golden_throne();
+    }
+    else if (craft_name === "Biggest Banhammer") {
+        craft_biggest_banhammer();
+    }
+    else if (craft_name === "Staff Beauty Parlor") {
+        craft_staff_beauty_parlor();
+    }
+    else if (craft_name === "Random Staff Card") {
+        craft_random_staff_card();
+    }
+    else if (craft_name === "Realm of Staff") {
+        craft_realm_of_staff();
+    }
+    else if (craft_name === "Super Mushroom") {
+        craft_super_mushroom();
+    }
+    else if (craft_name === "Fire Flower") {
+        craft_fire_flower();
+    }
+    else if (craft_name === "Penguin Suit") {
+        craft_penguin_suit();
+    }
+    else if (craft_name === "Goal Pole") {
+        craft_goal_pole();
+    }
+    else if (craft_name === "Portal Gun") {
+        craft_portal_gun();
+    }
+    else if (craft_name === "Ricks Portal Gun") {
+        craft_ricks_portal_gun();
+    }
+    else if (craft_name === "Space Wormhole") {
+        craft_space_wormhole();
+    }
+    else if (craft_name === "Interdimensional Portal") {
+        craft_interdimensional_portal();
+    }
+
     enable_quick_craft_buttons();
 }
 
@@ -1092,8 +1503,6 @@ function open_crafting_submenu(craft_name) {
 
     var currentCraft = craftList[craft_name];
 
-    console.log(currentCraft);
-
     $("#crafting-submenu").append('<p> Ingredients: </p>');
 
     currentCraft.ingredients.map(ingredient => {
@@ -1126,7 +1535,6 @@ function open_crafting_submenu(craft_name) {
             (async function loop() {
                 for (let i = 0; i < craftNumber; i++) {
                     await new Promise(resolve => setTimeout(function() {
-                        console.log('craft');
                         do_craft(craft_name);
                         take_craft(craft_name);
 
@@ -1230,6 +1638,20 @@ function close_crafting_submenu() {
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: gray;" id="melt_dwarven_gem" class="quick_craft_button recast">Melt Dwarven gem</button>');
     $("#quick-crafter").append('<br />');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="golden_throne" class="quick_craft_button staffcard">The Golden Throne</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="biggest_banhammer" class="quick_craft_button staffcard">Biggest Banhammer</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="staff_beauty_parlor" class="quick_craft_button staffcard">Staff Beauty Parlor</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="random_staff_card" class="quick_craft_button staffcard">Random Lvl2 Staff Card</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="realm_of_staff" class="quick_craft_button staffcard">Realm of Staff</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="portal_gun" class="quick_craft_button portalcard">Portal Gun</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="ricks_portal_gun" class="quick_craft_button portalcard">Rick\'s Portal Gun</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="space_wormhole" class="quick_craft_button portalcard">Space Wormhole</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="interdimensional_portal" class="quick_craft_button portalcard">Interdimensional Portal</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="super_mushroom" class="quick_craft_button mariocard">Super Mushroom</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="fire_flower" class="quick_craft_button mariocard">Fire Flower</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="penguin_suit" class="quick_craft_button mariocard">Penguin Suit</button>');
+    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: orange;" id="goal_pole" class="quick_craft_button mariocard">Goal Pole</button>');
+    $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
 
     var hasFoodBook = $("#crafting_recipes h3:contains('Food Cooking Recipes')").length ? true : false;
@@ -1240,17 +1662,40 @@ function close_crafting_submenu() {
     var hasLuckBook = $("#crafting_recipes h3:contains('Luck Potion Crafting Recipes')").length ? true : false;
     var hasDebugBook = $("#crafting_recipes h3:contains('A fake book for testing')").length ? true : false;
     var hasRecastBook = $("#crafting_recipes h3:contains('Recast Blacksmith Crafting Book')").length ? true : false;
+    var hasMarioBook = $("#crafting_recipes h3:contains('Mario Card Crafting')").length ? true : false;
+    var hasPortalBook = $("#crafting_recipes h3:contains('Portal Card Crafting')").length ? true : false;
+    var hasStaffBook = $("#crafting_recipes h3:contains('Staff Card Crafting')").length ? true : false;
 
     $("#quick-crafter").append('<span>Recipes will appear if you have one or more of the following books:</span>');
     $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<span><b>Glass Book:</span> ' + hasGlassBook + ' | <b>Food Book:</b> ' + hasFoodBook +
-                               ' | <b>Basic Stat Potion Book:</b> ' + hasStatPotionBook + ' | <b>Metal Bar Book:</b> '
-                               + hasMetalBarBook + ' | <b>Jewelry Book:</b> ' + hasJewelryBook + ' | <b>Luck Book:</b> ' + hasLuckBook
-                               + ' | <b>Recast Blacksmith Book:</b> ' + hasRecastBook + '</p>');
+    $("#quick-crafter").append('<span><b>Glass:</span> ' + hasGlassBook + ' | <b>Food:</b> ' + hasFoodBook
+                               + ' | <b>Basic Stat Potion:</b> ' + hasStatPotionBook + ' | <b>Metal Bar:</b> '
+                               + hasMetalBarBook + ' | <b>Jewelry:</b> ' + hasJewelryBook + ' | <b>Luck:</b> ' + hasLuckBook
+                               + ' | <b>Recast Blacksmith:</b> ' + hasRecastBook
+                               + ' | <b>Mario Card:</b> ' + hasMarioBook
+                               + ' | <b>Portal Card:</b> ' + hasMarioBook
+                               + ' | <b>Staff Card:</b> ' + hasMarioBook
+                               + '</p>');
 
      $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
     if (hasFoodBook === false) {
         $('.food').remove();
+    }
+
+    if (hasMarioBook === false) {
+        $('.mariocard').remove();
+    }
+
+    if (hasStaffBook === false) {
+        $('.staffcard').remove();
+    }
+
+    if (hasPortalBook === false) {
+        $('.portalcard').remove();
+    }
+
+    if (hasStaffBook === false) {
+        $('.staff').remove();
     }
 
     if (hasStatPotionBook === false) {
@@ -1277,7 +1722,6 @@ function close_crafting_submenu() {
         $('.recast').remove();
     }
 
-    //console.log(ingredients);
     build_on_hand();
     build_craft_list();
 
@@ -1425,4 +1869,44 @@ function close_crafting_submenu() {
         open_crafting_submenu("exquisite constellations of rubies");
     });
 
+    /* Cards */
+    $("#golden_throne").click(function() {
+        open_crafting_submenu("The Golden Throne");
+    });
+    $("#biggest_banhammer").click(function() {
+        open_crafting_submenu("Biggest Banhammer");
+    });
+    $("#staff_beauty_parlor").click(function() {
+        open_crafting_submenu("Staff Beauty Parlor");
+    });
+    $("#random_staff_card").click(function() {
+        open_crafting_submenu("Random Staff Card");
+    });
+    $("#realm_of_staff").click(function() {
+        open_crafting_submenu("Realm of Staff");
+    });
+    $("#portal_gun").click(function() {
+        open_crafting_submenu("Portal Gun");
+    });
+    $("#ricks_portal_gun").click(function() {
+        open_crafting_submenu("Ricks Portal Gun");
+    });
+    $("#space_wormhole").click(function() {
+        open_crafting_submenu("Space Wormhole");
+    });
+    $("#interdimensional_portal").click(function() {
+        open_crafting_submenu("Interdimensional Portal");
+    });
+    $("#super_mushroom").click(function() {
+        open_crafting_submenu("Super Mushroom");
+    });
+    $("#fire_flower").click(function() {
+        open_crafting_submenu("Fire Flower");
+    });
+    $("#penguin_suit").click(function() {
+        open_crafting_submenu("Penguin Suit");
+    });
+    $("#goal_pole").click(function() {
+        open_crafting_submenu("Goal Pole");
+    });
 })();
