@@ -1,29 +1,62 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      1.7.12b
+// @version      2.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
-// @require      https://code.jquery.com/jquery-1.7.2.min.js
-// @require      https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js
 // ==/UserScript==
 
-const VERSION = '1.8';
+const VERSION = '2.0';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
  * Too little of a delay will cause more bugs */
 
-const RETRIEVE_ITEMS = true; // set to true to automatically retrieve craft recipes
-const BUTTON_LOCKOUT_DELAY = 12000;
-const ITEM_WINDOW_DELAY = 550;
-const CRAFT_TIME = 4700;
-const GRAB_TIME = 7500;
-const NEXT_CRAFT_TIME = 2000;
+const BUTTON_LOCKOUT_DELAY = 1000;
+const CRAFT_TIME = 1000;
+const GRAB_TIME = 1;
+const NEXT_CRAFT_TIME = 1;
 
 /* >>>END<<< user adjustable variables */
+
+var blankSlot = "EEEEE";
+var slots = [];
+slots[0] = blankSlot;
+slots[1] = blankSlot;
+slots[2] = blankSlot;
+slots[3] = blankSlot;
+slots[4] = blankSlot;
+slots[5] = blankSlot;
+slots[6] = blankSlot;
+slots[7] = blankSlot;
+slots[8] = blankSlot;
+
+function getUrlVars(url) {
+    var vars = {};
+    var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+function getSlots() {
+    var combinedSlots = "";
+
+    var i = 0;
+    for (i = 0; i < slots.length; i++)
+        combinedSlots += slots[i];
+
+    return combinedSlots;
+}
+
+var authKey = getUrlVars(document.getElementsByTagName('link')[4].href).authkey;
+var urlBase = "https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=CUSTOMRECIPE&auth=" + authKey;
+
+console.log('testing the new url base:', urlBase);
+//console.log((slots.toString()).replace(",",""));
+console.log(getSlots());
 
 /* Used for dynamic button lockouts (i.e.: multicraft) */
 var next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
@@ -553,682 +586,317 @@ function build_craft_list() {
     craftList["melt dwarven gem"].available = Math.min(onHand["flux"], onHand["dwarven gem"]);
 }
 
-var dropConfig = {
-    drop: function(event, ui) {
-        // this is needed
+function setIngredientSlot (ingredientId, slot) {
+    // Check github for previous Drag and Drop functionality made with jQueryUI
+    if (slot === "#slot_0") {
+        slots[0] = ingredientId;
     }
-}
-
-var dragConfig = {
-    containment: "document",
-    helper: "clone",
-    appendTo: "#crafting_panel",
-    drag: function(event, ui) {
-        // this is needed
+    if (slot === "#slot_1") {
+        slots[1] = ingredientId;
     }
-}
-
-var slots = $( ".itemslot");
-var items = $( "li.item.ui-draggable.ui-draggable-handle" );
-
-function set_item_properties() {
-    var items = $( "li.item.ui-draggable.ui-draggable-handle" );
-
-    items.each(function( index ) {
-        var itemOffset = $(this).draggable(dragConfig);
-    });
-}
-
-function set_slot_properties() {
-    $( '#items-wrapper' ).droppable(dropConfig);
-    $( '#slots_panel' ).draggable(dragConfig);
-
-    slots.each(function( index ) {
-        if ($(this).data("slot") !== undefined) {
-            var slotOffset = $(this).droppable(dropConfig);
-        }
-    });
-}
-
-var triggerDragAndDrop = function (selectorDrag, selectorDrop) {
-    console.log('trying drag and drop', selectorDrag, selectorDrop);
-    // function for triggering mouse events
-    var fireMouseEvent = function (type, elem, centerX, centerY) {
-        var evt = document.createEvent('MouseEvents');
-        evt.initMouseEvent(type, true, true, window, 1, 1, 1, centerX, centerY, false, false, false, false, 0, elem);
-        elem.dispatchEvent(evt);
-    };
-
-    // fetch target elements
-    var elemDrag;
-    var elemDrop = document.querySelector(selectorDrop);
-
-    if (selectorDrag.includes("data-item") === true) {
-        elemDrag = document.querySelectorAll(selectorDrag);
-
-        var tmpElemDrag;
-
-        elemDrag.forEach(function(item) {
-            tmpElemDrag = item;
-
-            return false;
-        });
-
-        elemDrag = tmpElemDrag;
-    } else {
-        elemDrag = document.querySelector(selectorDrag);
+    if (slot === "#slot_2") {
+        slots[2] = ingredientId;
     }
-
-    if (selectorDrag === '#CraftingResult li' && elemDrag === null) {
-        alert('Craft unable to be made. The server may be responding slowly. Do you have the appropriate forge/enchantment/cooking fire?');
-        return false;
+    if (slot === "#slot_3") {
+        slots[3] = ingredientId;
     }
-
-    if (!elemDrag || !elemDrop) return false;
-
-    // calculate positions
-    var pos = elemDrag.getBoundingClientRect();
-    var center1X = Math.floor((pos.left + pos.right) / 2);
-    var center1Y = Math.floor((pos.top + pos.bottom) / 2);
-    pos = elemDrop.getBoundingClientRect();
-    var center2X = Math.floor((pos.left + pos.right) / 2);
-    var center2Y = Math.floor((pos.top + pos.bottom) / 2);
-
-    // mouse over dragged element and mousedown
-    fireMouseEvent('mousemove', elemDrag, center1X, center1Y);
-    fireMouseEvent('mouseenter', elemDrag, center1X, center1Y);
-    fireMouseEvent('mouseover', elemDrag, center1X, center1Y);
-    fireMouseEvent('mousedown', elemDrag, center1X, center1Y);
-
-    // start dragging process over to drop target
-    fireMouseEvent('dragstart', elemDrag, center1X, center1Y);
-    fireMouseEvent('drag', elemDrag, center1X, center1Y);
-    fireMouseEvent('mousemove', elemDrag, center1X, center1Y);
-    fireMouseEvent('drag', elemDrag, center2X, center2Y);
-    fireMouseEvent('mousemove', elemDrop, center2X, center2Y);
-
-    // trigger dragging process on top of drop target
-    fireMouseEvent('mouseenter', elemDrop, center2X, center2Y);
-    fireMouseEvent('dragenter', elemDrop, center2X, center2Y);
-    fireMouseEvent('mouseover', elemDrop, center2X, center2Y);
-    fireMouseEvent('dragover', elemDrop, center2X, center2Y);
-
-    // release dragged element on top of drop target
-    fireMouseEvent('drop', elemDrop, center2X, center2Y);
-    fireMouseEvent('dragend', elemDrag, center2X, center2Y);
-    fireMouseEvent('mouseup', elemDrag, center2X, center2Y);
-
-    return true;
+    if (slot === "#slot_4") {
+        slots[4] = ingredientId;
+    }
+    if (slot === "#slot_5") {
+        slots[5] = ingredientId;
+    }
+    if (slot === "#slot_6") {
+        slots[6] = ingredientId;
+    }
+    if (slot === "#slot_7") {
+        slots[7] = ingredientId;
+    }
+    if (slot === "#slot_8") {
+        slots[8] = ingredientId;
+    }
 };
 
-function grab_result() {
-    if (RETRIEVE_ITEMS === true) {
-        triggerDragAndDrop("#CraftingResult li", "#items-wrapper");
-
-        clear_crafting_area(true);
-        build_on_hand();
-        build_craft_list();
-    } else {
-        alert('Test mode is on. Turn RETRIEVE_ITEMS to true in the script to turn on automated craft retrieval. You may grab the craft result but there are visual (only) errors with doing so, and you have to refresh each craft.');
-    }
-}
-
-function clear_crafting_area(afterSuccessfulCraft) {
-    //$("#crafting-submenu").remove();
-
-    var i = 0;
-    for (i = 0; i < 3; i++) {
-        if (afterSuccessfulCraft !== true) {
-            triggerDragAndDrop("#slot_0 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_1 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_2 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_3 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_4 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_5 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_6 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_7 li", "#items-wrapper");
-            triggerDragAndDrop("#slot_8 li", "#items-wrapper");
+function take_craft() {
+    $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
+        if (data === "{}") {
+            // add a toast
         } else {
-            $("#slot_0 li").remove();
-            $("#slot_1 li").remove();
-            $("#slot_2 li").remove();
-            $("#slot_3 li").remove();
-            $("#slot_4 li").remove();
-            $("#slot_5 li").remove();
-            $("#slot_6 li").remove();
-            $("#slot_7 li").remove();
-            $("#slot_8 li").remove();
+            alert('Craft failed. Response from server: ', data)
         }
-    }
-
-    $("#CraftingResult li").remove();
-
-    set_item_properties();
-    set_slot_properties();
+    });
 }
 
 
 /* Crafts */
 function craft_glass_shards_from_tube() {
-    triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
+    setIngredientSlot(ingredients["test tube"], "#slot_4");
 }
 
 function craft_glass_shards_from_sand() {
-    triggerDragAndDrop(getElement(ingredients["pile of sand"]), "#slot_4");
-
-    //setTimeout(grab_result, GRAB_DELAY);
+    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
 }
 
 function craft_glass_test_tube() {
-    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_1");
-    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_4");
-    //setTimeout(grab_result, GRAB_DELAY);
+    setIngredientSlot(ingredients["glass shards"], "#slot_1");
+    setIngredientSlot(ingredients["glass shards"], "#slot_4");
 }
 
 function craft_glass_vial() {
-    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_1");
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_3");
-        setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_4");
-            setTimeout(function() {
-                triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_6");
-                setTimeout(function() {
-                    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_7");
-                    //setTimeout(grab_result, GRAB_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["glass shards"], "#slot_1");
+    setIngredientSlot(ingredients["glass shards"], "#slot_3");
+    setIngredientSlot(ingredients["glass shards"], "#slot_4");
+    setIngredientSlot(ingredients["glass shards"], "#slot_6");
+    setIngredientSlot(ingredients["glass shards"], "#slot_7");
 }
 
 function craft_glass_bowl() {
-    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_0");
-
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_1");
-        setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_2");
-            setTimeout(function() {
-                triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_3");
-                setTimeout(function() {
-                    triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_5");
-                    setTimeout(function() {
-                        triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_6");
-                        setTimeout(function() {
-                            triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_7");
-                            setTimeout(function() {
-                                triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_8");
-                                //setTimeout(grab_result, GRAB_DELAY + 200); // this needs more time
-                            }, ITEM_WINDOW_DELAY);
-                        }, ITEM_WINDOW_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["glass shards"], "#slot_0");
+    setIngredientSlot(ingredients["glass shards"], "#slot_1");
+    setIngredientSlot(ingredients["glass shards"], "#slot_2");
+    setIngredientSlot(ingredients["glass shards"], "#slot_3");
+    setIngredientSlot(ingredients["glass shards"], "#slot_5");
+    setIngredientSlot(ingredients["glass shards"], "#slot_6");
+    setIngredientSlot(ingredients["glass shards"], "#slot_7");
+    setIngredientSlot(ingredients["glass shards"], "#slot_8");
 }
 
 function craft_glass_dust_vial() {
-    triggerDragAndDrop(getElement(ingredients["pile of sand"]), "#slot_4");
-
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_7")
-        if (triggerDragAndDrop === true) {
-            //setTimeout(grab_result, GRAB_DELAY);
-        } else {
-            alert('Error 23. No Quartz Dust?');
-            enable_quick_craft_buttons();
-            clear_crafting_area();
-        }
-
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
+    setIngredientSlot(ingredients["quartz dust"], "#slot_7")
+    // if (setIngredientSlot === true) {} else {
+    //     alert('Error 23. No Quartz Dust?');
+    //     enable_quick_craft_buttons();
+    //     clear_crafting_area();
+    // }
 }
 
 function craft_glass_dust_bowl() {
-    triggerDragAndDrop(getElement(ingredients["pile of sand"]), "#slot_4");
-
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_7")
-        if (triggerDragAndDrop === true) {
-            //setTimeout(grab_result, GRAB_DELAY);
-        } else {
-            alert('Error 24. No Jade Dust?');
-            enable_quick_craft_buttons();
-            clear_crafting_area();
-        }
-
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
+    setIngredientSlot(ingredients["jade dust"], "#slot_7")
+    // if (setIngredientSlot === true) {} else {
+    //     alert('Error 24. No Jade Dust?');
+    //     enable_quick_craft_buttons();
+    //     clear_crafting_area();
+    // }
 }
 
 function craft_upload_potion_sampler() {
-    triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_2");
-        //setTimeout(grab_result, GRAB_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["test tube"], "#slot_4");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
 }
 
 function craft_small_upload_potion() {
-    triggerDragAndDrop(getElement(ingredients["vial"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_2");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_8");
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["vial"], "#slot_4");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_8");
 }
 
 function craft_upload_potion() {
-    triggerDragAndDrop(getElement(ingredients["vial"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_8");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_6");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_2");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_3");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["black elder leaves"]), "#slot_0");
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["vial"], "#slot_4");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_8");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_6");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_3");
+    setIngredientSlot(ingredients["black elder leaves"], "#slot_0");
 }
 
 function craft_large_upload_potion() {
-    triggerDragAndDrop(getElement(ingredients["bowl"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["upload potion"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["upload potion"]), "#slot_3");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_1");
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["bowl"], "#slot_4");
+    setIngredientSlot(ingredients["upload potion"], "#slot_5");
+    setIngredientSlot(ingredients["upload potion"], "#slot_3");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_1");
 }
 
 function craft_download_potion_sampler() {
-    triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_2");
-
-    setTimeout(function (){
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["garlic tincture"]), "#slot_5");
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["test tube"], "#slot_4");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
+    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
 }
 
 function craft_small_download_potion() {
-    triggerDragAndDrop(getElement(ingredients["vial"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["garlic tincture"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_8");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_2");
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["vial"], "#slot_4");
+    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_8");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
 }
 
 function craft_download_potion() {
-    triggerDragAndDrop(getElement(ingredients["vial"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["garlic tincture"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_8");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_6");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_2");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_3");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["purple angelica flowers"]), "#slot_0");
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["vial"], "#slot_4");
+    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_8");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_6");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_3");
+    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_0");
 }
 
 function craft_large_download_potion() {
-    triggerDragAndDrop(getElement(ingredients["bowl"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["download-reduction potion"]), "#slot_5");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["download-reduction potion"]), "#slot_3");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_1");
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["bowl"], "#slot_4");
+    setIngredientSlot(ingredients["download-reduction potion"], "#slot_5");
+    setIngredientSlot(ingredients["download-reduction potion"], "#slot_3");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_1");
 }
 
 function craft_garlic_tincture() {
-    triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_5");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["test tube"], "#slot_4");
+    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
 }
 
 function craft_impure_bronze_bar() {
-    triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_0");
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["clay"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_0");
+    setIngredientSlot(ingredients["clay"], "#slot_1");
 }
 
 function craft_bronze_bar() {
-    triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_0");
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["bronze alloy mix"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_0");
+    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_1");
 }
 
 function craft_iron_bar() {
-    triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_0");
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["iron ore"], "#slot_0");
+    setIngredientSlot(ingredients["iron ore"], "#slot_1");
 }
 
 function craft_steel_bar() {
-    triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_0");
-
-    setTimeout(function() {
-        triggerDragAndDrop(getElement(ingredients["iron ore"]), "#slot_1");
-
-        setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["lump of coal"]), "#slot_4");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["iron ore"], "#slot_0");
+    setIngredientSlot(ingredients["iron ore"], "#slot_1");
+    setIngredientSlot(ingredients["lump of coal"], "#slot_4");
 }
 
 function craft_steel_bar_from_iron_bar() {
-    triggerDragAndDrop(getElement(ingredients["iron bar"]), "#slot_1");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["lump of coal"]), "#slot_4");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["iron bar"], "#slot_1");
+    setIngredientSlot(ingredients["lump of coal"], "#slot_4");
 }
 
 function craft_gold_bar() {
-    triggerDragAndDrop(getElement(ingredients["gold ore"]), "#slot_0");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["gold ore"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["gold ore"], "#slot_0");
+    setIngredientSlot(ingredients["gold ore"], "#slot_1");
 }
 
 function craft_mithril_bar() {
-    triggerDragAndDrop(getElement(ingredients["mithril ore"]), "#slot_0");
-
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["mithril ore"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["mithril ore"], "#slot_0");
+    setIngredientSlot(ingredients["mithril ore"], "#slot_1");
 }
 
 function craft_adamantium_bar() {
-    triggerDragAndDrop(getElement(ingredients["adamantium ore"]), "#slot_0");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["adamantium ore"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["adamantium ore"], "#slot_0");
+    setIngredientSlot(ingredients["adamantium ore"], "#slot_1");
 }
 
 function craft_quartz_bar() {
-    triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_0");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["quartz dust"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["quartz dust"], "#slot_0");
+    setIngredientSlot(ingredients["quartz dust"], "#slot_1");
 }
 
 function craft_jade_bar() {
-    triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_0");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["jade dust"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["jade dust"], "#slot_0");
+    setIngredientSlot(ingredients["jade dust"], "#slot_1");
 }
 
 function craft_amethyst_bar() {
-    triggerDragAndDrop(getElement(ingredients["amethyst dust"]), "#slot_0");
-    setTimeout(function() {
-            triggerDragAndDrop(getElement(ingredients["amethyst dust"]), "#slot_1");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["amethyst dust"], "#slot_0");
+    setIngredientSlot(ingredients["amethyst dust"], "#slot_1");
 }
 
 function craft_small_luck_potion() {
-    triggerDragAndDrop(getElement(ingredients["vial"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_4");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_5");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["vial"], "#slot_3");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_4");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
 }
 
 function craft_large_luck_potion() {
-    triggerDragAndDrop(getElement(ingredients["bowl"]), "#slot_4");
-    triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_0");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_1");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_2");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_3");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["black elderberries"]), "#slot_5");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_7");
-
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["bowl"], "#slot_4");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_0");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_1");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_2");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_3");
+    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_7");
 }
 
 function craft_ruby_grained_baguette() {
-    triggerDragAndDrop(getElement(ingredients["ruby-flecked wheat"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["ruby-flecked wheat"]), "#slot_5");
-
-        //setTimeout(grab_result, GRAB_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["ruby-flecked wheat"], "#slot_4");
+    setIngredientSlot(ingredients["ruby-flecked wheat"], "#slot_5");
 }
 
 function craft_emerald_grained_baguette() {
-    triggerDragAndDrop(getElement(ingredients["emerald-flecked wheat"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["emerald-flecked wheat"]), "#slot_5");
-
-        //setTimeout(grab_result, GRAB_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["emerald-flecked wheat"], "#slot_4");
+    setIngredientSlot(ingredients["emerald-flecked wheat"], "#slot_5");
 }
 
 function craft_garlic_ruby_baguette() {
-    triggerDragAndDrop(getElement(ingredients["ruby-grained baguette"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_3");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_5");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["ruby-grained baguette"], "#slot_4");
+    setIngredientSlot(ingredients["head of garlic"], "#slot_3");
+    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
 }
 
 function craft_garlic_emerald_baguette() {
-    triggerDragAndDrop(getElement(ingredients["emerald-grained baguette"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["head of garlic"]), "#slot_5");
-
-        //setTimeout(grab_result, GRAB_DELAY);
-
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["emerald-grained baguette"], "#slot_4");
+    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
 }
 
 function craft_artisan_ruby_baguette() {
-    triggerDragAndDrop(getElement(ingredients["garlic ruby-baguette"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_4");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_5");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["garlic ruby-baguette"], "#slot_3");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_4");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_5");
 }
 
 function craft_artisan_emerald_baguette() {
-    triggerDragAndDrop(getElement(ingredients["garlic emerald-baguette"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["emerald chip"]), "#slot_4");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["yellow hellebore flower"]), "#slot_5");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["garlic emerald-baguette"], "#slot_3");
+    setIngredientSlot(ingredients["emerald chip"], "#slot_4");
+    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_5");
 }
 
 function craft_gazellian_emerald_baguette() {
-    triggerDragAndDrop(getElement(ingredients["artisan emerald-baguette"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["emerald chip"]), "#slot_4");
-
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["emerald chip"]), "#slot_5");
-
-            //setTimeout(grab_result, GRAB_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["artisan emerald-baguette"], "#slot_3");
+    setIngredientSlot(ingredients["emerald chip"], "#slot_4");
+    setIngredientSlot(ingredients["emerald chip"], "#slot_5");
 }
 
 function craft_carbon_crystalline_quartz_gem() {
-    triggerDragAndDrop(getElement(ingredients["carbon-crystalline quartz"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["glass shards"]), "#slot_1");
-
-        //setTimeout(grab_result, GRAB_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["carbon-crystalline quartz"], "#slot_4");
+    setIngredientSlot(ingredients["glass shards"], "#slot_1");
 }
 
 function craft_carbon_crystalline_quartz_necklace() {
-    triggerDragAndDrop(getElement(ingredients["quartz bar"]), "#slot_4");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["lump of coal"]), "#slot_5");
-
-        //setTimeout(grab_result, GRAB_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["quartz bar"], "#slot_4");
+    setIngredientSlot(ingredients["lump of coal"], "#slot_5");
 }
 
 function craft_exquisite_constellation_emeralds() {
-    triggerDragAndDrop(getElement(ingredients["emerald"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["emerald"]), "#slot_5");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["emerald"]), "#slot_6");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["emerald"]), "#slot_8");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_4");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_7");
-
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["emerald"], "#slot_3");
+    setIngredientSlot(ingredients["emerald"], "#slot_5");
+    setIngredientSlot(ingredients["emerald"], "#slot_6");
+    setIngredientSlot(ingredients["emerald"], "#slot_8");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
 }
 
 function craft_exquisite_constellation_rubies() {
-    triggerDragAndDrop(getElement(ingredients["ruby"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["ruby"]), "#slot_5");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["ruby"]), "#slot_6");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["ruby"]), "#slot_8");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_4");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_7");
-
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["ruby"], "#slot_3");
+    setIngredientSlot(ingredients["ruby"], "#slot_5");
+    setIngredientSlot(ingredients["ruby"], "#slot_6");
+    setIngredientSlot(ingredients["ruby"], "#slot_8");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
 }
 
 function craft_exquisite_constellation_sapphires() {
-    triggerDragAndDrop(getElement(ingredients["sapphire"]), "#slot_3");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["sapphire"]), "#slot_5");
-        setTimeout(function (){
-            triggerDragAndDrop(getElement(ingredients["sapphire"]), "#slot_6");
-            setTimeout(function (){
-                triggerDragAndDrop(getElement(ingredients["sapphire"]), "#slot_8");
-                setTimeout(function (){
-                    triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_4");
-                    setTimeout(function (){
-                        triggerDragAndDrop(getElement(ingredients["amethyst bar"]), "#slot_7");
-
-                        //setTimeout(grab_result, GRAB_DELAY);
-                    }, ITEM_WINDOW_DELAY);
-                }, ITEM_WINDOW_DELAY);
-            }, ITEM_WINDOW_DELAY);
-        }, ITEM_WINDOW_DELAY);
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["sapphire"], "#slot_3");
+    setIngredientSlot(ingredients["sapphire"], "#slot_5");
+    setIngredientSlot(ingredients["sapphire"], "#slot_6");
+    setIngredientSlot(ingredients["sapphire"], "#slot_8");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
+    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
 }
 
 function melt_dwarven_gem() {
-    triggerDragAndDrop(getElement(ingredients["flux"]), "#slot_7");
-
-    setTimeout(function (){
-        triggerDragAndDrop(getElement(ingredients["dwarven gem"]), "#slot_4");
-    }, ITEM_WINDOW_DELAY);
+    setIngredientSlot(ingredients["flux"], "#slot_7");
+    setIngredientSlot(ingredients["dwarven gem"], "#slot_4");
 }
 /* End Crafts */
 
@@ -1257,7 +925,7 @@ function do_craft(craft_name) {
         craft_glass_dust_bowl();
     }
 
-	/* Upload potions */
+    /* Upload potions */
     else if (craft_name === "upload potion sampler") {
         craft_upload_potion_sampler();
     }
@@ -1271,7 +939,7 @@ function do_craft(craft_name) {
         craft_large_upload_potion();
     }
 
-	/* Download potions */
+    /* Download potions */
     else if (craft_name === "download-reduction potion sampler") {
         craft_download_potion_sampler();
     }
@@ -1288,7 +956,7 @@ function do_craft(craft_name) {
         craft_garlic_tincture();
     }
 
-	/* Metal bars */
+    /* Metal bars */
     else if (craft_name === "impure bronze bar") {
         craft_impure_bronze_bar();
     }
@@ -1323,7 +991,7 @@ function do_craft(craft_name) {
         craft_amethyst_bar();
     }
 
-	/* Luck potions */
+    /* Luck potions */
     else if (craft_name === "small luck potion") {
         craft_small_luck_potion();
     }
@@ -1331,7 +999,7 @@ function do_craft(craft_name) {
         craft_large_luck_potion();
     }
 
-	/* Food */
+    /* Food */
     else if (craft_name === "ruby-grained baguette") {
         craft_ruby_grained_baguette();
     }
@@ -1354,7 +1022,7 @@ function do_craft(craft_name) {
         craft_gazellian_emerald_baguette();
     }
 
-	/* Jewelry */
+    /* Jewelry */
     else if (craft_name === "carbon-crystalline quartz gem") {
         craft_carbon_crystalline_quartz_gem();
     }
@@ -1449,18 +1117,9 @@ function open_crafting_submenu(craft_name) {
                     await new Promise(resolve => setTimeout(function() {
                         console.log('craft');
                         do_craft(craft_name);
+                        take_craft();
                         resolve();
                     }, CRAFT_TIME));
-                    await new Promise(resolve => setTimeout(function() {
-                        console.log('grab');
-                        grab_result();
-                        resolve();
-                    }, GRAB_TIME));
-                    await new Promise(resolve => setTimeout(function() {
-                        console.log('clear');
-                        clear_crafting_area();
-                        resolve();
-                    }, NEXT_CRAFT_TIME));
                 }
             })();
         });
@@ -1492,9 +1151,9 @@ function close_crafting_submenu() {
 //     $("#test_filter_by_id").click(function() {
 //         if (test === false) {
 //             clear_crafting_area();
-//             setTimeout(function() {
+//
 //                 console.log(getElement(ingredients["test tube"]));
-//                 triggerDragAndDrop(getElement(ingredients["test tube"]), "#slot_4");
+//                 setIngredientSlot(getElement(ingredients["test tube"]), "#slot_4");
 //             }, 1500);
 //             test = true;
 //         } else {
@@ -1604,9 +1263,6 @@ function close_crafting_submenu() {
     if (hasRecastBook === false) {
         $('.recast').remove();
     }
-
-    set_item_properties();
-    set_slot_properties();
 
     //console.log(ingredients);
     build_on_hand();
