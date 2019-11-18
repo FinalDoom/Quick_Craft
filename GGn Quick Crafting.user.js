@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.1.2
+// @version      2.2.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.1.2';
+const VERSION = '2.2.0';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -1269,16 +1269,16 @@ function craft_ricks_portal_gun() {
 }
 
 function craft_space_wormhole() {
-    setIngredientSlot(ingredients["Nyx Class Supercarrier"], "#slot_3");
+    setIngredientSlot(ingredients["Nyx class Supercarrier"], "#slot_3");
     setIngredientSlot(ingredients["Covetor Mining Ship"], "#slot_4");
     setIngredientSlot(ingredients["Chimera Schematic"], "#slot_5");
 }
-
+ 
 function craft_interdimensional_portal() {
     setIngredientSlot(ingredients["Portal Gun"], "#slot_3");
-    setIngredientSlot(ingredients["Ricks Portal Gun"], "#slot_4");
-    setIngredientSlot(ingredients["Space Wormhole"], "#slot_5");
-}
+    setIngredientSlot(ingredients["Space Wormhole"], "#slot_4");
+    setIngredientSlot(ingredients["Ricks Portal Gun"], "#slot_5");
+    }
 /* End Crafts */
 
 function do_craft(craft_name) {
