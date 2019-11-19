@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.2.1
+// @version      2.2.2
 // @description  Craft multiple items easier
 // @author       KingKrab23 with help from the community
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.2.1';
+const VERSION = '2.2.2';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
