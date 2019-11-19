@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.2.0
+// @version      2.2.1
 // @description  Craft multiple items easier
-// @author       KingKrab23
+// @author       KingKrab23 with help from the community
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.2.0';
+const VERSION = '2.2.1';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -712,7 +712,7 @@ function build_craft_list() {
 
     craftList["carbon-crystalline quartz necklace"] = {};
     craftList["carbon-crystalline quartz necklace"].ingredients = [
-        { name: "carbon-crystalline quartz gem", id: ingredients["carbon-crystalline quartz gem"], qty: 1, "on hand": onHand["carbon-crystalline quartz"] },
+        { name: "carbon-crystalline quartz", id: ingredients["carbon-crystalline quartz"], qty: 1, "on hand": onHand["carbon-crystalline quartz"] },
         { name: "glass shards", id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
     ];
     craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
@@ -1159,12 +1159,12 @@ function craft_gazellian_emerald_baguette() {
     setIngredientSlot(ingredients["emerald chip"], "#slot_5");
 }
 
-function craft_carbon_crystalline_quartz_gem() {
+function craft_carbon_crystalline_quartz_necklace() {
     setIngredientSlot(ingredients["carbon-crystalline quartz"], "#slot_4");
     setIngredientSlot(ingredients["glass shards"], "#slot_1");
 }
 
-function craft_carbon_crystalline_quartz_necklace() {
+function craft_carbon_crystalline_quartz_gem() {
     setIngredientSlot(ingredients["quartz bar"], "#slot_4");
     setIngredientSlot(ingredients["lump of coal"], "#slot_5");
 }
