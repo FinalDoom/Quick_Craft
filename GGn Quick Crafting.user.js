@@ -918,9 +918,10 @@ function reset_slots() {
 
 function take_craft(craft_name) {
     $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
-        //console.log(data);
+        console.log(data);
+        console.log(data.EquipID);
 
-        if (data === "{}") {
+        if (data === "{}" || data.EquipId !== "") {
             noty({type:'success', text: craft_name + ' was crafted successfully.'});
         } else {
             noty({type:'error', text: craft_name + ' failed.'});
@@ -1273,7 +1274,7 @@ function craft_space_wormhole() {
     setIngredientSlot(ingredients["Covetor Mining Ship"], "#slot_4");
     setIngredientSlot(ingredients["Chimera Schematic"], "#slot_5");
 }
- 
+
 function craft_interdimensional_portal() {
     setIngredientSlot(ingredients["Portal Gun"], "#slot_3");
     setIngredientSlot(ingredients["Space Wormhole"], "#slot_4");
