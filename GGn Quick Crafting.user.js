@@ -1655,7 +1655,7 @@ function close_crafting_submenu() {
     $("#quick-crafter").append('<br />');
     $("#quick-crafter").append('<br />');
 
-    var hasFoodBook = $("#crafting_recipes h3:contains('Food Cooking Recipes')").length ? true : false;
+    var hasFoodBook = $("#crafting_recipes h3:contains('Food Crafting Recipes')").length ? true : false;
     var hasStatPotionBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
     var hasMetalBarBook = $("#crafting_recipes h3:contains('Metal Bar Crafting Recipes')").length ? true : false;
     var hasJewelryBook = $("#crafting_recipes h3:contains('Jewelry Crafting Recipes')").length ? true : false;
