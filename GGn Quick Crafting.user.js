@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.2.2
+// @version      2.2.2.k3
 // @description  Craft multiple items easier
 // @author       KingKrab23 with help from the community
 // @match        https://gazellegames.net/user.php?action=crafting
 // @grant        none
 // ==/UserScript==
 
-const VERSION = '2.2.2';
+const VERSION = '2.2.2.k3';
 
 /* >>>BEGIN<<< User adjustable variables
  * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
@@ -18,6 +18,22 @@ const BUTTON_LOCKOUT_DELAY = 1000;
 const CRAFT_TIME = 1000;
 const GRAB_TIME = 1;
 const NEXT_CRAFT_TIME = 1;
+
+// Set which recipe categories are shown by default (1 = shown, 0 = hidden)
+// 0 only works for Glass and Recast at the moment, still have to rewrite the other buttons
+
+var DEFAULT = {};
+DEFAULT.TEST = 1
+DEFAULT.Glass = 0
+DEFAULT.Basic_Stats = 1
+DEFAULT.Material_Bars = 1
+DEFAULT.Luck = 1
+DEFAULT.Food = 1
+DEFAULT.Jewelry = 0
+DEFAULT.Recast = 0
+DEFAULT.Staff_Cards = 0
+DEFAULT.Portal_Cards = 0
+DEFAULT.Mario_Cards = 0
 
 /* >>>END<<< user adjustable variables */
 
@@ -442,22 +458,22 @@ function build_craft_list() {
     craftList["bowl"].icon = "http://test.test";
     craftList["bowl"].available = Math.floor(onHand["glass shards"] / 8);
 
-    craftList["dust ore glassware (vial)"] = {};
-    craftList["dust ore glassware (vial)"].ingredients = [
+    craftList["dust ore vial"] = {};
+    craftList["dust ore vial"].ingredients = [
         { name: "pile of sand", id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
         { name: "quartz dust", id: ingredients["quartz dust"], qty: 1, "on hand": onHand["quartz dust"] }
     ];
-    craftList["dust ore glassware (vial)"].icon = "http://test.test";
-    craftList["dust ore glassware (vial)"].available = Math.min(onHand["pile of sand"]
+    craftList["dust ore vial"].icon = "http://test.test";
+    craftList["dust ore vial"].available = Math.min(onHand["pile of sand"]
                                                                 , onHand["quartz dust"]);
 
-    craftList["dust ore glassware (bowl)"] = {};
-    craftList["dust ore glassware (bowl)"].ingredients = [
+    craftList["dust ore bowl"] = {};
+    craftList["dust ore bowl"].ingredients = [
         { name: "pile of sand", id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
         { name: "jade dust", id: ingredients["jade dust"], qty: 1, "on hand": onHand["jade dust"] }
     ];
-    craftList["dust ore glassware (bowl)"].icon = "http://test.test";
-    craftList["dust ore glassware (bowl)"].available = Math.min(onHand["pile of sand"]
+    craftList["dust ore bowl"].icon = "http://test.test";
+    craftList["dust ore bowl"].available = Math.min(onHand["pile of sand"]
                                                                 , onHand["jade dust"]);
 
     craftList["upload potion sampler"] = {};
@@ -719,31 +735,31 @@ function build_craft_list() {
     craftList["carbon-crystalline quartz necklace"].available = Math.min(onHand["carbon-crystalline quartz"]
                                                                          , onHand["glass shards"]);
 
-    craftList["exquisite constellations of rubies"] = {};
-    craftList["exquisite constellations of rubies"].ingredients = [
+    craftList["exquisite constellation of rubies"] = {};
+    craftList["exquisite constellation of rubies"].ingredients = [
         { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { name: "ruby", id: ingredients["ruby"], qty: 4, "on hand": onHand["ruby"] },
     ];
-    craftList["exquisite constellations of rubies"].icon = "http://test.test";
-    craftList["exquisite constellations of rubies"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+    craftList["exquisite constellation of rubies"].icon = "http://test.test";
+    craftList["exquisite constellation of rubies"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
                                                                          , Math.floor(onHand["ruby"] / 4));
 
-    craftList["exquisite constellations of sapphires"] = {};
-    craftList["exquisite constellations of sapphires"].ingredients = [
+    craftList["exquisite constellation of sapphires"] = {};
+    craftList["exquisite constellation of sapphires"].ingredients = [
         { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { name: "sapphire", id: ingredients["sapphire"], qty: 4, "on hand": onHand["sapphire"] },
     ];
-    craftList["exquisite constellations of sapphires"].icon = "http://test.test";
-    craftList["exquisite constellations of sapphires"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+    craftList["exquisite constellation of sapphires"].icon = "http://test.test";
+    craftList["exquisite constellation of sapphires"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
                                                                             , Math.floor(onHand["sapphire"] / 4));
 
-    craftList["exquisite constellations of emeralds"] = {};
-    craftList["exquisite constellations of emeralds"].ingredients = [
+    craftList["exquisite constellation of emeralds"] = {};
+    craftList["exquisite constellation of emeralds"].ingredients = [
         { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
         { name: "emerald", id: ingredients["emerald"], qty: 4, "on hand": onHand["emerald"] },
     ];
-    craftList["exquisite constellations of emeralds"].icon = "http://test.test";
-    craftList["exquisite constellations of emeralds"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
+    craftList["exquisite constellation of emeralds"].icon = "http://test.test";
+    craftList["exquisite constellation of emeralds"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
                                                                            , Math.floor(onHand["emerald"] / 4));
 
     craftList["melt dwarven gem"] = {};
@@ -755,122 +771,122 @@ function build_craft_list() {
     craftList["melt dwarven gem"].available = Math.min(onHand["flux"], onHand["dwarven gem"]);
 
     // Cards
-    craftList["The Golden Throne"] = {};
-    craftList["The Golden Throne"].ingredients = [
+    craftList["the golden throne"] = {};
+    craftList["the golden throne"].ingredients = [
         { name: "A Wild Artifaxx", id: ingredients["A Wild Artifaxx"], qty: 1, "on hand": onHand["A Wild Artifaxx"] },
         { name: "A Red Hot Flamed", id: ingredients["A Red Hot Flamed"], qty: 1, "on hand": onHand["A Red Hot Flamed"] },
         { name: "The Golden Daedy", id: ingredients["The Golden Daedy"], qty: 1, "on hand": onHand["The Golden Daedy"] },
     ];
-    craftList["The Golden Throne"].icon = "http://test.test";
-    craftList["The Golden Throne"].available = Math.min(onHand["A Wild Artifaxx"], onHand["A Red Hot Flamed"], onHand["The Golden Daedy"]);
+    craftList["the golden throne"].icon = "http://test.test";
+    craftList["the golden throne"].available = Math.min(onHand["A Wild Artifaxx"], onHand["A Red Hot Flamed"], onHand["The Golden Daedy"]);
 
-    craftList["Biggest Banhammer"] = {};
-    craftList["Biggest Banhammer"].ingredients = [
+    craftList["biggest banhammer"] = {};
+    craftList["biggest banhammer"].ingredients = [
         { name: "Stump's Banhammer", id: ingredients["Stump's Banhammer"], qty: 1, "on hand": onHand["Stump's Banhammer"] },
         { name: "thewhales Kiss", id: ingredients["thewhales Kiss"], qty: 1, "on hand": onHand["thewhales Kiss"] },
         { name: "Neos Ratio Cheats", id: ingredients["Neos Ratio Cheats"], qty: 1, "on hand": onHand["Neos Ratio Cheats"] },
     ];
-    craftList["Biggest Banhammer"].icon = "http://test.test";
-    craftList["Biggest Banhammer"].available = Math.min(onHand["Stump's Banhammer"], onHand["thewhales Kiss"], onHand["Neos Ratio Cheats"]);
+    craftList["biggest banhammer"].icon = "http://test.test";
+    craftList["biggest banhammer"].available = Math.min(onHand["Stump's Banhammer"], onHand["thewhales Kiss"], onHand["Neos Ratio Cheats"]);
 
-    craftList["Staff Beauty Parlor"] = {};
-    craftList["Staff Beauty Parlor"].ingredients = [
+    craftList["staff beauty parlor"] = {};
+    craftList["staff beauty parlor"].ingredients = [
         { name: "Alpaca Out of Nowhere!", id: ingredients["Alpaca Out of Nowhere!"], qty: 1, "on hand": onHand["Alpaca Out of Nowhere!"] },
         { name: "Nikos Transformation", id: ingredients["Nikos Transformation"], qty: 1, "on hand": onHand["Nikos Transformation"] },
         { name: "lepik le prick", id: ingredients["lepik le prick"], qty: 1, "on hand": onHand["lepik le prick"] },
     ];
-    craftList["Staff Beauty Parlor"].icon = "http://test.test";
-    craftList["Staff Beauty Parlor"].available = Math.min(onHand["Alpaca Out of Nowhere!"], onHand["Nikos Transformation"], onHand["lepik le prick"]);
+    craftList["staff beauty parlor"].icon = "http://test.test";
+    craftList["staff beauty parlor"].available = Math.min(onHand["Alpaca Out of Nowhere!"], onHand["Nikos Transformation"], onHand["lepik le prick"]);
 
-    craftList["Random Staff Card"] = {};
-    craftList["Random Staff Card"].ingredients = [
+    craftList["random lvl2 staff card"] = {};
+    craftList["random lvl2 staff card"].ingredients = [
         { name: "LinkinsRepeater Bone Hard Card", id: ingredients["LinkinsRepeater Bone Hard Card"], qty: 1, "on hand": onHand["LinkinsRepeater Bone Hard Card"] },
         { name: "MuffledSilence's Headphones", id: ingredients["MuffledSilence's Headphones"], qty: 1, "on hand": onHand["MuffledSilence's Headphones"] },
         { name: "Ze do Caixao Coffin Joe Card", id: ingredients["Ze do Caixao Coffin Joe Card"], qty: 1, "on hand": onHand["Ze do Caixao Coffin Joe Card"] },
     ];
-    craftList["Random Staff Card"].icon = "http://test.test";
-    craftList["Random Staff Card"].available = Math.min(onHand["LinkinsRepeater Bone Hard Card"], onHand["MuffledSilence's Headphones"], onHand["Ze do Caixao Coffin Joe Card"]);
+    craftList["random lvl2 staff card"].icon = "http://test.test";
+    craftList["random lvl2 staff card"].available = Math.min(onHand["LinkinsRepeater Bone Hard Card"], onHand["MuffledSilence's Headphones"], onHand["Ze do Caixao Coffin Joe Card"]);
 
-    craftList["Realm of Staff"] = {};
-    craftList["Realm of Staff"].ingredients = [
+    craftList["realm of staff"] = {};
+    craftList["realm of staff"].ingredients = [
         { name: "The Golden Throne", id: ingredients["The Golden Throne"], qty: 1, "on hand": onHand["The Golden Throne"] },
         { name: "Biggest Banhammer", id: ingredients["Biggest Banhammer"], qty: 1, "on hand": onHand["Biggest Banhammer"] },
         { name: "Staff Beauty Parlor", id: ingredients["Staff Beauty Parlor"], qty: 1, "on hand": onHand["Staff Beauty Parlor"] },
     ];
-    craftList["Realm of Staff"].icon = "http://test.test";
-    craftList["Realm of Staff"].available = Math.min(onHand["The Golden Throne"], onHand["Biggest Banhammer"], onHand["Staff Beauty Parlor"]);
+    craftList["realm of staff"].icon = "http://test.test";
+    craftList["realm of staff"].available = Math.min(onHand["The Golden Throne"], onHand["Biggest Banhammer"], onHand["Staff Beauty Parlor"]);
 
-    craftList["Super Mushroom"] = {};
-    craftList["Super Mushroom"].ingredients = [
+    craftList["super mushroom"] = {};
+    craftList["super mushroom"].ingredients = [
         { name: "Mario", id: ingredients["Mario"], qty: 1, "on hand": onHand["Mario"] },
         { name: "Princess Peach", id: ingredients["Princess Peach"], qty: 1, "on hand": onHand["Princess Peach"] },
         { name: "Toad", id: ingredients["Toad"], qty: 1, "on hand": onHand["Toad"] },
     ];
-    craftList["Super Mushroom"].icon = "http://test.test";
-    craftList["Super Mushroom"].available = Math.min(onHand["Princess Peach"], onHand["Mario"], onHand["Toad"]);
+    craftList["super mushroom"].icon = "http://test.test";
+    craftList["super mushroom"].available = Math.min(onHand["Princess Peach"], onHand["Mario"], onHand["Toad"]);
 
-    craftList["Fire Flower"] = {};
-    craftList["Fire Flower"].ingredients = [
+    craftList["fire flower"] = {};
+    craftList["fire flower"].ingredients = [
         { name: "Luigi", id: ingredients["Luigi"], qty: 1, "on hand": onHand["Luigi"] },
         { name: "Koopa Troopa", id: ingredients["Koopa Troopa"], qty: 1, "on hand": onHand["Koopa Troopa"] },
         { name: "Yoshi", id: ingredients["Yoshi"], qty: 1, "on hand": onHand["Yoshi"] },
     ];
-    craftList["Fire Flower"].icon = "http://test.test";
-    craftList["Fire Flower"].available = Math.min(onHand["Luigi"], onHand["Koopa Troopa"], onHand["Yoshi"]);
+    craftList["fire flower"].icon = "http://test.test";
+    craftList["fire flower"].available = Math.min(onHand["Luigi"], onHand["Koopa Troopa"], onHand["Yoshi"]);
 
-    craftList["Penguin Suit"] = {};
-    craftList["Penguin Suit"].ingredients = [
+    craftList["penguin suit"] = {};
+    craftList["penguin suit"].ingredients = [
         { name: "Bowser", id: ingredients["Bowser"], qty: 1, "on hand": onHand["Bowser"] },
         { name: "Wario", id: ingredients["Wario"], qty: 1, "on hand": onHand["Wario"] },
         { name: "Goomba", id: ingredients["Goomba"], qty: 1, "on hand": onHand["Goomba"] },
     ];
-    craftList["Penguin Suit"].icon = "http://test.test";
-    craftList["Penguin Suit"].available = Math.min(onHand["Bowser"], onHand["Wario"], onHand["Goomba"]);
+    craftList["penguin suit"].icon = "http://test.test";
+    craftList["penguin suit"].available = Math.min(onHand["Bowser"], onHand["Wario"], onHand["Goomba"]);
 
-    craftList["Goal Pole"] = {};
-    craftList["Goal Pole"].ingredients = [
+    craftList["goal pole"] = {};
+    craftList["goal pole"].ingredients = [
         { name: "Penguin Suit", id: ingredients["Penguin Suit"], qty: 1, "on hand": onHand["Penguin Suit"] },
         { name: "Fire Flower", id: ingredients["Fire Flower"], qty: 1, "on hand": onHand["Fire Flower"] },
         { name: "Super Mushroom", id: ingredients["Super Mushroom"], qty: 1, "on hand": onHand["Super Mushroom"] },
     ];
-    craftList["Goal Pole"].icon = "http://test.test";
-    craftList["Goal Pole"].available = Math.min(onHand["Penguin Suit"], onHand["Fire Flower"], onHand["Super Mushroom"]);
+    craftList["goal pole"].icon = "http://test.test";
+    craftList["goal pole"].available = Math.min(onHand["Penguin Suit"], onHand["Fire Flower"], onHand["Super Mushroom"]);
 
-    craftList["Portal Gun"] = {};
-    craftList["Portal Gun"].ingredients = [
+    craftList["portal gun"] = {};
+    craftList["portal gun"].ingredients = [
         { name: "Cake", id: ingredients["Cake"], qty: 1, "on hand": onHand["Cake"] },
         { name: "GLaDOS", id: ingredients["GLaDOS"], qty: 1, "on hand": onHand["GLaDOS"] },
         { name: "Companion Cube", id: ingredients["Companion Cube"], qty: 1, "on hand": onHand["Companion Cube"] },
     ];
-    craftList["Portal Gun"].icon = "http://test.test";
-    craftList["Portal Gun"].available = Math.min(onHand["Cake"], onHand["GLaDOS"], onHand["Companion Cube"]);
+    craftList["portal gun"].icon = "http://test.test";
+    craftList["portal gun"].available = Math.min(onHand["Cake"], onHand["GLaDOS"], onHand["Companion Cube"]);
 
-    craftList["Ricks Portal Gun"] = {};
-    craftList["Ricks Portal Gun"].ingredients = [
+    craftList["ricks portal gun"] = {};
+    craftList["ricks portal gun"].ingredients = [
         { name: "Rick Sanchez", id: ingredients["Rick Sanchez"], qty: 1, "on hand": onHand["Rick Sanchez"] },
         { name: "A Scared Morty", id: ingredients["A Scared Morty"], qty: 1, "on hand": onHand["A Scared Morty"] },
         { name: "Mr Poopy Butthole", id: ingredients["Mr Poopy Butthole"], qty: 1, "on hand": onHand["Mr Poopy Butthole"] },
     ];
-    craftList["Ricks Portal Gun"].icon = "http://test.test";
-    craftList["Ricks Portal Gun"].available = Math.min(onHand["Rick Sanchez"], onHand["A Scared Morty"], onHand["Mr Poopy Butthole"]);
+    craftList["ricks portal gun"].icon = "http://test.test";
+    craftList["ricks portal gun"].available = Math.min(onHand["Rick Sanchez"], onHand["A Scared Morty"], onHand["Mr Poopy Butthole"]);
 
-    craftList["Space Wormhole"] = {};
-    craftList["Space Wormhole"].ingredients = [
+    craftList["space wormhole"] = {};
+    craftList["space wormhole"].ingredients = [
         { name: "Nyx class Supercarrier", id: ingredients["Nyx class Supercarrier"], qty: 1, "on hand": onHand["Nyx class Supercarrier"] },
         { name: "Covetor Mining Ship", id: ingredients["Covetor Mining Ship"], qty: 1, "on hand": onHand["Covetor Mining Ship"] },
         { name: "Chimera Schematic", id: ingredients["Chimera Schematic"], qty: 1, "on hand": onHand["Chimera Schematic"] },
     ];
-    craftList["Space Wormhole"].icon = "http://test.test";
-    craftList["Space Wormhole"].available = Math.min(onHand["Nyx class Supercarrier"], onHand["Covetor Mining Ship"], onHand["Chimera Schematic"]);
+    craftList["space wormhole"].icon = "http://test.test";
+    craftList["space wormhole"].available = Math.min(onHand["Nyx class Supercarrier"], onHand["Covetor Mining Ship"], onHand["Chimera Schematic"]);
 
-    craftList["Interdimensional Portal"] = {};
-    craftList["Interdimensional Portal"].ingredients = [
+    craftList["interdimensional portal"] = {};
+    craftList["interdimensional portal"].ingredients = [
         { name: "Portal Gun", id: ingredients["Portal Gun"], qty: 1, "on hand": onHand["Portal Gun"] },
         { name: "Ricks Portal Gun", id: ingredients["Ricks Portal Gun"], qty: 1, "on hand": onHand["Ricks Portal Gun"] },
         { name: "Space Wormhole", id: ingredients["Space Wormhole"], qty: 1, "on hand": onHand["Space Wormhole"] },
     ];
-    craftList["Interdimensional Portal"].icon = "http://test.test";
-    craftList["Interdimensional Portal"].available = Math.min(onHand["Space Wormhole"], onHand["Ricks Portal Gun"], onHand["Portal Gun"]);
+    craftList["interdimensional portal"].icon = "http://test.test";
+    craftList["interdimensional portal"].available = Math.min(onHand["Space Wormhole"], onHand["Ricks Portal Gun"], onHand["Portal Gun"]);
 }
 
 function setIngredientSlot (ingredientId, slot) {
@@ -1300,10 +1316,10 @@ function do_craft(craft_name) {
     else if (craft_name === "bowl") {
         craft_glass_bowl();
     }
-    else if (craft_name === "dust ore glassware (vial)") {
+    else if (craft_name === "dust ore vial") {
         craft_glass_dust_vial();
     }
-    else if (craft_name === "dust ore glassware (bowl)") {
+    else if (craft_name === "dust ore bowl") {
         craft_glass_dust_bowl();
     }
 
@@ -1427,43 +1443,43 @@ function do_craft(craft_name) {
     }
 
     /* Cards */
-    else if (craft_name === "The Golden Throne") {
+    else if (craft_name === "the golden throne") {
         craft_golden_throne();
     }
-    else if (craft_name === "Biggest Banhammer") {
+    else if (craft_name === "biggest banhammer") {
         craft_biggest_banhammer();
     }
-    else if (craft_name === "Staff Beauty Parlor") {
+    else if (craft_name === "staff beauty parlor") {
         craft_staff_beauty_parlor();
     }
-    else if (craft_name === "Random Staff Card") {
+    else if (craft_name === "random lvl2 staff card") {
         craft_random_staff_card();
     }
-    else if (craft_name === "Realm of Staff") {
+    else if (craft_name === "realm of staff") {
         craft_realm_of_staff();
     }
-    else if (craft_name === "Super Mushroom") {
+    else if (craft_name === "super mushroom") {
         craft_super_mushroom();
     }
-    else if (craft_name === "Fire Flower") {
+    else if (craft_name === "fire flower") {
         craft_fire_flower();
     }
-    else if (craft_name === "Penguin Suit") {
+    else if (craft_name === "penguin suit") {
         craft_penguin_suit();
     }
-    else if (craft_name === "Goal Pole") {
+    else if (craft_name === "goal pole") {
         craft_goal_pole();
     }
-    else if (craft_name === "Portal Gun") {
+    else if (craft_name === "portal gun") {
         craft_portal_gun();
     }
-    else if (craft_name === "Ricks Portal Gun") {
+    else if (craft_name === "ricks portal gun") {
         craft_ricks_portal_gun();
     }
-    else if (craft_name === "Space Wormhole") {
+    else if (craft_name === "space wormhole") {
         craft_space_wormhole();
     }
-    else if (craft_name === "Interdimensional Portal") {
+    else if (craft_name === "interdimensional portal") {
         craft_interdimensional_portal();
     }
 
@@ -1488,21 +1504,19 @@ function enable_quick_craft_buttons() {
 
 var disable_craft_button = false;
 
+
 function open_crafting_submenu(craft_name) {
-    //clear_crafting_area();
     close_crafting_submenu();
     build_on_hand();
     build_craft_list();
-
-// I'm having trouble gettinga close button working right now, maybe later
-//     $("#current_craft_box").append('<div id="close-submenu" style="float:left">'
-//                                    + '<span style="text-decoration: underline" onClick=document.getElementById("crafting-submenu").outerHTML = ""; '
-//                                    + 'id="close_crafting_submenu">X</span></div>');
 
     $("#current_craft_box").append('<div id="crafting-submenu" style="text-align:center"></div>');
     $("#crafting-submenu").append('<p>' + titleCase(craft_name) + '</p>');
 
     var currentCraft = craftList[craft_name];
+    console.log(currentCraft);
+
+
 
     $("#crafting-submenu").append('<p> Ingredients: </p>');
 
@@ -1557,9 +1571,89 @@ function open_crafting_submenu(craft_name) {
     }
 }
 
+function open_crafting_submenu_TEST(craft_name, recipe) {
+    close_crafting_submenu();
+    $("#current_craft_box").append('<div id="crafting-submenu" style="text-align:center"></div>');
+    $("#crafting-submenu").append('<p>' + titleCase(craft_name) + '</p>');
+
+    var currentCraft = {};
+    currentCraft.available = 10000
+    currentCraft.ingredients = [];
+    for (var i = 0; i < recipe.length/2; i++) {
+        var ingr = recipe[2*i];
+        var qty = recipe[2*i+1].length;
+        var onhand = $("#items-wrapper .item[data-item=" + ingredients[ingr] + "] .item_count").text();
+        if (onhand === "") { onhand = $("#items-wrapper .item[data-item=" + ingredients[ingr] + "]").length; };
+        var avail = Math.floor(onhand/qty);
+        if (avail < currentCraft.available) {currentCraft.available = avail};
+        currentCraft.ingredients[i]={ name: ingr, id: ingredients[ingr], qty: qty, "on hand": onhand }};
+    currentCraft.icon = "http://test.test";
+
+    console.log(currentCraft);
+
+    $("#crafting-submenu").append('<p> Ingredients: </p>');
+
+    currentCraft.ingredients.map(ingredient => {
+        $("#crafting-submenu").append('<p style="display: inline">'
+                                      + titleCase(ingredient.name) + ': ' + ingredient.qty + '/' + ingredient["on hand"] + '</p>');
+        $("#crafting-submenu").append('<br />');
+    });
+
+    if (currentCraft.available > 0) {
+        $("#crafting-submenu").append('<select id="craft_number_select">');
+
+        for (i = 1; i <= currentCraft.available; i++) {
+            $("#craft_number_select").append("<option value='" + i + "'>" + i + "</option>");
+        }
+
+        $("#crafting-submenu").append('</select>');
+
+        var craftButton = $("<button>");
+        craftButton.on("click", function() {
+            var craftNumber = $("#craft_number_select").children("option:selected").val();
+
+            disable_craft_button = true;
+
+            next_button_lockout_delay = BUTTON_LOCKOUT_DELAY * Number(craftNumber);
+
+            disable_quick_craft_buttons();
+            enable_quick_craft_buttons();
+
+            (async function loop() {
+                for (let i = 0; i < craftNumber; i++) {
+                    await new Promise(resolve => setTimeout(function() {
+                        reset_slots();
+                        for (var j = 0; j < recipe.length/2; j++) {
+                            var ingr = recipe[2*j];
+                            for (var k = 0; k < recipe[2*j+1].length; k++) {
+                                slots[recipe[2*j+1][k]] = ingredients[ingr]}}
+                        take_craft(craft_name);
+                        resolve();
+                    }, CRAFT_TIME));
+                }
+            })();
+        });
+
+        craftButton.html('Craft');
+        craftButton.prop('style', 'margin-left: 5px');
+
+        $("#crafting-submenu").append(craftButton);
+
+        if (disable_craft_button === true) {
+            disable_quick_craft_buttons();
+        }
+    }
+}
+
 function close_crafting_submenu() {
     $("#crafting-submenu").remove();
 }
+
+
+
+
+
+
 
 (function() {
     'use strict';
@@ -1567,347 +1661,160 @@ function close_crafting_submenu() {
     $("#crafting_recipes").before(
         '<div id="quick-crafter" style="border: 1px solid #fff;margin-bottom: 17px;display: block;clear: both;position:relative;background-color:rgba(0,0,0,.7);padding:5px;"></div>');
 
-//     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: black;" id="test_filter_by_id">Test</button>');
+    const button_color = ["red","green"];
+    const button_display = ["none","inline"];
 
-//     var test = false;
-//     $("#test_filter_by_id").click(function() {
-//         if (test === false) {
-//             clear_crafting_area();
-//
-//                 console.log(getElement(ingredients["test tube"]));
-//                 setIngredientSlot(getElement(ingredients["test tube"]), "#slot_4");
-//             }, 1500);
-//             test = true;
-//         } else {
-//             grab_result();
-//             clear_crafting_area();
-//             test = false;
-//         }
-//     });
+// Creates a "Recipe Book" on/off button; bgcolor and tcolor are the background and text colors of the associated Recipe (craft) buttons
+
+    class Book_button {
+        constructor(book_name, bgcolor, tcolor) {
+            this.enabled = DEFAULT[book_name] ;
+            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="' + book_name + '" class="quick_craft_button">'+ book_name.replace(/_/g," ") +'</button>');
+            document.getElementById(book_name).style.backgroundColor=button_color[this.enabled];
+            document.getElementById(book_name).bgcolor = bgcolor;
+            document.getElementById(book_name).tcolor = tcolor;
+            $("#"+ book_name).click(() => {
+                this.enabled = 1 - this.enabled;
+                console.log(document.getElementById(book_name));
+                document.getElementById(book_name).style.backgroundColor=button_color[this.enabled];
+                var buttons = document.getElementsByClassName("qcbutton_" + book_name);
+                for (var i = 0; i < buttons.length; i++) {buttons[i].style.display = button_display[this.enabled]};
+            });
+        }
+    }
+
+
+// Creates a Recipe button; book_name is the name of the associated Recipe Book button (which impacts the colors, on/off ability and visibility DEFAULT preset)
+// Later I'll add a third "ingredients" parameter and rewrite the crafting code for easier implementation of new recipes
+
+        class Recipe_button {
+        constructor(book_name, recipe_name) {
+            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;" id="' + recipe_name + '" class="qcbutton_' + book_name + '">'+ titleCase(recipe_name.replace(/_/g," ")) +'</button>');
+            document.getElementById(recipe_name).style.backgroundColor = document.getElementById(book_name).bgcolor;
+            document.getElementById(recipe_name).style.color = document.getElementById(book_name).tcolor;
+            document.getElementById(recipe_name).style.display = button_display[DEFAULT[book_name]];
+            $("#"+ recipe_name).click(() => {
+                open_crafting_submenu(recipe_name.replace(/_/g," "));
+            });
+        }
+    }
+
+
+
+/* Creates a Recipe button.
+     book_name is the name of the associated Recipe Book button (which impacts the colors, on/off ability and visibility DEFAULT preset)    Slots: 0 1 2
+     recipe is, well, the recipe, the format being ["ingredient1", [slot1, slot2, ...], ... ]                                                      3 4 5
+                                                                                                                                                   6 7 8
+*/
+        class TEST_Recipe_button {
+        constructor(book_name, recipe_name, recipe) {
+            this.recipe = recipe;
+            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;" id="' + recipe_name + '" class="qcbutton_' + book_name + '">'+ titleCase(recipe_name.replace(/_/g," ")) +'</button>');
+            document.getElementById(recipe_name).style.backgroundColor = document.getElementById(book_name).bgcolor;
+            document.getElementById(recipe_name).style.color = document.getElementById(book_name).tcolor;
+            document.getElementById(recipe_name).style.display = button_display[DEFAULT[book_name]];
+            $("#"+ recipe_name).click(() => {
+                open_crafting_submenu_TEST(recipe_name.replace(/_/g," "),this.recipe);
+            });
+        }
+    }
 
     $("#quick-crafter").append('<div id="current_craft_box"></div>');
     $("#quick-crafter").append('<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.');
     $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: red;" id="clear_button" class="quick_craft_button">Clear</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="shards_tube" class="quick_craft_button">Glass Shards From Tube</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="shards_sand" class="quick_craft_button glass">Glass Shards From Sand</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="test_tube" class="quick_craft_button glass">Test Tube</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="vial" class="quick_craft_button glass">Vial</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="bowl" class="quick_craft_button glass">Bowl</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="dust_vial" class="quick_craft_button glass">Dust Ore Glassware (Vial)</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: white; color: black;" id="dust_bowl" class="quick_craft_button glass">Dust Ore Glassware (Bowl)</button>');
+    $("#quick-crafter").append('<br /> <br />');
+
+    $("#quick-crafter").append('<span>Show or hide crafting categories:</span>');
     $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="upload_potion_sampler" class="quick_craft_button basic_stat">Upload Potion Sampler</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="small_upload_potion" class="quick_craft_button basic_stat">Small Upload Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="upload_potion" class="quick_craft_button basic_stat">Upload Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="large_upload_potion" class="quick_craft_button basic_stat">Large Upload Potion</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: brown;" id="download_potion_sampler" class="quick_craft_button basic_stat">Download-Reduction Potion Sampler</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: brown;" id="small_download_potion" class="quick_craft_button basic_stat">Small Download-Reduction Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: brown;" id="download_potion" class="quick_craft_button basic_stat">Download-Reduction Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: brown;" id="large_download_potion" class="quick_craft_button basic_stat">Large Download-Reduction Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: brown;" id="garlic_tincture" class="quick_craft_button basic_stat">Garlic Tincture</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="impure_bronze_bar" class="quick_craft_button metal_bar">Impure Bronze Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="bronze_bar" class="quick_craft_button metal_bar">Bronze Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="iron_bar" class="quick_craft_button metal_bar">Iron Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="steel_bar" class="quick_craft_button metal_bar">Steel Bar from Iron Ore</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="steel_bar_from_iron_bar" class="quick_craft_button metal_bar">Steel Bar from Iron Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="gold_bar" class="quick_craft_button metal_bar">Gold Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="mithril_bar" class="quick_craft_button metal_bar">Mithril Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: purple;" id="adamantium_bar" class="quick_craft_button metal_bar">Adamantium Bar</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #9966cc;" id="quartz_bar" class="quick_craft_button metal_bar">Quartz Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #9966cc;" id="jade_bar" class="quick_craft_button metal_bar">Jade Bar</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #9966cc;" id="amethyst_bar" class="quick_craft_button metal_bar">Amethyst Bar</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: blue;" id="small_luck_potion" class="quick_craft_button luck">Small Luck Potion</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: blue;" id="large_luck_potion" class="quick_craft_button luck">Large Luck Potion</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="ruby_grained_baguette" class="quick_craft_button food">Ruby-Grained Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="emerald_grained_baguette" class="quick_craft_button food">Emerald-Grained Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="garlic_ruby_baguette" class="quick_craft_button food">Garlic Ruby-Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="garlic_emerald_baguette" class="quick_craft_button food">Garlic Emerald-Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="artisan_ruby_baguette" class="quick_craft_button food">Artisan Ruby-Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="artisan_emerald_baguette" class="quick_craft_button food">Artisan Emerald-Baguette</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: wheat;color: black;" id="gazellian_emerald_baguette" class="quick_craft_button food">Gazellian Emerald-Baguette</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="carbon_crystalline_quartz_gem" class="quick_craft_button jewelry">Carbon-Crystalline Quartz Gem</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="carbon_crystalline_quartz_necklace" class="quick_craft_button jewelry">Carbon-Crystalline Quartz Necklace</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_emeralds" class="quick_craft_button jewelry">Exquisite Constellation of Emeralds</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_rubies" class="quick_craft_button jewelry">Exquisite Constellation of Rubies</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: deeppink;" id="exquisite_constellation_sapphires" class="quick_craft_button jewelry">Exquisite Constellation of Sapphires</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: gray;" id="melt_dwarven_gem" class="quick_craft_button recast">Melt Dwarven gem</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="golden_throne" class="quick_craft_button staffcard">The Golden Throne</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="biggest_banhammer" class="quick_craft_button staffcard">Biggest Banhammer</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="staff_beauty_parlor" class="quick_craft_button staffcard">Staff Beauty Parlor</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="random_staff_card" class="quick_craft_button staffcard">Random Lvl2 Staff Card</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #15273F; color: white;" id="realm_of_staff" class="quick_craft_button staffcard">Realm of Staff</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="portal_gun" class="quick_craft_button portalcard">Portal Gun</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="ricks_portal_gun" class="quick_craft_button portalcard">Rick\'s Portal Gun</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="space_wormhole" class="quick_craft_button portalcard">Space Wormhole</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: #3A3F51; color: #0cf;" id="interdimensional_portal" class="quick_craft_button portalcard">Interdimensional Portal</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="super_mushroom" class="quick_craft_button mariocard">Super Mushroom</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="fire_flower" class="quick_craft_button mariocard">Fire Flower</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="penguin_suit" class="quick_craft_button mariocard">Penguin Suit</button>');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: honeydew; color: red;" id="goal_pole" class="quick_craft_button mariocard">Goal Pole</button>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<br />');
+    new Book_button("TEST", "red", "black");
+    new Book_button("Glass", "white", "black");
+    new Book_button("Basic_Stats", "green", "white");
+    new Book_button("Material_Bars", "purple", "white");
+    new Book_button("Luck", "blue", "white");
+    new Book_button("Food", "wheat", "black");
+    new Book_button("Jewelry", "deeppink", "white");
+    new Book_button("Recast", "gray", "white");
+    new Book_button("Staff_Cards", "#15273F", "white");
+    new Book_button("Portal_Cards", "#3A3F51", "0cf");
+    new Book_button("Mario_Cards", "honeydew", "red");
 
-    var hasFoodBook = $("#crafting_recipes h3:contains('Food Crafting Recipes')").length ? true : false;
-    var hasStatPotionBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
-    var hasMetalBarBook = $("#crafting_recipes h3:contains('Metal Bar Crafting Recipes')").length ? true : false;
-    var hasJewelryBook = $("#crafting_recipes h3:contains('Jewelry Crafting Recipes')").length ? true : false;
-    var hasGlassBook = $("#crafting_recipes h3:contains('Basic Stat Potion Crafting Recipes')").length ? true : false;
-    var hasLuckBook = $("#crafting_recipes h3:contains('Luck Potion Crafting Recipes')").length ? true : false;
-    var hasDebugBook = $("#crafting_recipes h3:contains('A fake book for testing')").length ? true : false;
-    var hasRecastBook = $("#crafting_recipes h3:contains('Recast Blacksmith Crafting Book')").length ? true : false;
-    var hasMarioBook = $("#crafting_recipes h3:contains('Mario Card Crafting')").length ? true : false;
-    var hasPortalBook = $("#crafting_recipes h3:contains('Portal Card Crafting')").length ? true : false;
-    var hasStaffBook = $("#crafting_recipes h3:contains('Staff Card Crafting')").length ? true : false;
 
-    $("#quick-crafter").append('<span>Recipes will appear if you have one or more of the following books:</span>');
-    $("#quick-crafter").append('<br />');
-    $("#quick-crafter").append('<span><b>Glass:</span> ' + hasGlassBook + ' | <b>Food:</b> ' + hasFoodBook
-                               + ' | <b>Basic Stat Potion:</b> ' + hasStatPotionBook + ' | <b>Metal Bar:</b> '
-                               + hasMetalBarBook + ' | <b>Jewelry:</b> ' + hasJewelryBook + ' | <b>Luck:</b> ' + hasLuckBook
-                               + ' | <b>Recast Blacksmith:</b> ' + hasRecastBook
-                               + ' | <b>Mario Card:</b> ' + hasMarioBook
-                               + ' | <b>Portal Card:</b> ' + hasMarioBook
-                               + ' | <b>Staff Card:</b> ' + hasMarioBook
-                               + '</p>');
+    $("#quick-crafter").append('<br /> <br /> <br />');
+    new TEST_Recipe_button("TEST", "TEST_small_upload_potion", ["vial", [4], "black elder leaves", [2,8], "black elderberries", [5]]);
+    new Recipe_button("Glass", "glass_shards_from_test_tube");
+    new Recipe_button("Glass", "glass_shards_from_sand");
+    new Recipe_button("Glass", "test_tube");
+    new Recipe_button("Glass", "vial");
+    new Recipe_button("Glass", "bowl");
+    new Recipe_button("Glass", "dust_ore_vial");
+    new Recipe_button("Glass", "dust_ore_bowl");
 
-     $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
-    if (hasFoodBook === false) {
-        $('.food').remove();
-    }
+    new Recipe_button("Basic_Stats", "upload_potion_sampler");
+    new Recipe_button("Basic_Stats", "small_upload_potion");
+    new Recipe_button("Basic_Stats", "upload_potion");
+    new Recipe_button("Basic_Stats", "large_upload_potion");
+    new Recipe_button("Basic_Stats", "download-reduction_potion_sampler");
+    new Recipe_button("Basic_Stats", "small_download-reduction_potion");
+    new Recipe_button("Basic_Stats", "download-reduction_potion");
+    new Recipe_button("Basic_Stats", "large_download-reduction_potion");
+    new Recipe_button("Basic_Stats", "garlic_tincture");
 
-    if (hasMarioBook === false) {
-        $('.mariocard').remove();
-    }
+    new Recipe_button("Material_Bars", "impure_bronze_bar");
+    new Recipe_button("Material_Bars", "bronze_bar");
+    new Recipe_button("Material_Bars", "iron_bar");
+    new Recipe_button("Material_Bars", "steel_bar");
+    new Recipe_button("Material_Bars", "steel_bar_from_iron_bar");
+    new Recipe_button("Material_Bars", "gold_bar");
+    new Recipe_button("Material_Bars", "mithril_bar");
+    new Recipe_button("Material_Bars", "adamantium_bar");
+    new Recipe_button("Material_Bars", "quartz_bar");
+    new Recipe_button("Material_Bars", "jade_bar");
+    new Recipe_button("Material_Bars", "amethyst_bar");
 
-    if (hasStaffBook === false) {
-        $('.staffcard').remove();
-    }
+    new Recipe_button("Luck", "small_luck_potion");
+    new Recipe_button("Luck", "large_luck_potion");
 
-    if (hasPortalBook === false) {
-        $('.portalcard').remove();
-    }
+    new Recipe_button("Food", "ruby-grained_baguette");
+    new Recipe_button("Food", "garlic_ruby-baguette");
+    new Recipe_button("Food", "artisan_ruby-baguette");
+    new Recipe_button("Food", "emerald-grained_baguette");
+    new Recipe_button("Food", "garlic_emerald-baguette");
+    new Recipe_button("Food", "artisan_emerald-baguette");
+    new Recipe_button("Food", "gazellian_emerald-baguette");
 
-    if (hasStaffBook === false) {
-        $('.staff').remove();
-    }
+    new Recipe_button("Jewelry", "carbon-crystalline_quartz_gem");
+    new Recipe_button("Jewelry", "carbon-crystalline_quartz_necklace");
+    new Recipe_button("Jewelry", "exquisite_constellation_of_emeralds");
+    new Recipe_button("Jewelry", "exquisite_constellation_of_sapphires");
+    new Recipe_button("Jewelry", "exquisite_constellation_of_rubies");
 
-    if (hasStatPotionBook === false) {
-        $('.basic_stat').remove();
-    }
+    new Recipe_button("Recast", "melt_dwarven_gem");
 
-    if (hasLuckBook === false) {
-        $('.luck').remove();
-    }
+    new Recipe_button("Staff_Cards", "the_golden_throne");
+    new Recipe_button("Staff_Cards", "biggest_banhammer");
+    new Recipe_button("Staff_Cards", "staff_beauty_parlor");
+    new Recipe_button("Staff_Cards", "random_lvl2_staff_card");
+    new Recipe_button("Staff_Cards", "realm_of_staff");
 
-    if (hasJewelryBook === false) {
-        $('.jewelry').remove();
-    }
+    new Recipe_button("Portal_Cards", "portal_gun");
+    new Recipe_button("Portal_Cards", "ricks_portal_gun");
+    new Recipe_button("Portal_Cards", "space_wormhole");
+    new Recipe_button("Portal_Cards", "interdimensional_portal");
 
-    if (hasMetalBarBook === false) {
-        $('.metal_bar').remove();
-    }
+    new Recipe_button("Mario_Cards", "super_mushroom");
+    new Recipe_button("Mario_Cards", "fire_flower");
+    new Recipe_button("Mario_Cards", "penguin_suit");
+    new Recipe_button("Mario_Cards", "goal_pole");
 
-    if (hasGlassBook === false) {
-        $('.glass').remove();
-    }
+    $("#quick-crafter").append('<br /><br /><br />');
+    $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
 
-    if (hasRecastBook === false) {
-        $('.recast').remove();
-    }
 
     build_on_hand();
     build_craft_list();
 
     $("#clear_button").click(function() {
-        next_button_lockout_delay = 300;
-        disable_quick_craft_buttons();
-
-        clear_crafting_area();
-
-        enable_quick_craft_buttons();
+        close_crafting_submenu();
     });
 
-    $("#melt_dwarven_gem").click(function() {
-        open_crafting_submenu("melt dwarven gem");
-    });
-
-    $("#shards_tube").click(function() {
-        open_crafting_submenu("glass shards from test tube");
-    });
-    $("#shards_sand").click(function() {
-        open_crafting_submenu("glass shards from sand");
-    });
-    $("#test_tube").click(function() {
-        open_crafting_submenu("test tube");
-    });
-    $("#vial").click(function() {
-        open_crafting_submenu("vial")
-    });
-    $("#bowl").click(function() {
-        open_crafting_submenu("bowl");
-    });
-    $("#dust_vial").click(function() {
-        open_crafting_submenu("dust ore glassware (vial)");
-    });
-    $("#dust_bowl").click(function() {
-        open_crafting_submenu("dust ore glassware (bowl)");
-    });
-
-    $("#upload_potion_sampler").click(function() {
-        open_crafting_submenu("upload potion sampler");
-    });
-    $("#small_upload_potion").click(function() {
-        open_crafting_submenu("small upload potion");
-    });
-    $("#upload_potion").click(function() {
-        open_crafting_submenu("upload potion");
-    });
-    $("#large_upload_potion").click(function() {
-        open_crafting_submenu("large upload potion");
-    });
-
-    $("#download_potion_sampler").click(function() {
-        open_crafting_submenu("download-reduction potion sampler");
-    });
-    $("#small_download_potion").click(function() {
-        open_crafting_submenu("small download-reduction potion");
-    });
-    $("#download_potion").click(function() {
-        open_crafting_submenu("download-reduction potion");
-    });
-    $("#large_download_potion").click(function() {
-        open_crafting_submenu("large download-reduction potion");
-    });
-
-    $("#garlic_tincture").click(function() {
-        open_crafting_submenu("garlic tincture");
-    });
-
-    $("#impure_bronze_bar").click(function() {
-        open_crafting_submenu("impure bronze bar");
-    });
-    $("#bronze_bar").click(function() {
-        open_crafting_submenu("bronze bar");
-    });
-    $("#iron_bar").click(function() {
-        open_crafting_submenu("iron bar");
-    });
-    $("#steel_bar").click(function() {
-        open_crafting_submenu("steel bar from iron ore");
-    });
-    $("#steel_bar_from_iron_bar").click(function() {
-        open_crafting_submenu("steel bar from iron bar");
-    });
-    $("#gold_bar").click(function() {
-        open_crafting_submenu("gold bar");
-    });
-    $("#mithril_bar").click(function() {
-        open_crafting_submenu("mithril bar");
-    });
-    $("#adamantium_bar").click(function() {
-        open_crafting_submenu("adamantium bar");
-    });
-    $("#quartz_bar").click(function() {
-        open_crafting_submenu("quartz bar");
-    });
-    $("#jade_bar").click(function() {
-        open_crafting_submenu("jade bar");
-    });
-    $("#amethyst_bar").click(function() {
-        open_crafting_submenu("amethyst bar");
-    });
-
-    $("#small_luck_potion").click(function() {
-        open_crafting_submenu("small luck potion");
-    });
-    $("#large_luck_potion").click(function() {
-        open_crafting_submenu("large luck potion");
-    });
-
-    $("#ruby_grained_baguette").click(function() {
-        open_crafting_submenu("ruby-grained baguette");
-    });
-    $("#emerald_grained_baguette").click(function() {
-        open_crafting_submenu("emerald-grained baguette");
-    });
-    $("#garlic_ruby_baguette").click(function() {
-        open_crafting_submenu("garlic ruby-baguette");
-    });
-    $("#garlic_emerald_baguette").click(function() {
-        open_crafting_submenu("garlic emerald-baguette");
-    });
-    $("#artisan_ruby_baguette").click(function() {
-        open_crafting_submenu("artisan ruby-baguette");
-    });
-    $("#artisan_emerald_baguette").click(function() {
-        open_crafting_submenu("artisan emerald-baguette");
-    });
-    $("#gazellian_emerald_baguette").click(function() {
-        open_crafting_submenu("gazellian emerald-baguette");
-    });
-
-    $("#carbon_crystalline_quartz_gem").click(function() {
-        open_crafting_submenu("carbon-crystalline quartz gem");
-    });
-    $("#carbon_crystalline_quartz_necklace").click(function() {
-        open_crafting_submenu("carbon-crystalline quartz necklace");
-    });
-    $("#exquisite_constellation_emeralds").click(function() {
-        open_crafting_submenu("exquisite constellations of emeralds");
-    });
-    $("#exquisite_constellation_sapphires").click(function() {
-        open_crafting_submenu("exquisite constellations of sapphires");
-    });
-    $("#exquisite_constellation_rubies").click(function() {
-        open_crafting_submenu("exquisite constellations of rubies");
-    });
-
-    /* Cards */
-    $("#golden_throne").click(function() {
-        open_crafting_submenu("The Golden Throne");
-    });
-    $("#biggest_banhammer").click(function() {
-        open_crafting_submenu("Biggest Banhammer");
-    });
-    $("#staff_beauty_parlor").click(function() {
-        open_crafting_submenu("Staff Beauty Parlor");
-    });
-    $("#random_staff_card").click(function() {
-        open_crafting_submenu("Random Staff Card");
-    });
-    $("#realm_of_staff").click(function() {
-        open_crafting_submenu("Realm of Staff");
-    });
-    $("#portal_gun").click(function() {
-        open_crafting_submenu("Portal Gun");
-    });
-    $("#ricks_portal_gun").click(function() {
-        open_crafting_submenu("Ricks Portal Gun");
-    });
-    $("#space_wormhole").click(function() {
-        open_crafting_submenu("Space Wormhole");
-    });
-    $("#interdimensional_portal").click(function() {
-        open_crafting_submenu("Interdimensional Portal");
-    });
-    $("#super_mushroom").click(function() {
-        open_crafting_submenu("Super Mushroom");
-    });
-    $("#fire_flower").click(function() {
-        open_crafting_submenu("Fire Flower");
-    });
-    $("#penguin_suit").click(function() {
-        open_crafting_submenu("Penguin Suit");
-    });
-    $("#goal_pole").click(function() {
-        open_crafting_submenu("Goal Pole");
-    });
 })();
