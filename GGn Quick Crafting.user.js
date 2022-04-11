@@ -393,7 +393,7 @@
   const oldBooks = GM_getValue('BOOKS_SAVE');
   if (oldBooks && typeof (oldBooks[0] !== 'object')) {
     for (var i = 0; i < oldBooks.length / 2; i++) {
-      books[i].disabled = oldBooks[2 * i] === 0;
+      books[Object.keys(books)[i]].disabled = oldBooks[2 * i] === 0;
     }
     GM_deleteValue('BOOKS_SAVE');
   }
