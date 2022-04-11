@@ -393,7 +393,7 @@
   const oldBooks = GM_getValue('BOOKS_SAVE');
   if (oldBooks && typeof (oldBooks[0] !== 'object')) {
     for (var i = 0; i < oldBooks.length / 2; i++) {
-      books[Object.keys(books)[i]].disabled = oldBooks[2 * i] === 0;
+      books[Object.keys(books)[i]].disabled = oldBooks[2 * i + 1] === 0;
     }
     GM_deleteValue('BOOKS_SAVE');
   }
@@ -1287,8 +1287,9 @@ a.disabled {
       if (ingredients_available[ingr] !== undefined) {
         var onhand = ingredients_available[ingr];
       } else {
-        onhand = $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
-            $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
+        onhand =
+          $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
+          $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
       }
       ingredients_available[ingr] = onhand;
       var avail = Math.floor(onhand / qty);
@@ -1348,9 +1349,7 @@ a.disabled {
         )
         .append($('<button>Craft</button>').click(doCraft))
         .append(
-          $(
-            '<button class="quick_craft_button">Craft maximum</button>',
-          ).click(function () {
+          $('<button class="quick_craft_button">Craft maximum</button>').click(function () {
             if (!$(this).hasClass('quick_craft_button_confirm')) {
               craftNumberSelect.val(currentCraft.available);
               $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
@@ -1454,16 +1453,12 @@ a.disabled {
         ).click(() => close_crafting_submenu()),
         $('<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">').append(
           '<span>Click on the buttons below to show or hide crafting categories - </span>',
-          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(
-            function () {
-              Object.values(books).forEach(({disabled, button}) => {
-                if (!disabled) button.click();
-              });
-            },
-          ),
-          $(
-            '<button style="background-color: green;" class="quick_craft_button">Show all</button>',
-          ).click(function () {
+          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(function () {
+            Object.values(books).forEach(({disabled, button}) => {
+              if (!disabled) button.click();
+            });
+          }),
+          $('<button style="background-color: green;" class="quick_craft_button">Show all</button>').click(function () {
             Object.values(books).forEach(({disabled, button}) => {
               if (disabled) button.click();
             });
@@ -1516,7 +1511,7 @@ a.disabled {
                 const disabled = (book.disabled = !book.disabled);
                 button.css('opacity', disabled ? 0.2 : 1);
                 $(book.section).css('display', disabled ? 'none' : '');
-                book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
+                if (book.hasOwnProperty('recipes')) book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
                 saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
               });
             if (disabled) {
