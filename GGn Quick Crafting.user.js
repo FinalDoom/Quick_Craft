@@ -1,1820 +1,1581 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.2.2.k3
+// @version      2.3
 // @description  Craft multiple items easier
-// @author       KingKrab23 with help from the community
+// @author       KingKrab23
+// @author       KSS
+// @author       FinalDoom
+// @author       GGN community
 // @match        https://gazellegames.net/user.php?action=crafting
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
 // ==/UserScript==
 
-const VERSION = '2.2.2.k3';
+(async function (window, $, VERSION) {
+  'use strict';
 
-/* >>>BEGIN<<< User adjustable variables
- * ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
- * Too little of a delay will cause more bugs */
+  //
+  // #region >>>BEGIN<<< User adjustable variables
+  //
+  // ONLY ADJUST THESE IF YOU KNOW WHAT YOU'RE DOING
+  // Too little of a delay will cause more bugs
+  //
 
-const BUTTON_LOCKOUT_DELAY = 1000;
-const CRAFT_TIME = 1000;
-const GRAB_TIME = 1;
-const NEXT_CRAFT_TIME = 1;
+  const CRAFT_TIME = 1000;
 
-// Set which recipe categories are shown by default (1 = shown, 0 = hidden)
-// 0 only works for Glass and Recast at the moment, still have to rewrite the other buttons
+  //
+  // #endregion >>>END<<< user adjustable variables
+  //
 
-var DEFAULT = {};
-DEFAULT.TEST = 1
-DEFAULT.Glass = 0
-DEFAULT.Basic_Stats = 1
-DEFAULT.Material_Bars = 1
-DEFAULT.Luck = 1
-DEFAULT.Food = 1
-DEFAULT.Jewelry = 0
-DEFAULT.Recast = 0
-DEFAULT.Staff_Cards = 0
-DEFAULT.Portal_Cards = 0
-DEFAULT.Mario_Cards = 0
+  //
+  // #region >>>BEGIN<<< Rarely updated data
+  //
+  // Recipes, books, items, etc. that will need to be updated
+  // when new recipes are added, but not otherwise
+  //
 
-/* >>>END<<< user adjustable variables */
-
-var blankSlot = "EEEEE";
-var slots = [];
-slots[0] = blankSlot;
-slots[1] = blankSlot;
-slots[2] = blankSlot;
-slots[3] = blankSlot;
-slots[4] = blankSlot;
-slots[5] = blankSlot;
-slots[6] = blankSlot;
-slots[7] = blankSlot;
-slots[8] = blankSlot;
-
-function getUrlVars(url) {
-    var vars = {};
-    var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-
-function getSlots() {
-    var combinedSlots = "";
-
-    var i = 0;
-    for (i = 0; i < slots.length; i++)
-        combinedSlots += slots[i];
-
-    return combinedSlots;
-}
-
-var authKey = getUrlVars(document.getElementsByTagName('link')[4].href).authkey;
-var urlBase = "https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=CUSTOMRECIPE&auth=" + authKey;
-
-/* Used for dynamic button lockouts (i.e.: multicraft) */
-var next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
-
-var style = document.createElement('style');
-style.type = 'text/css';
-style.innerHTML = '.disabled { background-color: #333 !important; color: #666 !important; }';
-document.getElementsByTagName('head')[0].appendChild(style);
-
-function getElement(itemId) {
-    return "#items-wrapper .item[data-item='" + itemId + "']";
-}
-
-function titleCase(str) {
-  return str.toLowerCase().split(' ').map(function(word) {
-    return word.replace(word[0], word[0].toUpperCase());
-  }).join(' ');
-}
-
-var ingredients = {};
-ingredients["glass shards"] = "01988";
-ingredients["test tube"] = "00125";
-ingredients["vial"] = "00124";
-ingredients["bowl"] = "00126";
-ingredients["pile of sand"] = "01987";
-ingredients["black elder leaves"] = "00115";
-ingredients["black elderberries"] = "00114";
-ingredients["yellow hellebore flower"] = "00113";
-ingredients["upload potion"] = "00099";
-ingredients["purple angelica flowers"] = "00111";
-ingredients["garlic tincture"] = "00127";
-ingredients["download-reduction potion"] = "00106";
-ingredients["head of garlic"] = "00112";
-ingredients["bronze alloy mix"] = "02225";
-ingredients["clay"] = "02234";
-ingredients["iron ore"] = "02226";
-ingredients["lump of coal"] = "02233";
-ingredients["iron bar"] = "02237";
-ingredients["gold ore"] = "02227";
-ingredients["adamantium ore"] = "02229";
-ingredients["mithril ore"] = "02228";
-ingredients["quartz dust"] = "02230";
-ingredients["jade dust"] = "02231";
-ingredients["amethyst dust"] = "02232";
-ingredients["ruby-flecked wheat"] = "02579";
-ingredients["emerald-flecked wheat"] = "02717";
-ingredients["ruby-grained baguette"] = "02580";
-ingredients["emerald-grained baguette"] = "02718";
-ingredients["garlic ruby-baguette"] = "02581";
-ingredients["garlic emerald-baguette"] = "02719";
-ingredients["artisan emerald-baguette"] = "02720";
-ingredients["emerald chip"] = "02551";
-ingredients["quartz bar"] = "02242";
-ingredients["carbon-crystalline quartz"] = "02537";
-ingredients["ruby"] = "02323";
-ingredients["sapphire"] = "02549";
-ingredients["emerald"] = "00116";
-ingredients["amethyst bar"] = "02244";
-ingredients["dwarven gem"] = "02508";
-ingredients["flux"] = "02653";
-
-// Cards
-ingredients["Bowser"] = "02395";
-ingredients["Goomba"] = "02396";
-ingredients["Koopa Troopa"] = "02397";
-ingredients["Luigi"] = "02391";
-ingredients["Mario"] = "02390";
-ingredients["Princess Peach"] = "02392";
-ingredients["Toad"] = "02393";
-ingredients["Wario"] = "02398";
-ingredients["Yoshi"] = "02394";
-ingredients["Fire Flower"] = "02402";
-ingredients["Penguin Suit"] = "02403";
-ingredients["Super Mushroom"] = "02401";
-ingredients["Goal Pole"] = "02404";
-ingredients["A Scared Morty"] = "02377";
-ingredients["Cake"] = "02373";
-ingredients["Chimera Schematic"] = "02382";
-ingredients["Companion Cube"] = "02375";
-ingredients["Covetor Mining Ship"] = "02383";
-ingredients["GLaDOS"] = "02374";
-ingredients["Mr Poopy Butthole"] = "02379";
-ingredients["Nyx class Supercarrier"] = "02381";
-ingredients["Rick Sanchez"] = "02378";
-ingredients["Portal Gun"] = "02376";
-ingredients["Ricks Portal Gun"] = "02380";
-ingredients["Space Wormhole"] = "02384";
-ingredients["Interdimensional Portal"] = "02385";
-ingredients["A Red Hot Flamed"] = "02359";
-ingredients["A Wild Artifaxx"] = "02358";
-ingredients["Alpaca Out of Nowhere!"] = "02361";
-ingredients["lepik le prick"] = "02368";
-ingredients["LinkinsRepeater Bone Hard Card"] = "02400";
-ingredients["MuffledSilence's Headphones"] = "02388";
-ingredients["Neos Ratio Cheats"] = "02366";
-ingredients["Nikos Transformation"] = "02367";
-ingredients["Stump's Banhammer"] = "02365";
-ingredients["The Golden Daedy"] = "02357";
-ingredients["thewhales Kiss"] = "02364";
-ingredients["Ze do Caixao Coffin Joe Card"] = "02410";
-ingredients["Random Staff Card"] = "02438";
-ingredients["The Golden Throne"] = "02369";
-ingredients["Staff Beauty Parlor"] = "02371";
-ingredients["Biggest Banhammer"] = "02370";
-ingredients["Realm of Staff"] = "02372";
-
-var onHand = {}; // .item_count").text()
-function build_on_hand() {
-    onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "] .item_count").text();
-    if (onHand["glass shards"] === "") { onHand["glass shards"] = $("#items-wrapper .item[data-item=" + ingredients["glass shards"] + "]").length; }
-
-    onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "] .item_count").text();
-    if (onHand["test tube"] === "") { onHand["test tube"] = $("#items-wrapper .item[data-item=" + ingredients["test tube"] + "]").length; }
-
-    onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "] .item_count").text();
-    if (onHand["vial"] === "") { onHand["vial"] = $("#items-wrapper .item[data-item=" + ingredients["vial"] + "]").length; }
-
-    onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "] .item_count").text();
-    if (onHand["bowl"] === "") { onHand["bowl"] = $("#items-wrapper .item[data-item=" + ingredients["bowl"] + "]").length; }
-
-    onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "] .item_count").text();
-    if (onHand["pile of sand"] === "") { onHand["pile of sand"] = $("#items-wrapper .item[data-item=" + ingredients["pile of sand"] + "]").length; }
-
-    onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "] .item_count").text();
-    if (onHand["black elder leaves"] === "") { onHand["black elder leaves"] = $("#items-wrapper .item[data-item=" + ingredients["black elder leaves"] + "]").length; }
-
-    onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "] .item_count").text();
-    if (onHand["black elderberries"] === "") { onHand["black elderberries"] = $("#items-wrapper .item[data-item=" + ingredients["black elderberries"] + "]").length; }
-
-    onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "] .item_count").text();
-    if (onHand["yellow hellebore flower"] === "") { onHand["yellow hellebore flower"] = $("#items-wrapper .item[data-item=" + ingredients["yellow hellebore flower"] + "]").length; }
-
-    onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "] .item_count").text();
-    if (onHand["upload potion"] === "") { onHand["upload potion"] = $("#items-wrapper .item[data-item=" + ingredients["upload potion"] + "]").length; }
-
-    onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "] .item_count").text();
-    if (onHand["purple angelica flowers"] === "") { onHand["purple angelica flowers"] = $("#items-wrapper .item[data-item=" + ingredients["purple angelica flowers"] + "]").length; }
-
-    onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "] .item_count").text();
-    if (onHand["garlic tincture"] === "") { onHand["garlic tincture"] = $("#items-wrapper .item[data-item=" + ingredients["garlic tincture"] + "]").length; }
-
-    onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "] .item_count").text();
-    if (onHand["download-reduction potion"] === "") { onHand["download-reduction potion"] = $("#items-wrapper .item[data-item=" + ingredients["download-reduction potion"] + "]").length; }
-
-    onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "] .item_count").text();
-    if (onHand["head of garlic"] === "") { onHand["head of garlic"] = $("#items-wrapper .item[data-item=" + ingredients["head of garlic"] + "]").length; }
-
-    onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "] .item_count").text();
-    if (onHand["bronze alloy mix"] === "") { onHand["bronze alloy mix"] = $("#items-wrapper .item[data-item=" + ingredients["bronze alloy mix"] + "]").length; }
-
-    onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "] .item_count").text();
-    if (onHand["clay"] === "") { onHand["clay"] = $("#items-wrapper .item[data-item=" + ingredients["clay"] + "]").length; }
-
-    onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "] .item_count").text();
-    if (onHand["iron ore"] === "") { onHand["iron ore"] = $("#items-wrapper .item[data-item=" + ingredients["iron ore"] + "]").length; }
-
-    onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "] .item_count").text();
-    if (onHand["lump of coal"] === "") { onHand["lump of coal"] = $("#items-wrapper .item[data-item=" + ingredients["lump of coal"] + "]").length; }
-
-    onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "] .item_count").text();
-    if (onHand["iron bar"] === "") { onHand["iron bar"] = $("#items-wrapper .item[data-item=" + ingredients["iron bar"] + "]").length; }
-
-    onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "] .item_count").text();
-    if (onHand["gold ore"] === "") { onHand["gold ore"] = $("#items-wrapper .item[data-item=" + ingredients["gold ore"] + "]").length; }
-
-    onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "] .item_count").text();
-    if (onHand["adamantium ore"] === "") { onHand["adamantium ore"] = $("#items-wrapper .item[data-item=" + ingredients["adamantium ore"] + "]").length; }
-
-    onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "] .item_count").text();
-    if (onHand["mithril ore"] === "") { onHand["mithril ore"] = $("#items-wrapper .item[data-item=" + ingredients["mithril ore"] + "]").length; }
-
-    onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "] .item_count").text();
-    if (onHand["quartz dust"] === "") { onHand["quartz dust"] = $("#items-wrapper .item[data-item=" + ingredients["quartz dust"] + "]").length; }
-
-    onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "] .item_count").text();
-    if (onHand["jade dust"] === "") { onHand["jade dust"] = $("#items-wrapper .item[data-item=" + ingredients["jade dust"] + "]").length; }
-
-    onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "] .item_count").text();
-    if (onHand["amethyst dust"] === "") { onHand["amethyst dust"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst dust"] + "]").length; }
-
-    onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "] .item_count").text();
-    if (onHand["ruby-flecked wheat"] === "") { onHand["ruby-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-flecked wheat"] + "]").length; }
-
-    onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "] .item_count").text();
-    if (onHand["emerald-flecked wheat"] === "") { onHand["emerald-flecked wheat"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-flecked wheat"] + "]").length; }
-
-    onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "] .item_count").text();
-    if (onHand["ruby-grained baguette"] === "") { onHand["ruby-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["ruby-grained baguette"] + "]").length; }
-
-    onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "] .item_count").text();
-    if (onHand["emerald-grained baguette"] === "") { onHand["emerald-grained baguette"] = $("#items-wrapper .item[data-item=" + ingredients["emerald-grained baguette"] + "]").length; }
-
-    onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "] .item_count").text();
-    if (onHand["garlic ruby-baguette"] === "") { onHand["garlic ruby-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic ruby-baguette"] + "]").length; }
-
-    onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "] .item_count").text();
-    if (onHand["garlic emerald-baguette"] === "") { onHand["garlic emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["garlic emerald-baguette"] + "]").length; }
-
-    onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "] .item_count").text();
-    if (onHand["artisan emerald-baguette"] === "") { onHand["artisan emerald-baguette"] = $("#items-wrapper .item[data-item=" + ingredients["artisan emerald-baguette"] + "]").length; }
-
-    onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "] .item_count").text();
-    if (onHand["emerald chip"] === "") { onHand["emerald chip"] = $("#items-wrapper .item[data-item=" + ingredients["emerald chip"] + "]").length; }
-
-    onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "] .item_count").text();
-    if (onHand["quartz bar"] === "") { onHand["quartz bar"] = $("#items-wrapper .item[data-item=" + ingredients["quartz bar"] + "]").length; }
-
-    onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "] .item_count").text();
-    if (onHand["carbon-crystalline quartz"] === "") { onHand["carbon-crystalline quartz"] = $("#items-wrapper .item[data-item=" + ingredients["carbon-crystalline quartz"] + "]").length; }
-
-    onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "] .item_count").text();
-    if (onHand["ruby"] === "") { onHand["ruby"] = $("#items-wrapper .item[data-item=" + ingredients["ruby"] + "]").length; }
-
-    onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "] .item_count").text();
-    if (onHand["sapphire"] === "") { onHand["sapphire"] = $("#items-wrapper .item[data-item=" + ingredients["sapphire"] + "]").length; }
-
-    onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "] .item_count").text();
-    if (onHand["emerald"] === "") { onHand["emerald"] = $("#items-wrapper .item[data-item=" + ingredients["emerald"] + "]").length; }
-
-    onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "] .item_count").text();
-    if (onHand["amethyst bar"] === "") { onHand["amethyst bar"] = $("#items-wrapper .item[data-item=" + ingredients["amethyst bar"] + "]").length; }
-
-    onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "] .item_count").text();
-    if (onHand["flux"] === "") { onHand["flux"] = $("#items-wrapper .item[data-item=" + ingredients["flux"] + "]").length; }
-
-    onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "] .item_count").text();
-    if (onHand["dwarven gem"] === "") { onHand["dwarven gem"] = $("#items-wrapper .item[data-item=" + ingredients["dwarven gem"] + "]").length; }
+  //
+  // #region Ingredients
+  //
+  // Maps ingredient names to site IDs, for use in crafting URLs
+  //
+  const ingredients = {
+    'glass shards': '01988',
+    'test tube': '00125',
+    vial: '00124',
+    bowl: '00126',
+    'pile of sand': '01987',
+    'black elder leaves': '00115',
+    'black elderberries': '00114',
+    'yellow hellebore flower': '00113',
+    'upload potion': '00099',
+    'purple angelica flowers': '00111',
+    'garlic tincture': '00127',
+    'download-reduction potion': '00106',
+    'head of garlic': '00112',
+    'bronze alloy mix': '02225',
+    'bronze bar': '02235',
+    'impure bronze bar': '02236',
+    'iron bar': '02237',
+    'steel bar': '02238',
+    'gold bar': '02239',
+    'mithril bar': '02240',
+    'adamantium bar': '02241',
+    'quartz bar': '02242',
+    'jade bar': '02243',
+    'amethyst bar': '02244',
+    clay: '02234',
+    'iron ore': '02226',
+    'lump of coal': '02233',
+    'gold ore': '02227',
+    'adamantium ore': '02229',
+    'mithril ore': '02228',
+    'quartz dust': '02230',
+    'jade dust': '02231',
+    'amethyst dust': '02232',
+    'ruby-flecked wheat': '02579',
+    'emerald-flecked wheat': '02717',
+    'ruby-grained baguette': '02580',
+    'emerald-grained baguette': '02718',
+    'garlic ruby-baguette': '02581',
+    'garlic emerald-baguette': '02719',
+    'artisan emerald-baguette': '02720',
+    'emerald chip': '02551',
+    'ruby chip': '02550',
+    'sapphire chip': '02552',
+    'carbon-crystalline quartz': '02537',
+    'exquisite constellation of emeralds': '02565',
+    'exquisite constellation of sapphires': '02564',
+    'exquisite constellation of rubies': '02563',
+    ruby: '02323',
+    sapphire: '02549',
+    emerald: '00116',
+    'dwarven gem': '02508',
+    flux: '02653',
+    tongs: '02627',
 
     // Cards
-    onHand["Bowser"] = $("#items-wrapper .item[data-item=" + ingredients["Bowser"] + "] .item_count").text();
-    if (onHand["Bowser"] === "") { onHand["Bowser"] = $("#items-wrapper .item[data-item=" + ingredients["Bowser"] + "]").length}
-
-    onHand["Goomba"] = $("#items-wrapper .item[data-item=" + ingredients["Goomba"] + "] .item_count").text();
-    if (onHand["Goomba"] === "") { onHand["Goomba"] = $("#items-wrapper .item[data-item=" + ingredients["Goomba"] + "]").length}
-
-    onHand["Koopa Troopa"] = $("#items-wrapper .item[data-item=" + ingredients["Koopa Troopa"] + "] .item_count").text();
-    if (onHand["Koopa Troopa"] === "") { onHand["Koopa Troopa"] = $("#items-wrapper .item[data-item=" + ingredients["Koopa Troopa"] + "]").length}
-
-    onHand["Luigi"] = $("#items-wrapper .item[data-item=" + ingredients["Luigi"] + "] .item_count").text();
-    if (onHand["Luigi"] === "") { onHand["Luigi"] = $("#items-wrapper .item[data-item=" + ingredients["Luigi"] + "]").length}
-
-    onHand["Mario"] = $("#items-wrapper .item[data-item=" + ingredients["Mario"] + "] .item_count").text();
-    if (onHand["Mario"] === "") { onHand["Mario"] = $("#items-wrapper .item[data-item=" + ingredients["Mario"] + "]").length}
-
-    onHand["Princess Peach"] = $("#items-wrapper .item[data-item=" + ingredients["Princess Peach"] + "] .item_count").text();
-    if (onHand["Princess Peach"] === "") { onHand["Princess Peach"] = $("#items-wrapper .item[data-item=" + ingredients["Princess Peach"] + "]").length}
-
-    onHand["Toad"] = $("#items-wrapper .item[data-item=" + ingredients["Toad"] + "] .item_count").text();
-    if (onHand["Toad"] === "") { onHand["Toad"] = $("#items-wrapper .item[data-item=" + ingredients["Toad"] + "]").length}
-
-    onHand["Wario"] = $("#items-wrapper .item[data-item=" + ingredients["Wario"] + "] .item_count").text();
-    if (onHand["Wario"] === "") { onHand["Wario"] = $("#items-wrapper .item[data-item=" + ingredients["Wario"] + "]").length}
-
-    onHand["Yoshi"] = $("#items-wrapper .item[data-item=" + ingredients["Yoshi"] + "] .item_count").text();
-    if (onHand["Yoshi"] === "") { onHand["Yoshi"] = $("#items-wrapper .item[data-item=" + ingredients["Yoshi"] + "]").length}
-
-    onHand["Fire Flower"] = $("#items-wrapper .item[data-item=" + ingredients["Fire Flower"] + "] .item_count").text();
-    if (onHand["Fire Flower"] === "") { onHand["Fire Flower"] = $("#items-wrapper .item[data-item=" + ingredients["Fire Flower"] + "]").length}
-
-    onHand["Penguin Suit"] = $("#items-wrapper .item[data-item=" + ingredients["Penguin Suit"] + "] .item_count").text();
-    if (onHand["Penguin Suit"] === "") { onHand["Penguin Suit"] = $("#items-wrapper .item[data-item=" + ingredients["Penguin Suit"] + "]").length}
-
-    onHand["Super Mushroom"] = $("#items-wrapper .item[data-item=" + ingredients["Super Mushroom"] + "] .item_count").text();
-    if (onHand["Super Mushroom"] === "") { onHand["Super Mushroom"] = $("#items-wrapper .item[data-item=" + ingredients["Super Mushroom"] + "]").length}
-
-    onHand["Goal Pole"] = $("#items-wrapper .item[data-item=" + ingredients["Goal Pole"] + "] .item_count").text();
-    if (onHand["Goal Pole"] === "") { onHand["Goal Pole"] = $("#items-wrapper .item[data-item=" + ingredients["Goal Pole"] + "]").length}
-
-    onHand["A Scared Morty"] = $("#items-wrapper .item[data-item=" + ingredients["A Scared Morty"] + "] .item_count").text();
-    if (onHand["A Scared Morty"] === "") { onHand["A Scared Morty"] = $("#items-wrapper .item[data-item=" + ingredients["A Scared Morty"] + "]").length}
-
-    onHand["Cake"] = $("#items-wrapper .item[data-item=" + ingredients["Cake"] + "] .item_count").text();
-    if (onHand["Cake"] === "") { onHand["Cake"] = $("#items-wrapper .item[data-item=" + ingredients["Cake"] + "]").length}
-
-    onHand["Chimera Schematic"] = $("#items-wrapper .item[data-item=" + ingredients["Chimera Schematic"] + "] .item_count").text();
-    if (onHand["Chimera Schematic"] === "") { onHand["Chimera Schematic"] = $("#items-wrapper .item[data-item=" + ingredients["Chimera Schematic"] + "]").length}
-
-    onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "] .item_count").text();
-    if (onHand["Companion Cube"] === "") { onHand["Companion Cube"] = $("#items-wrapper .item[data-item=" + ingredients["Companion Cube"] + "]").length}
-
-    onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Covetor Mining Ship"] + "] .item_count").text();
-    if (onHand["Covetor Mining Ship"] === "") { onHand["Covetor Mining Ship"] = $("#items-wrapper .item[data-item=" + ingredients["Covetor Mining Ship"] + "]").length}
-
-    onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "] .item_count").text();
-    if (onHand["GLaDOS"] === "") { onHand["GLaDOS"] = $("#items-wrapper .item[data-item=" + ingredients["GLaDOS"] + "]").length}
-
-    onHand["Mr Poopy Butthole"] = $("#items-wrapper .item[data-item=" + ingredients["Mr Poopy Butthole"] + "] .item_count").text();
-    if (onHand["Mr Poopy Butthole"] === "") { onHand["Mr Poopy Butthole"] = $("#items-wrapper .item[data-item=" + ingredients["Mr Poopy Butthole"] + "]").length}
-
-    onHand["Nyx class Supercarrier"] = $("#items-wrapper .item[data-item=" + ingredients["Nyx class Supercarrier"] + "] .item_count").text();
-    if (onHand["Nyx class Supercarrier"] === "") { onHand["Nyx class Supercarrier"] = $("#items-wrapper .item[data-item=" + ingredients["Nyx class Supercarrier"] + "]").length}
-
-    onHand["Rick Sanchez"] = $("#items-wrapper .item[data-item=" + ingredients["Rick Sanchez"] + "] .item_count").text();
-    if (onHand["Rick Sanchez"] === "") { onHand["Rick Sanchez"] = $("#items-wrapper .item[data-item=" + ingredients["Rick Sanchez"] + "]").length}
-
-    onHand["Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Portal Gun"] + "] .item_count").text();
-    if (onHand["Portal Gun"] === "") { onHand["Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Portal Gun"] + "]").length}
-
-    onHand["Ricks Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Ricks Portal Gun"] + "] .item_count").text();
-    if (onHand["Ricks Portal Gun"] === "") { onHand["Ricks Portal Gun"] = $("#items-wrapper .item[data-item=" + ingredients["Ricks Portal Gun"] + "]").length}
-
-    onHand["Space Wormhole"] = $("#items-wrapper .item[data-item=" + ingredients["Space Wormhole"] + "] .item_count").text();
-    if (onHand["Space Wormhole"] === "") { onHand["Space Wormhole"] = $("#items-wrapper .item[data-item=" + ingredients["Space Wormhole"] + "]").length}
-
-    onHand["Interdimensional Portal"] = $("#items-wrapper .item[data-item=" + ingredients["Interdimensional Portal"] + "] .item_count").text();
-    if (onHand["Interdimensional Portal"] === "") { onHand["Interdimensional Portal"] = $("#items-wrapper .item[data-item=" + ingredients["Interdimensional Portal"] + "]").length}
-
-    onHand["A Red Hot Flamed"] = $("#items-wrapper .item[data-item=" + ingredients["A Red Hot Flamed"] + "] .item_count").text();
-    if (onHand["A Red Hot Flamed"] === "") { onHand["A Red Hot Flamed"] = $("#items-wrapper .item[data-item=" + ingredients["A Red Hot Flamed"] + "]").length}
-
-    onHand["A Wild Artifaxx"] = $("#items-wrapper .item[data-item=" + ingredients["A Wild Artifaxx"] + "] .item_count").text();
-    if (onHand["A Wild Artifaxx"] === "") { onHand["A Wild Artifaxx"] = $("#items-wrapper .item[data-item=" + ingredients["A Wild Artifaxx"] + "]").length}
-
-    onHand["Alpaca Out of Nowhere!"] = $("#items-wrapper .item[data-item=" + ingredients["Alpaca Out of Nowhere!"] + "] .item_count").text();
-    if (onHand["Alpaca Out of Nowhere!"] === "") { onHand["Alpaca Out of Nowhere!"] = $("#items-wrapper .item[data-item=" + ingredients["Alpaca Out of Nowhere!"] + "]").length}
-
-    onHand["lepik le prick"] = $("#items-wrapper .item[data-item=" + ingredients["lepik le prick"] + "] .item_count").text();
-    if (onHand["lepik le prick"] === "") { onHand["lepik le prick"] = $("#items-wrapper .item[data-item=" + ingredients["lepik le prick"] + "]").length}
-
-    onHand["LinkinsRepeater Bone Hard Card"] = $("#items-wrapper .item[data-item=" + ingredients["LinkinsRepeater Bone Hard Card"] + "] .item_count").text();
-    if (onHand["LinkinsRepeater Bone Hard Card"] === "") { onHand["LinkinsRepeater Bone Hard Card"] = $("#items-wrapper .item[data-item=" + ingredients["LinkinsRepeater Bone Hard Card"] + "]").length}
-
-    onHand["MuffledSilence's Headphones"] = $("#items-wrapper .item[data-item=" + ingredients["MuffledSilence's Headphones"] + "] .item_count").text();
-    if (onHand["MuffledSilence's Headphones"] === "") { onHand["MuffledSilence's Headphones"] = $("#items-wrapper .item[data-item=" + ingredients["MuffledSilence's Headphones"] + "]").length}
-
-    onHand["Neos Ratio Cheats"] = $("#items-wrapper .item[data-item=" + ingredients["Neos Ratio Cheats"] + "] .item_count").text();
-    if (onHand["Neos Ratio Cheats"] === "") { onHand["Neos Ratio Cheats"] = $("#items-wrapper .item[data-item=" + ingredients["Neos Ratio Cheats"] + "]").length}
-
-    onHand["Nikos Transformation"] = $("#items-wrapper .item[data-item=" + ingredients["Nikos Transformation"] + "] .item_count").text();
-    if (onHand["Nikos Transformation"] === "") { onHand["Nikos Transformation"] = $("#items-wrapper .item[data-item=" + ingredients["Nikos Transformation"] + "]").length}
-
-    onHand["Stump's Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Stump's Banhammer"] + "] .item_count").text();
-    if (onHand["Stump's Banhammer"] === "") { onHand["Stump's Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Stump's Banhammer"] + "]").length}
-
-    onHand["The Golden Daedy"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Daedy"] + "] .item_count").text();
-    if (onHand["The Golden Daedy"] === "") { onHand["The Golden Daedy"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Daedy"] + "]").length}
-
-    onHand["thewhales Kiss"] = $("#items-wrapper .item[data-item=" + ingredients["thewhales Kiss"] + "] .item_count").text();
-    if (onHand["thewhales Kiss"] === "") { onHand["thewhales Kiss"] = $("#items-wrapper .item[data-item=" + ingredients["thewhales Kiss"] + "]").length}
-
-    onHand["Ze do Caixao Coffin Joe Card"] = $("#items-wrapper .item[data-item=" + ingredients["Ze do Caixao Coffin Joe Card"] + "] .item_count").text();
-    if (onHand["Ze do Caixao Coffin Joe Card"] === "") { onHand["Ze do Caixao Coffin Joe Card"] = $("#items-wrapper .item[data-item=" + ingredients["Ze do Caixao Coffin Joe Card"] + "]").length}
-
-    onHand["Random Staff Card"] = $("#items-wrapper .item[data-item=" + ingredients["Random Staff Card"] + "] .item_count").text();
-    if (onHand["Random Staff Card"] === "") { onHand["Random Staff Card"] = $("#items-wrapper .item[data-item=" + ingredients["Random Staff Card"] + "]").length}
-
-    onHand["The Golden Throne"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Throne"] + "] .item_count").text();
-    if (onHand["The Golden Throne"] === "") { onHand["The Golden Throne"] = $("#items-wrapper .item[data-item=" + ingredients["The Golden Throne"] + "]").length}
-
-    onHand["Staff Beauty Parlor"] = $("#items-wrapper .item[data-item=" + ingredients["Staff Beauty Parlor"] + "] .item_count").text();
-    if (onHand["Staff Beauty Parlor"] === "") { onHand["Staff Beauty Parlor"] = $("#items-wrapper .item[data-item=" + ingredients["Staff Beauty Parlor"] + "]").length}
-
-    onHand["Biggest Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Biggest Banhammer"] + "] .item_count").text();
-    if (onHand["Biggest Banhammer"] === "") { onHand["Biggest Banhammer"] = $("#items-wrapper .item[data-item=" + ingredients["Biggest Banhammer"] + "]").length}
-
-    onHand["Realm of Staff"] = $("#items-wrapper .item[data-item=" + ingredients["Realm of Staff"] + "] .item_count").text();
-    if (onHand["Realm of Staff"] === "") { onHand["Realm of Staff"] = $("#items-wrapper .item[data-item=" + ingredients["Realm of Staff"] + "]").length}
-}
-
-var craftList = {};
-
-function build_craft_list() {
-    craftList = {};
-
-    craftList["glass shards from test tube"] = {};
-    craftList["glass shards from test tube"].ingredients = [ { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] } ];
-    craftList["glass shards from test tube"].icon = "http://test.test";
-    craftList["glass shards from test tube"].available = onHand["test tube"];
-
-    craftList["glass shards from sand"] = {};
-    craftList["glass shards from sand"].ingredients = [ { name: "pile of sand", id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] } ];
-    craftList["glass shards from sand"].icon = "http://test.test";
-    craftList["glass shards from sand"].available = onHand["pile of sand"];
-
-    craftList["test tube"] = {};
-    craftList["test tube"].ingredients = [ { name: "glass shards", id: ingredients["glass shards"], qty: 2, "on hand": onHand["glass shards"] } ];
-    craftList["test tube"].icon = "http://test.test";
-    craftList["test tube"].available = Math.floor(onHand["glass shards"] / 2);
-
-    craftList["vial"] = {};
-    craftList["vial"].ingredients = [ { name: "glass shards", id: ingredients["glass shards"], qty: 5, "on hand": onHand["glass shards"] } ];
-    craftList["vial"].icon = "http://test.test";
-    craftList["vial"].available = Math.floor(onHand["glass shards"] / 5);
-
-    craftList["bowl"] = {};
-    craftList["bowl"].ingredients = [ { name: "glass shards", id: ingredients["glass shards"], qty: 8, "on hand": onHand["glass shards"] } ];
-    craftList["bowl"].icon = "http://test.test";
-    craftList["bowl"].available = Math.floor(onHand["glass shards"] / 8);
-
-    craftList["dust ore vial"] = {};
-    craftList["dust ore vial"].ingredients = [
-        { name: "pile of sand", id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
-        { name: "quartz dust", id: ingredients["quartz dust"], qty: 1, "on hand": onHand["quartz dust"] }
-    ];
-    craftList["dust ore vial"].icon = "http://test.test";
-    craftList["dust ore vial"].available = Math.min(onHand["pile of sand"]
-                                                                , onHand["quartz dust"]);
-
-    craftList["dust ore bowl"] = {};
-    craftList["dust ore bowl"].ingredients = [
-        { name: "pile of sand", id: ingredients["pile of sand"], qty: 1, "on hand": onHand["pile of sand"] },
-        { name: "jade dust", id: ingredients["jade dust"], qty: 1, "on hand": onHand["jade dust"] }
-    ];
-    craftList["dust ore bowl"].icon = "http://test.test";
-    craftList["dust ore bowl"].available = Math.min(onHand["pile of sand"]
-                                                                , onHand["jade dust"]);
-
-    craftList["upload potion sampler"] = {};
-    craftList["upload potion sampler"].ingredients = [
-        { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
-        { name: "black elder leaves", id: ingredients["black elder leaves"], qty: 1, "on hand": onHand["black elder leaves"] },
-        { name: "black elderberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
-    ];
-    craftList["upload potion sampler"].icon = "http://test.test";
-    craftList["upload potion sampler"].available = Math.min(onHand["black elder leaves"]
-                                                            , onHand["test tube"]
-                                                            , onHand["black elderberries"]);
-
-    craftList["small upload potion"] = {};
-    craftList["small upload potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
-        { name: "black elder leaves", id: ingredients["black elder leaves"], qty: 2, "on hand": onHand["black elder leaves"] },
-        { name: "black elderberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
-    ];
-    craftList["small upload potion"].icon = "http://test.test";
-    craftList["small upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 2)
-                                                          , onHand["vial"]
-                                                          , onHand["black elderberries"]);
-
-    craftList["upload potion"] = {};
-    craftList["upload potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
-        { name: "black elder leaves", id: ingredients["black elder leaves"], qty: 5, "on hand": onHand["black elder leaves"] },
-        { name: "black elderberries", id: ingredients["black elderberries"], qty: 1, "on hand": onHand["black elderberries"] }
-    ];
-    craftList["upload potion"].icon = "http://test.test";
-    craftList["upload potion"].available = Math.min(Math.floor(onHand["black elder leaves"] / 5)
-                                                    , onHand["black elderberries"]
-                                                    , onHand["vial"]);
-
-    craftList["large upload potion"] = {};
-    craftList["large upload potion"].ingredients = [
-        { name: "bowl", id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
-        { name: "upload potion", id: ingredients["upload potion"], qty: 2, "on hand": onHand["upload potion"] },
-        { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
-    ];
-    craftList["large upload potion"].icon = "http://test.test";
-    craftList["large upload potion"].available = Math.min(Math.floor(onHand["upload potion"] / 2)
-                                                          , onHand["bowl"]
-                                                          , onHand["yellow hellebore flower"]);
-
-    craftList["download-reduction potion sampler"] = {};
-    craftList["download-reduction potion sampler"].ingredients = [
-        { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
-        { name: "purple angelica flowers", id: ingredients["purple angelica flowers"], qty: 1, "on hand": onHand["purple angelica flowers"] },
-        { name: "garlic tincture", id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
-    ];
-    craftList["download-reduction potion sampler"].icon = "http://test.test";
-    craftList["download-reduction potion sampler"].available = Math.min(onHand["test tube"]
-                                                                        , onHand["purple angelica flowers"]
-                                                                        , onHand["garlic tincture"]);
-
-    craftList["small download-reduction potion"] = {};
-    craftList["small download-reduction potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
-        { name: "purple angelica flowers", id: ingredients["purple angelica flowers"], qty: 2, "on hand": onHand["purple angelica flowers"] },
-        { name: "garlic tincture", id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
-    ];
-    craftList["small download-reduction potion"].icon = "http://test.test";
-    craftList["small download-reduction potion"].available = Math.min(Math.floor(onHand["purple angelica flowers"] / 2)
-                                                                      , onHand["vial"]
-                                                                      , onHand["garlic tincture"]);
-
-    craftList["download-reduction potion"] = {};
-    craftList["download-reduction potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
-        { name: "purple angelica flowers", id: ingredients["purple angelica flowers"], qty: 5, "on hand": onHand["purple angelica flowers"] },
-        { name: "garlic tincture", id: ingredients["garlic tincture"], qty: 1, "on hand": onHand["garlic tincture"] }
-    ];
-    craftList["download-reduction potion"].icon = "http://test.test";
-    craftList["download-reduction potion"].available = Math.min(Math.floor(onHand["purple angelica flowers"] / 5)
-                                                                , onHand["vial"]
-                                                                , onHand["garlic tincture"]);
-
-    craftList["large download-reduction potion"] = {};
-    craftList["large download-reduction potion"].ingredients = [
-        { name: "bowl", id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
-        { name: "download-reduction potion", id: ingredients["download-reduction potion"], qty: 2, "on hand": onHand["download-reduction potion"] },
-        { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
-    ];
-    craftList["large download-reduction potion"].icon = "http://test.test";
-    craftList["large download-reduction potion"].available = Math.min(Math.floor(onHand["download-reduction potion"] / 2)
-                                                                      , onHand["bowl"]
-                                                                      , onHand["yellow hellebore flower"]);
-
-    craftList["garlic tincture"] = {};
-    craftList["garlic tincture"].ingredients = [
-        { name: "test tube", id: ingredients["test tube"], qty: 1, "on hand": onHand["test tube"] },
-        { name: "head of garlic", id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
-    ];
-    craftList["garlic tincture"].icon = "http://test.test";
-    craftList["garlic tincture"].available = Math.min(onHand["test tube"]
-                                                      , onHand["head of garlic"]);
-
-    craftList["small luck potion"] = {};
-    craftList["small luck potion"].ingredients = [
-        { name: "vial", id: ingredients["vial"], qty: 1, "on hand": onHand["vial"] },
-        { name: "black elderberries", id: ingredients["black elderberries"], qty: 2, "on hand": onHand["black elderberries"] },
-    ];
-    craftList["small luck potion"].icon = "http://test.test";
-    craftList["small luck potion"].available = Math.min(Math.floor(onHand["black elderberries"] / 2)
-                                                        , onHand["vial"]);
-
-    craftList["large luck potion"] = {};
-    craftList["large luck potion"].ingredients = [
-        { name: "bowl", id: ingredients["bowl"], qty: 1, "on hand": onHand["bowl"] },
-        { name: "black elderberries", id: ingredients["black elderberries"], qty: 5, "on hand": onHand["black elderberries"] },
-        { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] }
-    ];
-    craftList["large luck potion"].icon = "http://test.test";
-    craftList["large luck potion"].available = Math.min(Math.floor(onHand["black elderberries"] / 5)
-                                                        , onHand["bowl"]
-                                                        , onHand["yellow hellebore flower"]);
-
-    craftList["ruby-grained baguette"] = {};
-    craftList["ruby-grained baguette"].ingredients = [ { name: "ruby-flecked wheat", id: ingredients["ruby-flecked wheat"], qty: 2, "on hand": onHand["ruby-flecked wheat"] } ];
-    craftList["ruby-grained baguette"].icon = "http://test.test";
-    craftList["ruby-grained baguette"].available = Math.floor(onHand["ruby-flecked wheat"] / 2);
-
-    craftList["emerald-grained baguette"] = {};
-    craftList["emerald-grained baguette"].ingredients = [ { name: "emerald-flecked wheat", id: ingredients["emerald-flecked wheat"], qty: 2, "on hand": onHand["emerald-flecked wheat"] } ];
-    craftList["emerald-grained baguette"].icon = "http://test.test";
-    craftList["emerald-grained baguette"].available = Math.floor(onHand["emerald-flecked wheat"] / 2);
-
-    craftList["garlic ruby-baguette"] = {};
-    craftList["garlic ruby-baguette"].ingredients = [
-        { name: "ruby-grained baguette", id: ingredients["ruby-grained baguette"], qty: 1, "on hand": onHand["ruby-grained baguette"] },
-        { name: "head of garlic", id: ingredients["head of garlic"], qty: 2, "on hand": onHand["head of garlic"] },
-    ];
-    craftList["garlic ruby-baguette"].icon = "http://test.test";
-    craftList["garlic ruby-baguette"].available = Math.min(Math.floor(onHand["head of garlic"] / 2)
-                                                           , onHand["ruby-grained baguette"]);
-
-    craftList["garlic emerald-baguette"] = {};
-    craftList["garlic emerald-baguette"].ingredients = [
-        { name: "emerald-grained baguette", id: ingredients["emerald-grained baguette"], qty: 1, "on hand": onHand["emerald-grained baguette"] },
-        { name: "head of garlic", id: ingredients["head of garlic"], qty: 1, "on hand": onHand["head of garlic"] },
-    ];
-    craftList["garlic emerald-baguette"].icon = "http://test.test";
-    craftList["garlic emerald-baguette"].available = Math.min(onHand["head of garlic"]
-                                                              , onHand["emerald-grained baguette"]);
-
-    craftList["artisan emerald-baguette"] = {};
-    craftList["artisan emerald-baguette"].ingredients = [
-        { name: "garlic emerald-baguette", id: ingredients["garlic emerald-baguette"], qty: 1, "on hand": onHand["garlic emerald-baguette"] },
-        { name: "emerald chip", id: ingredients["emerald chip"], qty: 1, "on hand": onHand["emerald chip"] },
-        { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 1, "on hand": onHand["yellow hellebore flower"] },
-    ];
-    craftList["artisan emerald-baguette"].icon = "http://test.test";
-    craftList["artisan emerald-baguette"].available = Math.min(onHand["garlic emerald-baguette"]
-                                                               , onHand["emerald chip"]
-                                                               , onHand["yellow hellebore flower"]);
-
-    craftList["artisan ruby-baguette"] = {};
-    craftList["artisan ruby-baguette"].ingredients = [
-        { name: "garlic ruby-baguette", id: ingredients["garlic ruby-baguette"], qty: 1, "on hand": onHand["garlic ruby-baguette"] },
-        { name: "yellow hellebore flower", id: ingredients["yellow hellebore flower"], qty: 2, "on hand": onHand["yellow hellebore flower"] },
-    ];
-    craftList["artisan ruby-baguette"].icon = "http://test.test";
-    craftList["artisan ruby-baguette"].available = Math.min(Math.floor(onHand["yellow hellebore flower"] / 5)
-                                                            , onHand["garlic ruby-baguette"]);
-
-    craftList["gazellian emerald-baguette"] = {};
-    craftList["gazellian emerald-baguette"].ingredients = [
-        { name: "artisan emerald-baguette", id: ingredients["artisan emerald-baguette"], qty: 1, "on hand": onHand["artisan emerald-baguette"] },
-        { name: "emerald chip", id: ingredients["emerald chip"], qty: 2, "on hand": onHand["emerald chip"] }
-    ];
-    craftList["gazellian emerald-baguette"].icon = "http://test.test";
-    craftList["gazellian emerald-baguette"].available = Math.min(Math.floor(onHand["emerald chip"] / 2)
-                                                                 , onHand["artisan emerald-baguette"]);
-
-    craftList["impure bronze bar"] = {};
-    craftList["impure bronze bar"].ingredients = [
-        { name: "bronze alloy mix", id: ingredients["bronze alloy mix"], qty: 1, "on hand": onHand["bronze alloy mix"] },
-        { name: "clay", id: ingredients["clay"], qty: 1, "on hand": onHand["clay"] },
-    ];
-    craftList["impure bronze bar"].icon = "http://test.test";
-    craftList["impure bronze bar"].available = Math.min(onHand["bronze alloy mix"]
-                                                        , onHand["clay"]);
-
-    craftList["bronze bar"] = {};
-    craftList["bronze bar"].ingredients = [ { name: "bronze alloy mix", id: ingredients["bronze alloy mix"], qty: 2, "on hand": onHand["bronze alloy mix"] } ];
-    craftList["bronze bar"].icon = "http://test.test";
-    craftList["bronze bar"].available = Math.floor(onHand["bronze alloy mix"] / 2);
-
-    craftList["iron bar"] = {};
-    craftList["iron bar"].ingredients = [ {name: "iron ore", id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] } ];
-    craftList["iron bar"].icon = "http://test.test";
-    craftList["iron bar"].available = Math.floor(onHand["iron ore"] / 2);
-
-    craftList["gold bar"] = {};
-    craftList["gold bar"].ingredients = [ { name: "gold ore", id: ingredients["gold ore"], qty: 2, "on hand": onHand["gold ore"] } ];
-    craftList["gold bar"].icon = "http://test.test";
-    craftList["gold bar"].available = Math.floor(onHand["gold ore"] / 2);
-
-    craftList["mithril bar"] = {};
-    craftList["mithril bar"].ingredients = [ { name: "mithril ore", id: ingredients["mithril ore"], qty: 2, "on hand": onHand["mithril ore"] } ];
-    craftList["mithril bar"].icon = "http://test.test";
-    craftList["mithril bar"].available = Math.floor(onHand["mithril ore"] / 2);
-
-    craftList["adamantium bar"] = {};
-    craftList["adamantium bar"].ingredients = [ { name: "adamantium ore", id: ingredients["adamantium ore"], qty: 2, "on hand": onHand["adamantium ore"] } ];
-    craftList["adamantium bar"].icon = "http://test.test";
-    craftList["adamantium bar"].available = Math.floor(onHand["adamantium ore"] / 2);
-
-    craftList["amethyst bar"] = {};
-    craftList["amethyst bar"].ingredients = [ { name: "amethyst dust", id: ingredients["amethyst dust"], qty: 2, "on hand": onHand["amethyst dust"] } ];
-    craftList["amethyst bar"].icon = "http://test.test";
-    craftList["amethyst bar"].available = Math.floor(onHand["amethyst dust"] / 2);
-
-    craftList["quartz bar"] = {};
-    craftList["quartz bar"].ingredients = [ { name: "quartz dust", id: ingredients["quartz dust"], qty: 2, "on hand": onHand["quartz dust"] } ];
-    craftList["quartz bar"].icon = "http://test.test";
-    craftList["quartz bar"].available = Math.floor(onHand["quartz dust"] / 2);
-
-    craftList["jade bar"] = {};
-    craftList["jade bar"].ingredients = [ { name: "jade dust", id: ingredients["jade dust"], qty: 2, "on hand": onHand["jade dust"] } ];
-    craftList["jade bar"].icon = "http://test.test";
-    craftList["jade bar"].available = Math.floor(onHand["jade dust"] / 2);
-
-    craftList["steel bar from iron ore"] = {};
-    craftList["steel bar from iron ore"].ingredients = [
-        { name: "iron ore", id: ingredients["iron ore"], qty: 2, "on hand": onHand["iron ore"] },
-        { name: "lump of coal", id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
-    ];
-    craftList["steel bar from iron ore"].icon = "http://test.test";
-    craftList["steel bar from iron ore"].available = Math.min(Math.floor(onHand["iron ore"] / 2)
-                                                              , onHand["lump of coal"]);
-
-    craftList["steel bar from iron bar"] = {};
-    craftList["steel bar from iron bar"].ingredients = [
-        { name: "iron bar", id: ingredients["iron bar"], qty: 1, "on hand": onHand["iron bar"] },
-        { name: "lump of coal", id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
-    ];
-    craftList["steel bar from iron bar"].icon = "http://test.test";
-    craftList["steel bar from iron bar"].available = Math.min(onHand["iron bar"]
-                                                              , onHand["lump of coal"]);
-
-    craftList["carbon-crystalline quartz gem"] = {};
-    craftList["carbon-crystalline quartz gem"].ingredients = [
-        { name: "quartz bar", id: ingredients["quartz bar"], qty: 1, "on hand": onHand["quartz bar"] },
-        { name: "lump of coal", id: ingredients["lump of coal"], qty: 1, "on hand": onHand["lump of coal"] },
-    ];
-    craftList["carbon-crystalline quartz gem"].icon = "http://test.test";
-    craftList["carbon-crystalline quartz gem"].available = Math.min(onHand["quartz bar"]
-                                                                    , onHand["lump of coal"]);
-
-    craftList["carbon-crystalline quartz necklace"] = {};
-    craftList["carbon-crystalline quartz necklace"].ingredients = [
-        { name: "carbon-crystalline quartz", id: ingredients["carbon-crystalline quartz"], qty: 1, "on hand": onHand["carbon-crystalline quartz"] },
-        { name: "glass shards", id: ingredients["glass shards"], qty: 1, "on hand": onHand["glass shards"] },
-    ];
-    craftList["carbon-crystalline quartz necklace"].icon = "http://test.test";
-    craftList["carbon-crystalline quartz necklace"].available = Math.min(onHand["carbon-crystalline quartz"]
-                                                                         , onHand["glass shards"]);
-
-    craftList["exquisite constellation of rubies"] = {};
-    craftList["exquisite constellation of rubies"].ingredients = [
-        { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
-        { name: "ruby", id: ingredients["ruby"], qty: 4, "on hand": onHand["ruby"] },
-    ];
-    craftList["exquisite constellation of rubies"].icon = "http://test.test";
-    craftList["exquisite constellation of rubies"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
-                                                                         , Math.floor(onHand["ruby"] / 4));
-
-    craftList["exquisite constellation of sapphires"] = {};
-    craftList["exquisite constellation of sapphires"].ingredients = [
-        { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
-        { name: "sapphire", id: ingredients["sapphire"], qty: 4, "on hand": onHand["sapphire"] },
-    ];
-    craftList["exquisite constellation of sapphires"].icon = "http://test.test";
-    craftList["exquisite constellation of sapphires"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
-                                                                            , Math.floor(onHand["sapphire"] / 4));
-
-    craftList["exquisite constellation of emeralds"] = {};
-    craftList["exquisite constellation of emeralds"].ingredients = [
-        { name: "amethyst bar", id: ingredients["amethyst bar"], qty: 2, "on hand": onHand["amethyst bar"] },
-        { name: "emerald", id: ingredients["emerald"], qty: 4, "on hand": onHand["emerald"] },
-    ];
-    craftList["exquisite constellation of emeralds"].icon = "http://test.test";
-    craftList["exquisite constellation of emeralds"].available = Math.min(Math.floor(onHand["amethyst bar"] / 2)
-                                                                           , Math.floor(onHand["emerald"] / 4));
-
-    craftList["melt dwarven gem"] = {};
-    craftList["melt dwarven gem"].ingredients = [
-        { name: "flux", id: ingredients["flux"], qty: 1, "on hand": onHand["flux"] },
-        { name: "dwarven gem", id: ingredients["dwarven gem"], qty: 1, "on hand": onHand["dwarven gem"] },
-    ];
-    craftList["melt dwarven gem"].icon = "http://test.test";
-    craftList["melt dwarven gem"].available = Math.min(onHand["flux"], onHand["dwarven gem"]);
-
-    // Cards
-    craftList["the golden throne"] = {};
-    craftList["the golden throne"].ingredients = [
-        { name: "A Wild Artifaxx", id: ingredients["A Wild Artifaxx"], qty: 1, "on hand": onHand["A Wild Artifaxx"] },
-        { name: "A Red Hot Flamed", id: ingredients["A Red Hot Flamed"], qty: 1, "on hand": onHand["A Red Hot Flamed"] },
-        { name: "The Golden Daedy", id: ingredients["The Golden Daedy"], qty: 1, "on hand": onHand["The Golden Daedy"] },
-    ];
-    craftList["the golden throne"].icon = "http://test.test";
-    craftList["the golden throne"].available = Math.min(onHand["A Wild Artifaxx"], onHand["A Red Hot Flamed"], onHand["The Golden Daedy"]);
-
-    craftList["biggest banhammer"] = {};
-    craftList["biggest banhammer"].ingredients = [
-        { name: "Stump's Banhammer", id: ingredients["Stump's Banhammer"], qty: 1, "on hand": onHand["Stump's Banhammer"] },
-        { name: "thewhales Kiss", id: ingredients["thewhales Kiss"], qty: 1, "on hand": onHand["thewhales Kiss"] },
-        { name: "Neos Ratio Cheats", id: ingredients["Neos Ratio Cheats"], qty: 1, "on hand": onHand["Neos Ratio Cheats"] },
-    ];
-    craftList["biggest banhammer"].icon = "http://test.test";
-    craftList["biggest banhammer"].available = Math.min(onHand["Stump's Banhammer"], onHand["thewhales Kiss"], onHand["Neos Ratio Cheats"]);
-
-    craftList["staff beauty parlor"] = {};
-    craftList["staff beauty parlor"].ingredients = [
-        { name: "Alpaca Out of Nowhere!", id: ingredients["Alpaca Out of Nowhere!"], qty: 1, "on hand": onHand["Alpaca Out of Nowhere!"] },
-        { name: "Nikos Transformation", id: ingredients["Nikos Transformation"], qty: 1, "on hand": onHand["Nikos Transformation"] },
-        { name: "lepik le prick", id: ingredients["lepik le prick"], qty: 1, "on hand": onHand["lepik le prick"] },
-    ];
-    craftList["staff beauty parlor"].icon = "http://test.test";
-    craftList["staff beauty parlor"].available = Math.min(onHand["Alpaca Out of Nowhere!"], onHand["Nikos Transformation"], onHand["lepik le prick"]);
-
-    craftList["random lvl2 staff card"] = {};
-    craftList["random lvl2 staff card"].ingredients = [
-        { name: "LinkinsRepeater Bone Hard Card", id: ingredients["LinkinsRepeater Bone Hard Card"], qty: 1, "on hand": onHand["LinkinsRepeater Bone Hard Card"] },
-        { name: "MuffledSilence's Headphones", id: ingredients["MuffledSilence's Headphones"], qty: 1, "on hand": onHand["MuffledSilence's Headphones"] },
-        { name: "Ze do Caixao Coffin Joe Card", id: ingredients["Ze do Caixao Coffin Joe Card"], qty: 1, "on hand": onHand["Ze do Caixao Coffin Joe Card"] },
-    ];
-    craftList["random lvl2 staff card"].icon = "http://test.test";
-    craftList["random lvl2 staff card"].available = Math.min(onHand["LinkinsRepeater Bone Hard Card"], onHand["MuffledSilence's Headphones"], onHand["Ze do Caixao Coffin Joe Card"]);
-
-    craftList["realm of staff"] = {};
-    craftList["realm of staff"].ingredients = [
-        { name: "The Golden Throne", id: ingredients["The Golden Throne"], qty: 1, "on hand": onHand["The Golden Throne"] },
-        { name: "Biggest Banhammer", id: ingredients["Biggest Banhammer"], qty: 1, "on hand": onHand["Biggest Banhammer"] },
-        { name: "Staff Beauty Parlor", id: ingredients["Staff Beauty Parlor"], qty: 1, "on hand": onHand["Staff Beauty Parlor"] },
-    ];
-    craftList["realm of staff"].icon = "http://test.test";
-    craftList["realm of staff"].available = Math.min(onHand["The Golden Throne"], onHand["Biggest Banhammer"], onHand["Staff Beauty Parlor"]);
-
-    craftList["super mushroom"] = {};
-    craftList["super mushroom"].ingredients = [
-        { name: "Mario", id: ingredients["Mario"], qty: 1, "on hand": onHand["Mario"] },
-        { name: "Princess Peach", id: ingredients["Princess Peach"], qty: 1, "on hand": onHand["Princess Peach"] },
-        { name: "Toad", id: ingredients["Toad"], qty: 1, "on hand": onHand["Toad"] },
-    ];
-    craftList["super mushroom"].icon = "http://test.test";
-    craftList["super mushroom"].available = Math.min(onHand["Princess Peach"], onHand["Mario"], onHand["Toad"]);
-
-    craftList["fire flower"] = {};
-    craftList["fire flower"].ingredients = [
-        { name: "Luigi", id: ingredients["Luigi"], qty: 1, "on hand": onHand["Luigi"] },
-        { name: "Koopa Troopa", id: ingredients["Koopa Troopa"], qty: 1, "on hand": onHand["Koopa Troopa"] },
-        { name: "Yoshi", id: ingredients["Yoshi"], qty: 1, "on hand": onHand["Yoshi"] },
-    ];
-    craftList["fire flower"].icon = "http://test.test";
-    craftList["fire flower"].available = Math.min(onHand["Luigi"], onHand["Koopa Troopa"], onHand["Yoshi"]);
-
-    craftList["penguin suit"] = {};
-    craftList["penguin suit"].ingredients = [
-        { name: "Bowser", id: ingredients["Bowser"], qty: 1, "on hand": onHand["Bowser"] },
-        { name: "Wario", id: ingredients["Wario"], qty: 1, "on hand": onHand["Wario"] },
-        { name: "Goomba", id: ingredients["Goomba"], qty: 1, "on hand": onHand["Goomba"] },
-    ];
-    craftList["penguin suit"].icon = "http://test.test";
-    craftList["penguin suit"].available = Math.min(onHand["Bowser"], onHand["Wario"], onHand["Goomba"]);
-
-    craftList["goal pole"] = {};
-    craftList["goal pole"].ingredients = [
-        { name: "Penguin Suit", id: ingredients["Penguin Suit"], qty: 1, "on hand": onHand["Penguin Suit"] },
-        { name: "Fire Flower", id: ingredients["Fire Flower"], qty: 1, "on hand": onHand["Fire Flower"] },
-        { name: "Super Mushroom", id: ingredients["Super Mushroom"], qty: 1, "on hand": onHand["Super Mushroom"] },
-    ];
-    craftList["goal pole"].icon = "http://test.test";
-    craftList["goal pole"].available = Math.min(onHand["Penguin Suit"], onHand["Fire Flower"], onHand["Super Mushroom"]);
-
-    craftList["portal gun"] = {};
-    craftList["portal gun"].ingredients = [
-        { name: "Cake", id: ingredients["Cake"], qty: 1, "on hand": onHand["Cake"] },
-        { name: "GLaDOS", id: ingredients["GLaDOS"], qty: 1, "on hand": onHand["GLaDOS"] },
-        { name: "Companion Cube", id: ingredients["Companion Cube"], qty: 1, "on hand": onHand["Companion Cube"] },
-    ];
-    craftList["portal gun"].icon = "http://test.test";
-    craftList["portal gun"].available = Math.min(onHand["Cake"], onHand["GLaDOS"], onHand["Companion Cube"]);
-
-    craftList["ricks portal gun"] = {};
-    craftList["ricks portal gun"].ingredients = [
-        { name: "Rick Sanchez", id: ingredients["Rick Sanchez"], qty: 1, "on hand": onHand["Rick Sanchez"] },
-        { name: "A Scared Morty", id: ingredients["A Scared Morty"], qty: 1, "on hand": onHand["A Scared Morty"] },
-        { name: "Mr Poopy Butthole", id: ingredients["Mr Poopy Butthole"], qty: 1, "on hand": onHand["Mr Poopy Butthole"] },
-    ];
-    craftList["ricks portal gun"].icon = "http://test.test";
-    craftList["ricks portal gun"].available = Math.min(onHand["Rick Sanchez"], onHand["A Scared Morty"], onHand["Mr Poopy Butthole"]);
-
-    craftList["space wormhole"] = {};
-    craftList["space wormhole"].ingredients = [
-        { name: "Nyx class Supercarrier", id: ingredients["Nyx class Supercarrier"], qty: 1, "on hand": onHand["Nyx class Supercarrier"] },
-        { name: "Covetor Mining Ship", id: ingredients["Covetor Mining Ship"], qty: 1, "on hand": onHand["Covetor Mining Ship"] },
-        { name: "Chimera Schematic", id: ingredients["Chimera Schematic"], qty: 1, "on hand": onHand["Chimera Schematic"] },
-    ];
-    craftList["space wormhole"].icon = "http://test.test";
-    craftList["space wormhole"].available = Math.min(onHand["Nyx class Supercarrier"], onHand["Covetor Mining Ship"], onHand["Chimera Schematic"]);
-
-    craftList["interdimensional portal"] = {};
-    craftList["interdimensional portal"].ingredients = [
-        { name: "Portal Gun", id: ingredients["Portal Gun"], qty: 1, "on hand": onHand["Portal Gun"] },
-        { name: "Ricks Portal Gun", id: ingredients["Ricks Portal Gun"], qty: 1, "on hand": onHand["Ricks Portal Gun"] },
-        { name: "Space Wormhole", id: ingredients["Space Wormhole"], qty: 1, "on hand": onHand["Space Wormhole"] },
-    ];
-    craftList["interdimensional portal"].icon = "http://test.test";
-    craftList["interdimensional portal"].available = Math.min(onHand["Space Wormhole"], onHand["Ricks Portal Gun"], onHand["Portal Gun"]);
-}
-
-function setIngredientSlot (ingredientId, slot) {
-    // Check github for previous Drag and Drop functionality made with jQueryUI
-    if (slot === "#slot_0") {
-        slots[0] = ingredientId;
+    Bowser: '02395',
+    Goomba: '02396',
+    'Koopa Troopa': '02397',
+    Luigi: '02391',
+    Mario: '02390',
+    'Princess Peach': '02392',
+    Toad: '02393',
+    Wario: '02398',
+    Yoshi: '02394',
+    'Fire Flower': '02402',
+    'Penguin Suit': '02403',
+    'Super Mushroom': '02401',
+    'Goal Pole': '02404',
+    'A Scared Morty': '02377',
+    Cake: '02373',
+    'Chimera Schematic': '02382',
+    'Companion Cube': '02375',
+    'Covetor Mining Ship': '02383',
+    GLaDOS: '02374',
+    'Mr Poopy Butthole': '02379',
+    'Nyx class Supercarrier': '02381',
+    'Rick Sanchez': '02378',
+    'Portal Gun': '02376',
+    'Ricks Portal Gun': '02380',
+    'Space Wormhole': '02384',
+    'Interdimensional Portal': '02385',
+    'A Red Hot Flamed': '02359',
+    'A Wild Artifaxx': '02358',
+    'Alpaca Out of Nowhere!': '02361',
+    'lepik le prick': '02368',
+    'LinkinsRepeater Bone Hard Card': '02400',
+    "MuffledSilence's Headphones": '02388',
+    'Neos Ratio Cheats': '02366',
+    'Nikos Transformation': '02367',
+    "Stump's Banhammer": '02365',
+    'The Golden Daedy': '02357',
+    'thewhales Kiss': '02364',
+    'Ze do Caixao Coffin Joe Card': '02410',
+    'Random Staff Card': '02438',
+    'The Golden Throne': '02369',
+    'Staff Beauty Parlor': '02371',
+    'Biggest Banhammer': '02370',
+    'Realm of Staff': '02372',
+
+    // Adventure Club
+    'glowing leaves': '02844',
+    'glowing ash': '02892',
+    'condensed light': '02841',
+    'bottled ghost': '02842',
+    hide: '02816',
+    'advanced hide': '02894',
+    cloth: '02814',
+    scrap: '02813',
+    'troll tooth': '02893',
+
+    // Xmas
+    'Cyberpunk 2077': '03105',
+    'Watch Dogs Legion': '03106',
+    'Dirt 5': '03107',
+    'Genshin Impact': '03108',
+    'Animal Crossing': '03109',
+    Gazelle: '03110',
+    Mafia: '03111',
+    'Red Crewmate Bauble': '03113',
+    'Green Crewmate Bauble': '03114',
+    'Cyan Crewmate Bauble': '03115',
+    'Broken Bauble Fragment': '03119',
+    'Wilted Four-Leaves Holly': '03120',
+    'pile of snow': '02295',
+    snowball: '02296',
+    'large snowball': '02305',
+    'candy cane': '02297',
+    'hot chocolate': '02298',
+    'pile of charcoal': '02300',
+    carrot: '02306',
+    'christmas spices': '02688',
+    'old scarf & hat': '02689',
+    'Perfect Snowball': '02698',
+    Mistletoe: '02699',
+    'Santa Suit': '02700',
+    'Abominable Santa': '02701',
+    'Icy Kisses': '02702',
+    'Sexy Santa': '02703',
+    'Christmas Cheer': '02704',
+    'Gingerbread Kitana': '02969',
+    'Gingerbread Marston': '02970',
+    'Gingerbread Doomslayer': '02972',
+    'Millenium Falcon Gingerbread': '02973',
+    'Gingerbread AT Walker': '02974',
+    'Mario Christmas': '02975',
+    'Baby Yoda With Gingerbread': '02976',
+    'snowman cookie': '03313',
+    snowflake: '03325',
+    'penguin snowglobe': '03326',
+    'owl snowglobe': '03327',
+    'Santa Claus Is Out There': '03328',
+    'Back to the Future': '03329',
+    'Big Lebowski': '03330',
+    Picard: '03331',
+    Braveheart: '03332',
+    Indy: '03333',
+    Gremlins: '03334',
+    'Die Hard': '03335',
+    'Jurassic Park': '03336',
+    Mando: '03338',
+    Doomguy: '03339',
+    Grievous: '03340',
+    'Have a Breathtaking Christmas': '03341',
+
+    // Birthday
+    'lick badge bits': '02826',
+    'Ripped Gazelle': '02829',
+    'Fancy Gazelle': '02830',
+    'Gamer Gazelle': '02831',
+    'Future Gazelle': '02833',
+    'Alien Gazelle': '02834',
+    'Lucky Gazelle': '02835',
+    'Supreme Gazelle': '02836',
+    'Exodus Truce': '03023',
+    'Gazelle Breaking Bad': '03024',
+    'A Fair Fight': '03025',
+    'Home Sweet Home': '03026',
+    'Birthday Battle Kart': '03027',
+    'What an Adventure': '03028',
+    'After Party': '03029',
+    'birthday leaves': '03031',
+    'Bill Rizer': '03151',
+    'Donkey Kong': '03152',
+    'Duck Hunt Dog': '03153',
+    'Dr Mario': '03154',
+    Pit: '03155',
+    'Little Mac': '03156',
+    'Mega Man': '03157',
+    Link: '03158',
+    'Pac-Man': '03159',
+    'Samus Aran': '03160',
+    'Simon Belmont': '03161',
+    Kirby: '03162',
+    'Black Mage': '03163',
+    'party pipe badge bit': '03166',
+    'slice of birthday cake': '03379',
+    'golden egg': '03384',
+
+    //Valentine
+    'Valentine sugar heart': '03000',
+    'Valentine chocolate heart': '03001',
+    'Sonic and Amy': '02986',
+    'Yoshi and Birdo': '02987',
+    'Kirlia and Meloetta': '02988',
+    'Aerith and Cloud': '02989',
+    'Master Chief and Cortana': '02990',
+    'Dom and Maria': '02991',
+    'Mr and Mrs Pac Man': '02992',
+    'Chainsaw Chess': '02993',
+    'Chainsaw Wizard': '02994',
+    'Angelise Reiter': '02995',
+    'Ivy Valentine': '02996',
+    'Jill Valentine': '02997',
+    Sophitia: '02998',
+    Yennefer: '02999',
+    'Valentine rose': '03002',
+    'Symbol of love': '03143',
+    'Old worn boots': '03144',
+    'Cupids magical feather': '03145',
+    'rose petals': '03359',
+
+    //Dwarven
+    'abandoned dwarven helmet': '03207',
+    'abandoned dwarven cuirass': '03208',
+    'abandoned dwarven gloves': '03209',
+    'abandoned dwarven boots': '03210',
+    'abandoned dwarven axe': '03211',
+    milk: '03218',
+    cherries: '03219',
+    grapes: '03220',
+    coconuts: '03221',
+    marshmallows: '03222',
+    'cocoa beans': '03223',
+    'vanilla pods': '03224',
+    strawberries: '03225',
+    cinnamon: '03241',
+
+    //Halloween
+    'Ripe Pumpkin': '02589',
+    'Rotting Pumpkin': '02590',
+    'Carved Pumpkin': '02591',
+    'Stormrage Pumpkin': '02592',
+    'Russian Pumpkin': '02593',
+    'Green Mario Pumpkin': '02594',
+    'Lame Pumpkin Trio': '02595',
+    'pumpkin badge bits': '02600',
+    'Bloody Mario': '02945',
+    'Mommys Recipe': '02946',
+    'Memory Boost': '02947',
+    'Link Was Here': '02948',
+    'Gohma Sees You': '02949',
+    'Skultilla The Cake Guard': '02950',
+    'Who Eats Whom': '02951',
+    'cupcake crumbles': '02952',
+    Blinky: '03263',
+    Clyde: '03265',
+    Pinky: '03266',
+    Inky: '03267',
+    Ghostbusters: '03268',
+    Boo: '03269',
+    'King Boo': '03270',
+    'haunted tombstone shard': '03281',
+    snowman: '02307',
+
+    //Bling
+    'green onyx gem': '00120',
+    'flawless amethyst': '00121',
+    'Farores flame': '02153',
+    'Nayrus flame': '02154',
+    'Dins flame': '02155',
+    'irc voice 2w': '00072',
+    'irc voice 2w - low cost': '00175',
+    'irc voice 8w': '02212',
+  };
+
+  const non_ingredients = {
+    '2x glass shards': '2436',
+    '3x glass shards': '2437',
+    'upload potion sampler': '66',
+    'small upload potion': '98',
+    'large upload potion': '100',
+    'download-reduction potion sampler': '104',
+    'small download-reduction potion': '105',
+    'large download-reduction potion': '107',
+    'small luck potion': '2433',
+    'large luck potion': '2434',
+    'artisan ruby-baguette': '2582',
+    'gazellian emerald-baguette': '2721',
+    '2x bronze alloy mix': '2666',
+    '2x iron ore': '2668',
+    '2x gold ore': '2670',
+    '2x mithril ore': '2671',
+    '2x adamantium ore': '2672',
+    '2x quartz dust': '2673',
+    '2x jade dust': '2675',
+    '2x amethyst dust': '2676',
+    'random lvl2 staff card': '2438',
+    'Christmas Bauble Badge': '3112',
+    'Christmas Impostor Bauble': '3117',
+    'lucky four-leaves holly': '3121',
+    'peppermint hot chocolate': '2299',
+    'hyper realistic eggnog': '2303',
+    'cant believe this is cherry': '2822',
+    'grape milkshake': '3226',
+    'coco-cooler milkshake': '3227',
+    'cinnamon milkshake': '3228',
+    'rocky road milkshake': '3229',
+    'neapolitan milkshake': '3230',
+    'special box': '3004',
+  };
+  //
+  // #endregion
+  //
+
+  //
+  // #region Recipe Book definitions
+  //
+  // Used to create enable/disable buttons
+  // bgcolor and color are also used for the associated recipe buttons
+  // Keys must match top-level keys in recipes
+  //
+
+  //
+  // Other object properties are:
+  //  button: the jQuery object referring to the associated button
+  //  recipes: an array of associated recipe buttons (jQuery objs)
+  //  section: the jQuery object for the element wrapping associated recipe buttons
+  //
+  const books = GM_getValue('selected_books', {
+    Glass: {bgcolor: 'white', color: 'black', disabled: true},
+    Potions: {bgcolor: 'green', color: 'white', disabled: false},
+    // Luck: {bgcolor: 'blue', color: 'white', disabled: false},
+    Food: {bgcolor: 'wheat', color: 'black', disabled: false},
+    Dwarven: {bgcolor: 'brown', color: 'beige', disabled: true},
+    Material_Bars: {bgcolor: 'purple', color: 'white', disabled: false},
+    Armor: {bgcolor: 'darkblue', color: 'white', disabled: true},
+    Weapons: {bgcolor: 'darkred', color: 'white', disabled: true},
+    Recasting: {bgcolor: 'gray', color: 'white', disabled: true},
+    Jewelry: {bgcolor: 'deeppink', color: 'white', disabled: true},
+    Bling: {bgcolor: 'gold', color: 'darkgray', disabled: true},
+    Trading_Decks: {bgcolor: '#15273F', color: 'white', disabled: true},
+    Xmas_Crafting: {bgcolor: 'red', color: 'lightgreen', disabled: true},
+    Birthday: {bgcolor: 'dark', color: 'gold', disabled: true},
+    Valentines: {bgcolor: 'pink', color: 'deeppink', disabled: true},
+    Adventure_Club: {bgcolor: 'yellow', color: 'black', disabled: true},
+    Halloween: {bgcolor: 'gray', color: 'black', disabled: true},
+  });
+  // Migrate old saves
+  const oldBooks = GM_getValue('BOOKS_SAVE');
+  if (oldBooks && typeof (oldBooks[0] !== 'object')) {
+    for (var i = 0; i < oldBooks.length / 2; i++) {
+      books[i].disabled = oldBooks[2 * i] === 0;
     }
-    if (slot === "#slot_1") {
-        slots[1] = ingredientId;
-    }
-    if (slot === "#slot_2") {
-        slots[2] = ingredientId;
-    }
-    if (slot === "#slot_3") {
-        slots[3] = ingredientId;
-    }
-    if (slot === "#slot_4") {
-        slots[4] = ingredientId;
-    }
-    if (slot === "#slot_5") {
-        slots[5] = ingredientId;
-    }
-    if (slot === "#slot_6") {
-        slots[6] = ingredientId;
-    }
-    if (slot === "#slot_7") {
-        slots[7] = ingredientId;
-    }
-    if (slot === "#slot_8") {
-        slots[8] = ingredientId;
-    }
-};
+    GM_deleteValue('BOOKS_SAVE');
+  }
+  //
+  // #endregion Recipe Book definitions
+  //
 
-function reset_slots() {
-    slots[0] = blankSlot;
-    slots[1] = blankSlot;
-    slots[2] = blankSlot;
-    slots[3] = blankSlot;
-    slots[4] = blankSlot;
-    slots[5] = blankSlot;
-    slots[6] = blankSlot;
-    slots[7] = blankSlot;
-    slots[8] = blankSlot;
-}
+  //
+  // #region Recipe definitions
+  //
+  // Defines all the recipes with ingredients and results
+  //
+  // key is the key in the book object above that these recipes belong to
+  // value is an array of arrays, where inner arrays define a row of recipe buttons via recipe objects
+  //
+  // recipe object:
+  //  name is the recipe site id
+  //  recipe is the recipe, format: ["ingredient1", [slot1, slot2, ...], ... ]       Slots: 0 1 2
+  //  result (optional) is the name of the item created by the recipe                       3 4 5
+  //    result is used as title of the crafting box, and                                    6 7 8
+  //    in dynamic counting (only if it's an ingredient);
+  //    not necessary if it's the same as the name
+  //    of the recipe, with "_" replaced with " ".
+  //
 
-function take_craft(craft_name) {
-    $.get(urlBase.replace("CUSTOMRECIPE", getSlots()), function( data ) {
-        console.log(data);
-        console.log(data.EquipID);
+  // relates book object to list(s) of associated recipes' info
+  const recipes = {
+    Glass: [
+      [
+        {name: 'glass_shards_from_sand', recipe: ['pile of sand', [4]], result: 'glass shards'},
+        {name: 'glass_shards_from_test_tube', recipe: ['test tube', [4]], result: 'glass shards'},
+        {name: 'glass_shards_from_vial', recipe: ['vial', [4]], result: '2x glass shards'},
+        {name: 'glass_shards_from_bowl', recipe: ['bowl', [4]], result: '3x glass shards'},
+      ],
+      [
+        {name: 'test_tube', recipe: ['glass shards', [1, 4]], result: undefined},
+        {name: 'vial', recipe: ['glass shards', [1, 3, 4, 6, 7]], result: undefined},
+        {name: 'bowl', recipe: ['glass shards', [0, 1, 2, 3, 5, 6, 7, 8]], result: undefined},
+        {name: 'dust_ore_vial', recipe: ['pile of sand', [4], 'quartz dust', [7]], result: 'vial'},
+        {name: 'dust_ore_bowl', recipe: ['pile of sand', [4], 'jade dust', [7]], result: 'bowl'},
+      ],
+    ],
+    Potions: [
+      [
+        {
+          name: 'upload_potion_sampler',
+          recipe: ['test tube', [4], 'black elderberries', [5], 'black elder leaves', [2]],
+          result: undefined,
+        },
+        {
+          name: 'small_upload_potion',
+          recipe: ['vial', [4], 'black elder leaves', [2, 8], 'black elderberries', [5]],
+          result: undefined,
+        },
+        {
+          name: 'upload_potion',
+          recipe: ['vial', [4], 'black elder leaves', [0, 2, 3, 6, 8], 'black elderberries', [5]],
+          result: undefined,
+        },
+        {
+          name: 'large_upload_potion',
+          recipe: ['bowl', [4], 'upload potion', [3, 5], 'yellow hellebore flower', [1]],
+          result: undefined,
+        },
+      ],
+      [
+        {
+          name: 'download-reduction_potion_sampler',
+          recipe: ['test tube', [4], 'garlic tincture', [5], 'purple angelica flowers', [2]],
+          result: undefined,
+        },
+        {
+          name: 'small_download-reduction_potion',
+          recipe: ['vial', [4], 'purple angelica flowers', [2, 8], 'garlic tincture', [5]],
+          result: undefined,
+        },
+        {
+          name: 'download-reduction_potion',
+          recipe: ['vial', [4], 'purple angelica flowers', [0, 2, 3, 6, 8], 'garlic tincture', [5]],
+          result: undefined,
+        },
+        {
+          name: 'large_download-reduction_potion',
+          recipe: ['bowl', [4], 'download-reduction potion', [3, 5], 'yellow hellebore flower', [1]],
+          result: undefined,
+        },
+        {name: 'garlic_tincture', recipe: ['test tube', [4], 'head of garlic', [5]], result: undefined},
+      ],
+      [
+        {name: 'small_luck_potion', recipe: ['vial', [3], 'black elderberries', [4, 5]], result: undefined},
+        {
+          name: 'large_luck_potion',
+          recipe: ['bowl', [4], 'black elderberries', [0, 1, 2, 3, 5], 'yellow hellebore flower', [7]],
+          result: undefined,
+        },
+      ],
+    ],
+    Food: [
+      [
+        {name: 'ruby-grained_baguette', recipe: ['ruby-flecked wheat', [4, 5]], result: undefined},
+        {
+          name: 'garlic_ruby-baguette',
+          recipe: ['ruby-grained baguette', [4], 'head of garlic', [3, 5]],
+          result: undefined,
+        },
+        {
+          name: 'artisan_ruby-baguette',
+          recipe: ['garlic ruby-baguette', [3], 'yellow hellebore flower', [4, 5]],
+          result: undefined,
+        },
+      ],
+      [
+        {name: 'emerald-grained_baguette', recipe: ['emerald-flecked wheat', [4, 5]], result: undefined},
+        {
+          name: 'garlic_emerald-baguette',
+          recipe: ['emerald-grained baguette', [4], 'head of garlic', [5]],
+          result: undefined,
+        },
+        {
+          name: 'artisan_emerald-baguette',
+          recipe: ['garlic emerald-baguette', [3], 'emerald chip', [4], 'yellow hellebore flower', [5]],
+          result: undefined,
+        },
+        {
+          name: 'gazellian_emerald-baguette',
+          recipe: ['artisan emerald-baguette', [3], 'emerald chip', [4, 5]],
+          result: undefined,
+        },
+      ],
+    ],
+    Dwarven: [
+      [
+        {
+          name: 'cant_believe_this_is_cherry',
+          recipe: ['milk', [0], 'pile of snow', [1], 'cherries', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
+        },
+        {
+          name: 'grape_milkshake',
+          recipe: ['milk', [0], 'pile of snow', [1], 'grapes', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
+        },
+        {
+          name: 'coco-cooler_milkshake',
+          recipe: ['milk', [0], 'pile of snow', [1], 'coconuts', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
+        },
+        {
+          name: 'cinnamon_milkshake',
+          recipe: ['milk', [0], 'pile of snow', [1], 'cinnamon', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
+        },
+        {
+          name: 'rocky_road_milkshake',
+          recipe: [
+            'milk',
+            [0],
+            'pile of snow',
+            [1],
+            'cocoa beans',
+            [3],
+            'marshmallows',
+            [4],
+            'glass shards',
+            [6, 7, 8],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'neapolitan_milkshake',
+          recipe: [
+            'milk',
+            [0],
+            'pile of snow',
+            [1],
+            'cocoa beans',
+            [3],
+            'vanilla pods',
+            [4],
+            'strawberries',
+            [5],
+            'glass shards',
+            [6, 7, 8],
+          ],
+          result: undefined,
+        },
+      ],
+    ],
+    Material_Bars: [
+      [
+        {name: 'impure_bronze_bar', recipe: ['bronze alloy mix', [0], 'clay', [1]], result: undefined},
+        {name: 'bronze_bar', recipe: ['bronze alloy mix', [0, 1]]},
+        {name: 'iron_bar', recipe: ['iron ore', [0, 1]], result: 'iron bar'},
+        {name: 'steel_bar', recipe: ['iron ore', [0, 1], 'lump of coal', [4]], result: undefined},
+        {name: 'steel_bar_from_iron_bar', recipe: ['iron bar', [1], 'lump of coal', [4]], result: 'steel bar'},
+        {name: 'gold_bar', recipe: ['gold ore', [0, 1]], result: undefined},
+        {name: 'mithril_bar', recipe: ['mithril ore', [0, 1]], result: undefined},
+        {name: 'adamantium_bar', recipe: ['adamantium ore', [0, 1]], result: undefined},
+        {name: 'quartz_bar', recipe: ['quartz dust', [0, 1]], result: undefined},
+        {name: 'jade_bar', recipe: ['jade dust', [0, 1]], result: undefined},
+        {name: 'amethyst_bar', recipe: ['amethyst dust', [0, 1]], result: undefined},
+      ],
+    ],
+    Armor: [
+      [
+        {name: 'impure_bronze_cuirass', recipe: ['impure bronze bar', [1, 6]], result: undefined},
+        {name: 'bronze_cuirass', recipe: ['bronze bar', [1, 6]], result: undefined},
+        {name: 'iron_cuirass', recipe: ['iron bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'steel_cuirass', recipe: ['steel bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'gold_cuirass', recipe: ['gold bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'mithril_cuirass', recipe: ['mithril bar', [1, 4, 6, 7, 8]], result: undefined},
+        {name: 'adamantium_cuirass', recipe: ['adamantium bar', [1, 4, 6, 7, 8]], result: undefined},
+      ],
+      [
+        {name: 'quartz_chainmail', recipe: ['quartz bar', [1, 6]], result: undefined},
+        {name: 'jade_chainmail', recipe: ['jade bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'amethyst_chainmail', recipe: ['amethyst bar', [1, 4, 6, 7, 8]], result: undefined},
+      ],
+      [
+        {name: 'impure_bronze_segmentata', recipe: ['impure bronze bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'bronze_segmentata', recipe: ['bronze bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'iron_segmentata', recipe: ['iron bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'steel_segmentata', recipe: ['steel bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'gold_segmentata', recipe: ['gold bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'mithril_segmentata', recipe: ['mithril bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'adamantium_segmentata', recipe: ['adamantium bar', [1, 4], 'tongs', [7]], result: undefined},
+      ],
+      [
+        {name: 'quartz_lamellar', recipe: ['quartz bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'jade_lamellar', recipe: ['jade bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'amethyst_lamellar', recipe: ['amethyst bar', [1, 4], 'tongs', [7]], result: undefined},
+      ],
+      [
+        {name: 'impure_bronze_armguards', recipe: ['impure bronze bar', [1], 'tongs', [6, 8]], result: undefined},
+        {
+          name: 'impure_bronze_power_gloves',
+          recipe: ['impure bronze bar', [1], 'tongs', [5], 'ruby chip', [6]],
+          result: undefined,
+        },
+      ],
+    ],
+    Weapons: [
+      [
+        {name: 'impure_bronze_claymore', recipe: ['impure bronze bar', [0, 7]], result: undefined},
+        {name: 'bronze_claymore', recipe: ['bronze bar', [0, 7]], result: undefined},
+        {name: 'iron_claymore', recipe: ['iron bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'steel_claymore', recipe: ['steel bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'gold_claymore', recipe: ['gold bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'mithril_claymore', recipe: ['mithril bar', [0, 1, 2, 4, 7]], result: undefined},
+        {name: 'adamantium_claymore', recipe: ['adamantium bar', [0, 1, 2, 4, 7]], result: undefined},
+      ],
+      [
+        {name: 'quartz_khopesh', recipe: ['quartz bar', [0, 7]], result: undefined},
+        {name: 'jade_khopesh', recipe: ['jade bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'amethyst_khopesh', recipe: ['amethyst bar', [0, 1, 2, 4, 7]], result: undefined},
+      ],
+      [
+        {name: 'impure_bronze_billhook', recipe: ['tongs', [1], 'impure bronze bar', [7]], result: undefined},
+        {name: 'bronze_billhook', recipe: ['tongs', [1], 'bronze bar', [7]], result: undefined},
+        {name: 'iron_billhook', recipe: ['tongs', [1], 'iron bar', [4, 7]], result: undefined},
+        {name: 'steel_billhook', recipe: ['tongs', [1], 'steel bar', [4, 7]], result: undefined},
+        {name: 'gold_billhook', recipe: ['tongs', [1], 'gold bar', [4, 7]], result: undefined},
+        {name: 'mithril_billhook', recipe: ['tongs', [1], 'mithril bar', [4, 7]], result: undefined},
+        {name: 'adamantium_billhook', recipe: ['tongs', [1], 'adamantium bar', [4, 7]], result: undefined},
+      ],
+      [
+        {name: 'quartz_guandao', recipe: ['tongs', [1], 'quartz bar', [7]], result: undefined},
+        {name: 'jade_guandao', recipe: ['tongs', [1], 'jade bar', [4, 7]], result: undefined},
+        {name: 'amethyst_guandao', recipe: ['tongs', [1], 'amethyst bar', [4, 7]], result: undefined},
+      ],
+    ],
+    Recasting: [
+      [
+        {
+          name: 'impure_bronze_bar_to_ore',
+          recipe: ['impure bronze bar', [4], 'flux', [3, 5]],
+          result: 'bronze alloy mix',
+        },
+        {name: 'bronze_bar_to_ore', recipe: ['bronze bar', [4], 'flux', [3, 5]], result: '2x bronze alloy mix'},
+        {name: 'iron_bar_to_ore', recipe: ['iron bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
+        {name: 'steel_bar_to_ore', recipe: ['steel bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
+        {name: 'gold_bar_to_ore', recipe: ['gold bar', [4], 'flux', [3, 5]], result: '2x gold ore'},
+        {name: 'mithril_bar_to_ore', recipe: ['mithril bar', [4], 'flux', [3, 5]], result: '2x mithril ore'},
+        {name: 'adamantium_bar_to_ore', recipe: ['adamantium bar', [4], 'flux', [3, 5]], result: '2x adamantium ore'},
+      ],
+      [
+        {name: 'quartz_bar_to_dust', recipe: ['quartz bar', [4], 'flux', [3, 5]], result: '2x quartz dust'},
+        {name: 'jade_bar_to_dust', recipe: ['jade bar', [4], 'flux', [3, 5]], result: '2x jade dust'},
+        {name: 'amethyst_bar_to_dust', recipe: ['amethyst bar', [4], 'flux', [3, 5]], result: '2x amethyst dust'},
+        {
+          name: 'downgrade_bronze_bar',
+          recipe: ['bronze bar', [4], 'flux', [7], 'clay', [3, 5]],
+          result: '2x impure bronze bar',
+        },
+        {name: 'downgrade_steel_bar', recipe: ['steel bar', [4], 'flux', [7]], result: 'iron bar'},
+        {name: 'melt_dwarven_gem', recipe: ['dwarven gem', [4], 'flux', [7]], result: 'pile of sand'},
+      ],
+    ],
+    Jewelry: [
+      [
+        {name: 'carbon-crystalline_quartz', recipe: ['quartz bar', [4], 'lump of coal', [5]], result: undefined},
+        {
+          name: 'carbon-crystalline_quartz_necklace',
+          recipe: ['carbon-crystalline quartz', [4], 'glass shards', [1]],
+          result: undefined,
+        },
+        {
+          name: 'exquisite_constellation_of_emeralds',
+          recipe: ['emerald', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
+          result: undefined,
+        },
+        {
+          name: 'exquisite_constellation_of_sapphires',
+          recipe: ['sapphire', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
+          result: undefined,
+        },
+        {
+          name: 'exquisite_constellation_of_rubies',
+          recipe: ['ruby', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
+          result: undefined,
+        },
+      ],
+    ],
+    Trading_Decks: [
+      [
+        {
+          name: 'The_Golden_Throne',
+          recipe: ['A Wild Artifaxx', [3], 'A Red Hot Flamed', [4], 'The Golden Daedy', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Biggest_Banhammer',
+          recipe: ["Stump's Banhammer", [3], 'thewhales Kiss', [4], 'Neos Ratio Cheats', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Staff_Beauty_Parlor',
+          recipe: ['Alpaca Out of Nowhere!', [3], 'Nikos Transformation', [4], 'lepik le prick', [5]],
+          result: undefined,
+        },
+        {
+          name: 'random_lvl2_staff_card',
+          recipe: [
+            'LinkinsRepeater Bone Hard Card',
+            [3],
+            "MuffledSilence's Headphones",
+            [4],
+            'Ze do Caixao Coffin Joe Card',
+            [5],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'Realm_of_Staff',
+          recipe: ['The Golden Throne', [3], 'Biggest Banhammer', [4], 'Staff Beauty Parlor', [5]],
+          result: undefined,
+        },
+      ],
+      [
+        {name: 'Portal_Gun', recipe: ['Cake', [3], 'GLaDOS', [4], 'Companion Cube', [5]], result: 'Portal Gun'},
+        {
+          name: 'Space_Wormhole',
+          recipe: ['Nyx class Supercarrier', [3], 'Covetor Mining Ship', [4], 'Chimera Schematic', [5]],
+          result: 'Space Wormhole',
+        },
+        {
+          name: 'Ricks_Portal_Gun',
+          recipe: ['Rick Sanchez', [3], 'A Scared Morty', [4], 'Mr Poopy Butthole', [5]],
+          result: 'Ricks Portal Gun',
+        },
+        {
+          name: 'Interdimensional_Portal',
+          recipe: ['Portal Gun', [3], 'Space Wormhole', [4], 'Ricks Portal Gun', [5]],
+          result: 'Interdimensional Portal',
+        },
+      ],
+      [
+        {name: 'Super_Mushroom', recipe: ['Mario', [3], 'Princess Peach', [4], 'Toad', [5]], result: 'Super Mushroom'},
+        {name: 'Fire_Flower', recipe: ['Luigi', [3], 'Koopa Troopa', [4], 'Yoshi', [5]], result: 'Fire Flower'},
+        {name: 'Penguin_Suit', recipe: ['Bowser', [3], 'Goomba', [4], 'Wario', [5]], result: 'Penguin Suit'},
+        {
+          name: 'Goal_Pole',
+          recipe: ['Super Mushroom', [3], 'Fire Flower', [4], 'Penguin Suit', [5]],
+          result: 'Goal Pole',
+        },
+      ],
+      [
+        {
+          name: 'Random_Lootbox',
+          recipe: ['Realm of Staff', [0], 'Goal Pole', [4], 'Interdimensional Portal', [6]],
+          result: undefined,
+        },
+        {name: 'Dins_Lootbox', recipe: ['Realm of Staff', [0, 6], 'Goal Pole', [4]], result: undefined},
+        {name: 'Farores_Lootbox', recipe: ['Goal Pole', [0, 6], 'Realm of Staff', [4]], result: undefined},
+        {name: 'Nayrus_Lootbox', recipe: ['Interdimensional Portal', [0, 6], 'Realm of Staff', [4]], result: undefined},
+      ],
+    ],
+    Xmas_Crafting: [
+      [
+        {name: 'Dirt_5', recipe: ['Cyberpunk 2077', [4], 'Watch Dogs Legion', [5]], result: undefined},
+        {name: 'Gazelle', recipe: ['Genshin Impact', [4], 'Animal Crossing', [5]], result: undefined},
+        {name: 'Mafia', recipe: ['Dirt 5', [4], 'Gazelle', [5]], result: undefined},
+        {name: 'Christmas_Bauble_Badge', recipe: ['Broken Bauble Fragment', [1, 2, 4, 5]], result: undefined},
+        {
+          name: 'Christmas_Impostor_Bauble',
+          recipe: ['Red Crewmate Bauble', [3], 'Green Crewmate Bauble', [4], 'Cyan Crewmate Bauble', [5]],
+          result: undefined,
+        },
+        {
+          name: 'lucky_four-leaves_holly',
+          recipe: ['Wilted Four-Leaves Holly', [4], 'black elderberries', [2, 5, 8]],
+          result: undefined,
+        },
+      ],
+      [
+        {name: 'snowball', recipe: ['pile of snow', [4, 7]], result: undefined},
+        {name: 'large_snowball', recipe: ['pile of snow', [1, 3, 5, 7], 'snowball', [4]], result: undefined},
+        {name: 'hot_chocolate', recipe: ['christmas spices', [1], 'snowball', [4], 'bowl', [7]], result: undefined},
+        {name: 'peppermint_hot_chocolate', recipe: ['candy cane', [1], 'hot chocolate', [4]], result: undefined},
+        {
+          name: 'hyper_realistic_eggnog',
+          recipe: ['christmas spices', [7], 'snowball', [4], 'bowl', [1]],
+          result: undefined,
+        },
+        {name: 'pile_of_charcoal', recipe: ['lump of coal', [1, 3, 4, 5]], result: undefined},
+        {
+          name: 'snowman',
+          recipe: [
+            'carrot',
+            [0],
+            'old scarf & hat',
+            [1],
+            'clay',
+            [2],
+            'snowball',
+            [3],
+            'large snowball',
+            [4, 7],
+            'pile of charcoal',
+            [5, 8],
+            'bowl',
+            [6],
+          ],
+          result: undefined,
+        },
+      ],
+      [
+        {name: 'Abominable_Santa', recipe: ['Perfect Snowball', [4], 'Santa Suit', [5]], result: undefined},
+        {name: 'Icy_Kisses', recipe: ['Perfect Snowball', [4], 'Mistletoe', [5]], result: undefined},
+        {name: 'Sexy_Santa', recipe: ['Santa Suit', [4], 'Mistletoe', [5]], result: undefined},
+        {
+          name: 'Christmas_Cheer',
+          recipe: ['Abominable Santa', [3], 'Icy Kisses', [4], 'Sexy Santa', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Gingerbread_Doomslayer',
+          recipe: ['Gingerbread Kitana', [4], 'Gingerbread Marston', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Mario_Christmas',
+          recipe: ['Millenium Falcon Gingerbread', [4], 'Gingerbread AT Walker', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Baby_Yoda_With_Gingerbread',
+          recipe: ['Gingerbread Doomslayer', [4], 'Mario Christmas', [5]],
+          result: undefined,
+        },
+      ],
+      [
+        {
+          name: 'Grievous',
+          recipe: ['Santa Claus Is Out There', [3], 'Back to the Future', [4], 'Gremlins', [5]],
+          result: undefined,
+        },
+        {name: 'Mando', recipe: ['Picard', [0], 'Braveheart', [1], 'Indy', [2]], result: undefined},
+        {name: 'Doomguy', recipe: ['Big Lebowski', [6], 'Die Hard', [7], 'Jurassic Park', [8]], result: undefined},
+        {
+          name: 'Have_a_Breathtaking_Christmas',
+          recipe: ['Grievous', [1], 'Mando', [4], 'Doomguy', [7]],
+          result: undefined,
+        },
+        {name: 'Young_Snowman', recipe: ['snowman', [4], 'snowman cookie', [1, 3, 5, 7]], result: undefined},
+      ],
+    ],
+    Birthday: [
+      [
+        {name: 'Future_Gazelle', recipe: ['Ripped Gazelle', [3], 'Gamer Gazelle', [4]], result: undefined},
+        {name: 'Alien_Gazelle', recipe: ['Ripped Gazelle', [3], 'Fancy Gazelle', [4]], result: undefined},
+        {name: 'Lucky_Gazelle', recipe: ['Fancy Gazelle', [4], 'Gamer Gazelle', [5]], result: undefined},
+        {
+          name: 'Supreme_Gazelle',
+          recipe: ['Future Gazelle', [3], 'Alien Gazelle', [4], 'Lucky Gazelle', [5]],
+          result: undefined,
+        },
+        {name: 'birthday_licks_badge_-_9th', recipe: ['lick badge bits', [3, 4, 5, 6, 7, 8]], result: undefined},
+      ],
+      [
+        {name: 'A_Fair_Fight', recipe: ['Exodus Truce', [4], 'Gazelle Breaking Bad', [5]], result: undefined},
+        {name: 'What_an_Adventure', recipe: ['Home Sweet Home', [4], 'Birthday Battle Kart', [5]], result: undefined},
+        {name: 'After_Party', recipe: ['A Fair Fight', [4], 'What an Adventure', [5]], result: undefined},
+        {name: 'birthday_gazelle_badge_-_10th', recipe: ['birthday leaves', [0, 2, 3, 5, 6, 8]], result: undefined},
+      ],
+      [
+        {name: 'Dr_Mario', recipe: ['Bill Rizer', [3], 'Donkey Kong', [4], 'Duck Hunt Dog', [5]], result: undefined},
+        {name: 'Link', recipe: ['Pit', [3], 'Little Mac', [4], 'Mega Man', [5]], result: undefined},
+        {name: 'Kirby', recipe: ['Pac-Man', [3], 'Samus Aran', [4], 'Simon Belmont', [5]], result: undefined},
+        {name: 'Black_Mage', recipe: ['Dr Mario', [0], 'Link', [4], 'Kirby', [8]], result: undefined},
+        {name: 'birthday_gazelle_badge_-_11th', recipe: ['party pipe badge bit', [0, 4, 5, 8]], result: undefined},
+      ],
+      [
+        {name: '12th_birthday_badge', recipe: ['slice of birthday cake', [0, 2, 4, 6, 8]], result: undefined},
+        {
+          name: 'Red_Dragon',
+          recipe: [
+            'Dins flame',
+            [4],
+            'Who Eats Whom',
+            [0],
+            'Baby Yoda With Gingerbread',
+            [1],
+            'After Party',
+            [2],
+            'Lame Pumpkin Trio',
+            [6],
+            'Christmas Cheer',
+            [7],
+            'Supreme Gazelle',
+            [8],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'Green_Dragon',
+          recipe: [
+            'Farores flame',
+            [4],
+            'Who Eats Whom',
+            [0],
+            'Baby Yoda With Gingerbread',
+            [1],
+            'After Party',
+            [2],
+            'Lame Pumpkin Trio',
+            [6],
+            'Christmas Cheer',
+            [7],
+            'Supreme Gazelle',
+            [8],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'Blue_Dragon',
+          recipe: [
+            'Nayrus flame',
+            [4],
+            'Who Eats Whom',
+            [0],
+            'Baby Yoda With Gingerbread',
+            [1],
+            'After Party',
+            [2],
+            'Lame Pumpkin Trio',
+            [6],
+            'Christmas Cheer',
+            [7],
+            'Supreme Gazelle',
+            [8],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'Gold_Dragon',
+          recipe: [
+            'golden egg',
+            [4],
+            'Who Eats Whom',
+            [0],
+            'Baby Yoda With Gingerbread',
+            [1],
+            'After Party',
+            [2],
+            'Lame Pumpkin Trio',
+            [6],
+            'Christmas Cheer',
+            [7],
+            'Supreme Gazelle',
+            [8],
+          ],
+          result: undefined,
+        },
+      ],
+    ],
+    Valentines: [
+      [
+        {
+          name: 'Kirlia_and_Meloetta',
+          recipe: ['Sonic and Amy', [3], 'Valentine sugar heart', [4], 'Yoshi and Birdo', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Dom_and_Maria',
+          recipe: ['Aerith and Cloud', [3], 'Valentine sugar heart', [4], 'Master Chief and Cortana', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Mr_and_Mrs_Pac_Man',
+          recipe: ['Kirlia and Meloetta', [3], 'Valentine sugar heart', [4], 'Dom and Maria', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Angelise_Reiter',
+          recipe: ['Chainsaw Chess', [3], 'Valentine chocolate heart', [4], 'Chainsaw Wizard', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Sophitia',
+          recipe: ['Ivy Valentine', [3], 'Valentine chocolate heart', [4], 'Jill Valentine', [5]],
+          result: undefined,
+        },
+        {
+          name: 'Yennefer',
+          recipe: ['Angelise Reiter', [3], 'Valentine chocolate heart', [4], 'Sophitia', [5]],
+          result: undefined,
+        },
+      ],
+      [
+        {name: 'vegetal_symbol', recipe: ['Valentine rose', [1, 3, 5, 7]], result: 'Symbol of love'},
+        {name: 'mineral_symbol', recipe: ['ruby', [0, 2, 6, 8]], result: 'Symbol of love'},
+        {
+          name: 'Cupids_magical_feather',
+          recipe: ['quartz bar', [0, 2], 'jade bar', [1], 'gold ore', [4], 'amethyst dust', [7]],
+          result: undefined,
+        },
+        {
+          name: 'Cupids_winged_boots',
+          recipe: ['Symbol of love', [1], 'Old worn boots', [4], 'Cupids magical feather', [6, 8]],
+          result: undefined,
+        },
+        {name: 'Valentine_2022_Badge', recipe: ['rose petals', [0, 2, 4, 6, 8]], result: undefined},
+        {
+          name: 'special_box',
+          recipe: ['Mr and Mrs Pac Man', [0], 'Black Mage', [2], 'Yennefer', [6], 'King Boo', [8]],
+          result: undefined,
+        },
+      ],
+    ],
+    Halloween: [
+      [
+        {name: 'Stormrage_Pumpkin', recipe: ['Rotting Pumpkin', [4], 'Carved Pumpkin', [5]], result: undefined},
+        {name: 'Russian_Pumpkin', recipe: ['Carved Pumpkin', [4], 'Ripe Pumpkin', [5]], result: undefined},
+        {name: 'Green_Mario_Pumpkin', recipe: ['Ripe Pumpkin', [4], 'Rotting Pumpkin', [5]], result: undefined},
+        {
+          name: 'Lame_Pumpkin_Trio',
+          recipe: ['Stormrage Pumpkin', [3], 'Russian Pumpkin', [4], 'Green Mario Pumpkin', [5]],
+          result: undefined,
+        },
+        {name: 'Halloween_Pumpkin_Badge', recipe: ['pumpkin badge bits', [3, 4, 5, 6, 7, 8]], result: undefined},
+      ],
+      [
+        {name: 'Memory_Boost', recipe: ['Bloody Mario', [4], 'Mommys Recipe', [5]], result: undefined},
+        {name: 'Skultilla_The_Cake_Guard', recipe: ['Link Was Here', [4], 'Gohma Sees You', [5]], result: undefined},
+        {name: 'Who_Eats_Whom', recipe: ['Memory Boost', [4], 'Skultilla The Cake Guard', [5]], result: undefined},
+        {name: 'Halloween_Cupcake_Badge', recipe: ['cupcake crumbles', [3, 4, 5, 6, 7, 8]], result: undefined},
+      ],
+      [
+        {name: 'Ghostbusters', recipe: ['Blinky', [3], 'Clyde', [4]], result: undefined},
+        {name: 'Boo', recipe: ['Pinky', [3], 'Inky', [4]], result: undefined},
+        {name: 'King_Boo', recipe: ['Ghostbusters', [3], 'Boo', [4]], result: undefined},
+        {name: 'Tombstone_Badge', recipe: ['haunted tombstone shard', [0, 1, 2, 6, 7, 8]], result: undefined},
+      ],
+    ],
+    Adventure_Club: [
+      [
+        {name: 'regenerate', recipe: ['glowing leaves', [4]], result: undefined},
+        {name: 'hypnosis', recipe: ['glowing leaves', [3, 4, 5]], result: undefined},
+        {name: 'muddle', recipe: ['glowing leaves', [1, 4, 7]], result: undefined},
+        {name: 'parasite', recipe: ['glowing leaves', [0, 1, 2, 6, 7, 8]], result: undefined},
+        {name: 'burst_of_light', recipe: ['condensed light', [4]], result: undefined},
+        {name: 'dark_orb', recipe: ['bottled ghost', [4]], result: undefined},
+        {name: 'burning_ash_cloud', recipe: ['glowing ash', [1, 3, 4, 5, 7]], result: undefined},
+      ],
+      [
+        {name: '3_backpack_slots', recipe: ['cloth', [4], 'hide', [3, 5]], result: undefined},
+        {name: '4_backpack_slots', recipe: ['cloth', [4], 'hide', [1, 3, 5, 7]], result: undefined},
+        {
+          name: '6_backpack_slots',
+          recipe: ['cloth', [0, 2, 6, 8], 'hide', [1, 3, 5, 7], 'advanced hide', [4]],
+          result: undefined,
+        },
+        {name: 'scrappy_gauntlets', recipe: ['scrap', [1, 4, 7]], result: undefined},
+        {
+          name: 'troll_tooth_necklace',
+          recipe: ['scrap', [7], 'hide', [1], 'troll tooth', [3, 4, 5]],
+          result: undefined,
+        },
+      ],
+    ],
+    Bling: [
+      [
+        {
+          name: 'Unity_Necklace',
+          recipe: [
+            'Dins flame',
+            [0],
+            'Farores flame',
+            [1],
+            'Nayrus flame',
+            [2],
+            'gold bar',
+            [3],
+            'flawless amethyst',
+            [4],
+            'jade bar',
+            [5],
+            'carbon-crystalline quartz',
+            [6, 7, 8],
+          ],
+          result: undefined,
+        },
+        {
+          name: 'Flame_Badge',
+          recipe: ['Dins flame', [0], 'Farores flame', [7], 'Nayrus flame', [2], 'flawless amethyst', [4]],
+          result: undefined,
+        },
+        {name: 'Nayrus_Username', recipe: ['Nayrus flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Farores_Username', recipe: ['Farores flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Dins_Username', recipe: ['Dins flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Dwarven_Discoball', recipe: ['dwarven gem', [0, 1, 2, 3, 4, 5, 6, 7, 8]], result: undefined},
+        {name: 'irc_voice_8w', recipe: ['irc voice 2w', [3, 4, 5]], result: undefined},
+        {name: 'irc_voice_8w_-_low_cost', recipe: ['irc voice 2w - low cost', [1, 3, 4, 5]], result: 'irc voice 8w'},
+        {name: 'irc_voice_1y', recipe: ['irc voice 8w', [0, 1, 2, 3, 4, 5], 'sapphire', [7]], result: undefined},
+      ],
+    ],
+  };
+  ///
+  // #endregion Recipe definitions
+  //
+  //
+  // #endregion >>>BEGIN<<< Rarely updated data
+  //
 
-        if (data === "{}" || data.EquipId !== "") {
-            noty({type:'success', text: craft_name + ' was crafted successfully.'});
-        } else {
-            noty({type:'error', text: craft_name + ' failed.'});
-            alert('Crafting failed. Response from server: ', data)
-        }
+  //
+  // #region Main functions
+  //
+  const authKey = new URLSearchParams($('link[rel="alternate"]').attr('href')).get('authkey');
+  const urlBase = (customRecipe) =>
+    `https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=${customRecipe}&auth=${authKey}`;
+  const blankSlot = 'EEEEE';
+  const slots = new Array(9).fill(blankSlot);
+
+  function reset_slots() {
+    slots.fill(blankSlot);
+  }
+
+  function getSlots() {
+    return slots.join('');
+  }
+
+  function titleCaseFromUnderscored(str) {
+    return str.replace(/_/g, ' ').replace(/(?:^|\s)\w/g, function (match) {
+      return match.toUpperCase();
     });
+  }
+
+  //
+  // #region Stylesheets
+  //
+  const styleExtraBookSpace = $(`<style>
+.recipe_buttons {
+    row-gap: 1rem;
 }
-
-
-/* Crafts */
-function craft_glass_shards_from_tube() {
-    setIngredientSlot(ingredients["test tube"], "#slot_4");
+</style>`);
+  const styleIngredientQuantity = $(`<style>
+.ingredient_quantity {
+    flex-direction: row;
 }
-
-function craft_glass_shards_from_sand() {
-    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
+</style>`);
+  const styleIngredientQuantitySwap = $(`<style>
+.ingredient_quantity {
+    flex-direction: row-reverse;
 }
-
-function craft_glass_test_tube() {
-    setIngredientSlot(ingredients["glass shards"], "#slot_1");
-    setIngredientSlot(ingredients["glass shards"], "#slot_4");
+</style>`);
+  const head = $('head');
+  head.append(`<style>
+.disabled {
+    background-color: #333 !important;
+    color: #666 !important;
+    pointer-events: none;
 }
-
-function craft_glass_vial() {
-    setIngredientSlot(ingredients["glass shards"], "#slot_1");
-    setIngredientSlot(ingredients["glass shards"], "#slot_3");
-    setIngredientSlot(ingredients["glass shards"], "#slot_4");
-    setIngredientSlot(ingredients["glass shards"], "#slot_6");
-    setIngredientSlot(ingredients["glass shards"], "#slot_7");
+a.disabled {
+    pointer-events: none;
 }
-
-function craft_glass_bowl() {
-    setIngredientSlot(ingredients["glass shards"], "#slot_0");
-    setIngredientSlot(ingredients["glass shards"], "#slot_1");
-    setIngredientSlot(ingredients["glass shards"], "#slot_2");
-    setIngredientSlot(ingredients["glass shards"], "#slot_3");
-    setIngredientSlot(ingredients["glass shards"], "#slot_5");
-    setIngredientSlot(ingredients["glass shards"], "#slot_6");
-    setIngredientSlot(ingredients["glass shards"], "#slot_7");
-    setIngredientSlot(ingredients["glass shards"], "#slot_8");
+.quick_craft_button {
+    margin-left: 2rem;
+    background-color: orange;
 }
-
-function craft_glass_dust_vial() {
-    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
-    setIngredientSlot(ingredients["quartz dust"], "#slot_7")
-    // if (setIngredientSlot === true) {} else {
-    //     alert('Error 23. No Quartz Dust?');
-    //     enable_quick_craft_buttons();
-    //     clear_crafting_area();
-    // }
+.quick_craft_button_confirm {
+    background-color: red;
 }
-
-function craft_glass_dust_bowl() {
-    setIngredientSlot(ingredients["pile of sand"], "#slot_4");
-    setIngredientSlot(ingredients["jade dust"], "#slot_7")
-    // if (setIngredientSlot === true) {} else {
-    //     alert('Error 24. No Jade Dust?');
-    //     enable_quick_craft_buttons();
-    //     clear_crafting_area();
-    // }
+.recipe_buttons {
+    margin-bottom: 1em;
+    display: flex;
+    flex-direction: column;
 }
+</style>`);
+  if (GM_getValue('SEG', false)) {
+    head.append(styleExtraBookSpace);
+  }
+  if (GM_getValue('NHswitch', false)) {
+    head.append(styleIngredientQuantitySwap);
+  } else {
+    head.append(styleIngredientQuantity);
+  }
+  //
+  // #endregion Stylesheets
+  //
 
-function craft_upload_potion_sampler() {
-    setIngredientSlot(ingredients["test tube"], "#slot_4");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
-}
+  //
+  // #region Crafting menu and logic
+  //
 
-function craft_small_upload_potion() {
-    setIngredientSlot(ingredients["vial"], "#slot_4");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_8");
-}
+  const gmKeyCurrentCraft = 'current_craft';
 
-function craft_upload_potion() {
-    setIngredientSlot(ingredients["vial"], "#slot_4");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_8");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_6");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_2");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_3");
-    setIngredientSlot(ingredients["black elder leaves"], "#slot_0");
-}
+  const ingredients_available = [];
+  var craftingSubmenu;
+  var isCrafting = false;
 
-function craft_large_upload_potion() {
-    setIngredientSlot(ingredients["bowl"], "#slot_4");
-    setIngredientSlot(ingredients["upload potion"], "#slot_5");
-    setIngredientSlot(ingredients["upload potion"], "#slot_3");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_1");
-}
+  var tradeInventory;
+  var fetching = false;
 
-function craft_download_potion_sampler() {
-    setIngredientSlot(ingredients["test tube"], "#slot_4");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
-    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
-}
-
-function craft_small_download_potion() {
-    setIngredientSlot(ingredients["vial"], "#slot_4");
-    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_8");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
-}
-
-function craft_download_potion() {
-    setIngredientSlot(ingredients["vial"], "#slot_4");
-    setIngredientSlot(ingredients["garlic tincture"], "#slot_5");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_8");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_6");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_2");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_3");
-    setIngredientSlot(ingredients["purple angelica flowers"], "#slot_0");
-}
-
-function craft_large_download_potion() {
-    setIngredientSlot(ingredients["bowl"], "#slot_4");
-    setIngredientSlot(ingredients["download-reduction potion"], "#slot_5");
-    setIngredientSlot(ingredients["download-reduction potion"], "#slot_3");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_1");
-}
-
-function craft_garlic_tincture() {
-    setIngredientSlot(ingredients["test tube"], "#slot_4");
-    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
-}
-
-function craft_impure_bronze_bar() {
-    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_0");
-    setIngredientSlot(ingredients["clay"], "#slot_1");
-}
-
-function craft_bronze_bar() {
-    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_0");
-    setIngredientSlot(ingredients["bronze alloy mix"], "#slot_1");
-}
-
-function craft_iron_bar() {
-    setIngredientSlot(ingredients["iron ore"], "#slot_0");
-    setIngredientSlot(ingredients["iron ore"], "#slot_1");
-}
-
-function craft_steel_bar() {
-    setIngredientSlot(ingredients["iron ore"], "#slot_0");
-    setIngredientSlot(ingredients["iron ore"], "#slot_1");
-    setIngredientSlot(ingredients["lump of coal"], "#slot_4");
-}
-
-function craft_steel_bar_from_iron_bar() {
-    setIngredientSlot(ingredients["iron bar"], "#slot_1");
-    setIngredientSlot(ingredients["lump of coal"], "#slot_4");
-}
-
-function craft_gold_bar() {
-    setIngredientSlot(ingredients["gold ore"], "#slot_0");
-    setIngredientSlot(ingredients["gold ore"], "#slot_1");
-}
-
-function craft_mithril_bar() {
-    setIngredientSlot(ingredients["mithril ore"], "#slot_0");
-    setIngredientSlot(ingredients["mithril ore"], "#slot_1");
-}
-
-function craft_adamantium_bar() {
-    setIngredientSlot(ingredients["adamantium ore"], "#slot_0");
-    setIngredientSlot(ingredients["adamantium ore"], "#slot_1");
-}
-
-function craft_quartz_bar() {
-    setIngredientSlot(ingredients["quartz dust"], "#slot_0");
-    setIngredientSlot(ingredients["quartz dust"], "#slot_1");
-}
-
-function craft_jade_bar() {
-    setIngredientSlot(ingredients["jade dust"], "#slot_0");
-    setIngredientSlot(ingredients["jade dust"], "#slot_1");
-}
-
-function craft_amethyst_bar() {
-    setIngredientSlot(ingredients["amethyst dust"], "#slot_0");
-    setIngredientSlot(ingredients["amethyst dust"], "#slot_1");
-}
-
-function craft_small_luck_potion() {
-    setIngredientSlot(ingredients["vial"], "#slot_3");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_4");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
-}
-
-function craft_large_luck_potion() {
-    setIngredientSlot(ingredients["bowl"], "#slot_4");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_0");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_1");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_2");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_3");
-    setIngredientSlot(ingredients["black elderberries"], "#slot_5");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_7");
-}
-
-function craft_ruby_grained_baguette() {
-    setIngredientSlot(ingredients["ruby-flecked wheat"], "#slot_4");
-    setIngredientSlot(ingredients["ruby-flecked wheat"], "#slot_5");
-}
-
-function craft_emerald_grained_baguette() {
-    setIngredientSlot(ingredients["emerald-flecked wheat"], "#slot_4");
-    setIngredientSlot(ingredients["emerald-flecked wheat"], "#slot_5");
-}
-
-function craft_garlic_ruby_baguette() {
-    setIngredientSlot(ingredients["ruby-grained baguette"], "#slot_4");
-    setIngredientSlot(ingredients["head of garlic"], "#slot_3");
-    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
-}
-
-function craft_garlic_emerald_baguette() {
-    setIngredientSlot(ingredients["emerald-grained baguette"], "#slot_4");
-    setIngredientSlot(ingredients["head of garlic"], "#slot_5");
-}
-
-function craft_artisan_ruby_baguette() {
-    setIngredientSlot(ingredients["garlic ruby-baguette"], "#slot_3");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_4");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_5");
-}
-
-function craft_artisan_emerald_baguette() {
-    setIngredientSlot(ingredients["garlic emerald-baguette"], "#slot_3");
-    setIngredientSlot(ingredients["emerald chip"], "#slot_4");
-    setIngredientSlot(ingredients["yellow hellebore flower"], "#slot_5");
-}
-
-function craft_gazellian_emerald_baguette() {
-    setIngredientSlot(ingredients["artisan emerald-baguette"], "#slot_3");
-    setIngredientSlot(ingredients["emerald chip"], "#slot_4");
-    setIngredientSlot(ingredients["emerald chip"], "#slot_5");
-}
-
-function craft_carbon_crystalline_quartz_necklace() {
-    setIngredientSlot(ingredients["carbon-crystalline quartz"], "#slot_4");
-    setIngredientSlot(ingredients["glass shards"], "#slot_1");
-}
-
-function craft_carbon_crystalline_quartz_gem() {
-    setIngredientSlot(ingredients["quartz bar"], "#slot_4");
-    setIngredientSlot(ingredients["lump of coal"], "#slot_5");
-}
-
-function craft_exquisite_constellation_emeralds() {
-    setIngredientSlot(ingredients["emerald"], "#slot_3");
-    setIngredientSlot(ingredients["emerald"], "#slot_5");
-    setIngredientSlot(ingredients["emerald"], "#slot_6");
-    setIngredientSlot(ingredients["emerald"], "#slot_8");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
-}
-
-function craft_exquisite_constellation_rubies() {
-    setIngredientSlot(ingredients["ruby"], "#slot_3");
-    setIngredientSlot(ingredients["ruby"], "#slot_5");
-    setIngredientSlot(ingredients["ruby"], "#slot_6");
-    setIngredientSlot(ingredients["ruby"], "#slot_8");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
-}
-
-function craft_exquisite_constellation_sapphires() {
-    setIngredientSlot(ingredients["sapphire"], "#slot_3");
-    setIngredientSlot(ingredients["sapphire"], "#slot_5");
-    setIngredientSlot(ingredients["sapphire"], "#slot_6");
-    setIngredientSlot(ingredients["sapphire"], "#slot_8");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_4");
-    setIngredientSlot(ingredients["amethyst bar"], "#slot_7");
-}
-
-function melt_dwarven_gem() {
-    setIngredientSlot(ingredients["flux"], "#slot_7");
-    setIngredientSlot(ingredients["dwarven gem"], "#slot_4");
-}
-
-// Cards
-function craft_golden_throne() {
-    setIngredientSlot(ingredients["A Wild Artifaxx"], "#slot_3");
-    setIngredientSlot(ingredients["A Red Hot Flamed"], "#slot_4");
-    setIngredientSlot(ingredients["The Golden Daedy"], "#slot_5");
-}
-
-function craft_biggest_banhammer() {
-    setIngredientSlot(ingredients["Stump's Banhammer"], "#slot_3");
-    setIngredientSlot(ingredients["thewhales Kiss"], "#slot_4");
-    setIngredientSlot(ingredients["Neos Ratio Cheats"], "#slot_5");
-}
-
-function craft_staff_beauty_parlor() {
-    setIngredientSlot(ingredients["Alpaca Out of Nowhere!"], "#slot_3");
-    setIngredientSlot(ingredients["Nikos Transformation"], "#slot_4");
-    setIngredientSlot(ingredients["lepik le prick"], "#slot_5");
-}
-
-function craft_random_staff_card() {
-    setIngredientSlot(ingredients["LinkinsRepeater Bone Hard Card"], "#slot_3");
-    setIngredientSlot(ingredients["MuffledSilence's Headphones"], "#slot_4");
-    setIngredientSlot(ingredients["Ze do Caixao Coffin Joe Card"], "#slot_5");
-}
-
-function craft_realm_of_staff() {
-    setIngredientSlot(ingredients["The Golden Throne"], "#slot_3");
-    setIngredientSlot(ingredients["Biggest Banhammer"], "#slot_4");
-    setIngredientSlot(ingredients["Staff Beauty Parlor"], "#slot_5");
-}
-
-function craft_super_mushroom() {
-    setIngredientSlot(ingredients["Mario"], "#slot_3");
-    setIngredientSlot(ingredients["Princess Peach"], "#slot_4");
-    setIngredientSlot(ingredients["Toad"], "#slot_5");
-}
-
-function craft_fire_flower() {
-    setIngredientSlot(ingredients["Luigi"], "#slot_3");
-    setIngredientSlot(ingredients["Koopa Troopa"], "#slot_4");
-    setIngredientSlot(ingredients["Yoshi"], "#slot_5");
-}
-
-function craft_penguin_suit() {
-    setIngredientSlot(ingredients["Bowser"], "#slot_3");
-    setIngredientSlot(ingredients["Goomba"], "#slot_4");
-    setIngredientSlot(ingredients["Wario"], "#slot_5");
-}
-
-function craft_goal_pole() {
-    setIngredientSlot(ingredients["Super Mushroom"], "#slot_3");
-    setIngredientSlot(ingredients["Fire Flower"], "#slot_4");
-    setIngredientSlot(ingredients["Penguin Suit"], "#slot_5");
-}
-
-function craft_portal_gun() {
-    setIngredientSlot(ingredients["Cake"], "#slot_3");
-    setIngredientSlot(ingredients["GLaDOS"], "#slot_4");
-    setIngredientSlot(ingredients["Companion Cube"], "#slot_5");
-}
-
-function craft_ricks_portal_gun() {
-    setIngredientSlot(ingredients["Rick Sanchez"], "#slot_3");
-    setIngredientSlot(ingredients["A Scared Morty"], "#slot_4");
-    setIngredientSlot(ingredients["Mr Poopy Butthole"], "#slot_5");
-}
-
-function craft_space_wormhole() {
-    setIngredientSlot(ingredients["Nyx class Supercarrier"], "#slot_3");
-    setIngredientSlot(ingredients["Covetor Mining Ship"], "#slot_4");
-    setIngredientSlot(ingredients["Chimera Schematic"], "#slot_5");
-}
-
-function craft_interdimensional_portal() {
-    setIngredientSlot(ingredients["Portal Gun"], "#slot_3");
-    setIngredientSlot(ingredients["Space Wormhole"], "#slot_4");
-    setIngredientSlot(ingredients["Ricks Portal Gun"], "#slot_5");
+  async function get_trade_inv() {
+    if (fetching || tradeInventory) {
+      while (!tradeInventory) await new Promise((r) => setTimeout(r, 30));
+      return tradeInventory;
+    } else {
+      fetching = true;
+      return $.ajax({
+        url: 'https://gazellegames.net/user.php?action=trade&userid=0',
+        success: function (data) {
+          tradeInventory = data;
+          return data;
+        },
+      });
     }
-/* End Crafts */
+  }
 
-function do_craft(craft_name) {
-    //console.log('crafting', craft_name);
+  function take_craft(craft_name) {
+    $.get(urlBase(getSlots()), function (data) {
+      console.log(data);
+      console.log(data.EquipID);
 
-    /* Glass */
-    if (craft_name === "glass shards from test tube") {
-        craft_glass_shards_from_tube();
-    } else if (craft_name === "glass shards from sand") {
-        craft_glass_shards_from_sand();
-    }
-    else if (craft_name === "test tube") {
-        craft_glass_test_tube();
-    }
-    else if (craft_name === "vial") {
-        craft_glass_vial();
-    }
-    else if (craft_name === "bowl") {
-        craft_glass_bowl();
-    }
-    else if (craft_name === "dust ore vial") {
-        craft_glass_dust_vial();
-    }
-    else if (craft_name === "dust ore bowl") {
-        craft_glass_dust_bowl();
-    }
-
-    /* Upload potions */
-    else if (craft_name === "upload potion sampler") {
-        craft_upload_potion_sampler();
-    }
-    else if (craft_name === "small upload potion") {
-        craft_small_upload_potion();
-    }
-    else if (craft_name === "upload potion") {
-        craft_upload_potion();
-    }
-    else if (craft_name === "large upload potion") {
-        craft_large_upload_potion();
-    }
-
-    /* Download potions */
-    else if (craft_name === "download-reduction potion sampler") {
-        craft_download_potion_sampler();
-    }
-    else if (craft_name === "small download-reduction potion") {
-        craft_small_download_potion();
-    }
-    else if (craft_name === "download-reduction potion") {
-        craft_download_potion();
-    }
-    else if (craft_name === "large download-reduction potion") {
-        craft_large_download_potion();
-    }
-    else if (craft_name === "garlic tincture") {
-        craft_garlic_tincture();
-    }
-
-    /* Metal bars */
-    else if (craft_name === "impure bronze bar") {
-        craft_impure_bronze_bar();
-    }
-    else if (craft_name === "bronze bar") {
-        craft_bronze_bar();
-    }
-    else if (craft_name === "iron bar") {
-        craft_iron_bar();
-    }
-    else if (craft_name === "steel bar from iron ore") {
-        craft_steel_bar();
-    }
-    else if (craft_name === "steel bar from iron bar") {
-        craft_steel_bar_from_iron_bar();
-    }
-    else if (craft_name === "gold bar") {
-        craft_gold_bar();
-    }
-    else if (craft_name === "mithril bar") {
-        craft_mithril_bar();
-    }
-    else if (craft_name === "adamantium bar") {
-        craft_adamantium_bar();
-    }
-    else if (craft_name === "quartz bar") {
-        craft_quartz_bar();
-    }
-    else if (craft_name === "jade bar") {
-        craft_jade_bar();
-    }
-    else if (craft_name === "amethyst bar") {
-        craft_amethyst_bar();
-    }
-
-    /* Luck potions */
-    else if (craft_name === "small luck potion") {
-        craft_small_luck_potion();
-    }
-    else if (craft_name === "large luck potion") {
-        craft_large_luck_potion();
-    }
-
-    /* Food */
-    else if (craft_name === "ruby-grained baguette") {
-        craft_ruby_grained_baguette();
-    }
-    else if (craft_name === "emerald-grained baguette") {
-        craft_emerald_grained_baguette();
-    }
-    else if (craft_name === "garlic ruby-baguette") {
-        craft_garlic_ruby_baguette();
-    }
-    else if (craft_name === "garlic emerald-baguette") {
-        craft_garlic_emerald_baguette();
-    }
-    else if (craft_name === "artisan ruby-baguette") {
-        craft_artisan_ruby_baguette();
-    }
-    else if (craft_name === "artisan emerald-baguette") {
-        craft_artisan_emerald_baguette();
-    }
-    else if (craft_name === "gazellian emerald-baguette") {
-        craft_gazellian_emerald_baguette();
-    }
-
-    /* Jewelry */
-    else if (craft_name === "carbon-crystalline quartz gem") {
-        craft_carbon_crystalline_quartz_gem();
-    }
-    else if (craft_name === "carbon-crystalline quartz necklace") {
-        craft_carbon_crystalline_quartz_necklace();
-    }
-    else if (craft_name === "exquisite constellation emeralds") {
-        craft_exquisite_constellation_emeralds();
-    }
-    else if (craft_name === "exquisite constellation sapphires") {
-        craft_exquisite_constellation_sapphires();
-    }
-    else if (craft_name === "exquisite constellation rubies") {
-        craft_exquisite_constellation_rubies();
-    }
-
-    /* Misc/Recast */
-    else if (craft_name === "melt dwarven gem") {
-        melt_dwarven_gem();
-    }
-
-    /* Cards */
-    else if (craft_name === "the golden throne") {
-        craft_golden_throne();
-    }
-    else if (craft_name === "biggest banhammer") {
-        craft_biggest_banhammer();
-    }
-    else if (craft_name === "staff beauty parlor") {
-        craft_staff_beauty_parlor();
-    }
-    else if (craft_name === "random lvl2 staff card") {
-        craft_random_staff_card();
-    }
-    else if (craft_name === "realm of staff") {
-        craft_realm_of_staff();
-    }
-    else if (craft_name === "super mushroom") {
-        craft_super_mushroom();
-    }
-    else if (craft_name === "fire flower") {
-        craft_fire_flower();
-    }
-    else if (craft_name === "penguin suit") {
-        craft_penguin_suit();
-    }
-    else if (craft_name === "goal pole") {
-        craft_goal_pole();
-    }
-    else if (craft_name === "portal gun") {
-        craft_portal_gun();
-    }
-    else if (craft_name === "ricks portal gun") {
-        craft_ricks_portal_gun();
-    }
-    else if (craft_name === "space wormhole") {
-        craft_space_wormhole();
-    }
-    else if (craft_name === "interdimensional portal") {
-        craft_interdimensional_portal();
-    }
-
-    enable_quick_craft_buttons();
-}
-
-function disable_quick_craft_buttons() {
-    $("#crafting-submenu button").prop("disabled",true);
-    $("#crafting-submenu button").addClass("disabled");
-}
-
-function enable_quick_craft_buttons() {
-    setTimeout(function() {
-        $("#crafting-submenu button").prop("disabled",false);
-        $("#crafting-submenu button").removeClass("disabled");
-
-        disable_craft_button = false;
-
-        next_button_lockout_delay = BUTTON_LOCKOUT_DELAY;
-    }, next_button_lockout_delay);
-}
-
-var disable_craft_button = false;
-
-
-function open_crafting_submenu(craft_name) {
-    close_crafting_submenu();
-    build_on_hand();
-    build_craft_list();
-
-    $("#current_craft_box").append('<div id="crafting-submenu" style="text-align:center"></div>');
-    $("#crafting-submenu").append('<p>' + titleCase(craft_name) + '</p>');
-
-    var currentCraft = craftList[craft_name];
-    console.log(currentCraft);
-
-
-
-    $("#crafting-submenu").append('<p> Ingredients: </p>');
-
-    currentCraft.ingredients.map(ingredient => {
-        $("#crafting-submenu").append('<p style="display: inline">'
-                                      + titleCase(ingredient.name) + ': ' + ingredient.qty + '/' + ingredient["on hand"] + '</p>');
-        $("#crafting-submenu").append('<br />');
+      if (data === '{}' || data.EquipId !== '') {
+        window.noty({type: 'success', text: `${craft_name} was crafted successfully.`});
+      } else {
+        window.noty({type: 'error', text: `${craft_name} failed.`});
+        alert(`Crafting failed. Response from server: ${data}`);
+      }
     });
+  }
 
-    if (currentCraft.available > 0) {
-        $("#crafting-submenu").append('<select id="craft_number_select">');
+  function close_crafting_submenu() {
+    if (craftingSubmenu) {
+      craftingSubmenu.remove();
+      GM_deleteValue(gmKeyCurrentCraft);
+    }
+  }
 
-        var i;
-        for (i = 1; i <= currentCraft.available; i++) {
-            $("#craft_number_select").append("<option value='" + i + "'>" + i + "</option>");
-        }
+  async function open_crafting_submenu(craft_name, recipe, result) {
+    if (isCrafting) return;
 
-        $("#crafting-submenu").append('</select>');
+    if (ingredients_available[result] === undefined) {
+      if (ingredients[result] !== undefined) {
+        ingredients_available[result] =
+          $(`#items-wrapper .item[data-item='${ingredients[result]}'] .item_count`).text() ||
+          $(`#items-wrapper .item[data-item='${ingredients[result]}']`).length;
+      } else if (non_ingredients[result] !== undefined) {
+        ingredients_available[result] = (
+          (await get_trade_inv()).match(RegExp(`data-item='${non_ingredients[result]}'`, 'g')) || []
+        ).length;
+      }
+    }
 
-        var craftButton = $("<button>");
-        craftButton.on("click", function() {
-            var craftNumber = $("#craft_number_select").children("option:selected").val();
+    const currentCraft = {available: 10000, ingredients: []};
+    for (var i = 0; i < recipe.length / 2; ++i) {
+      const ingr = recipe[2 * i];
+      const qty = recipe[2 * i + 1].length;
+      if (ingredients_available[ingr] !== undefined) {
+        var onhand = ingredients_available[ingr];
+      } else {
+        onhand = $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
+            $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
+      }
+      ingredients_available[ingr] = onhand;
+      var avail = Math.floor(onhand / qty);
+      if (avail < currentCraft.available) {
+        currentCraft.available = avail;
+      }
+      currentCraft.ingredients[i] = {name: ingr, id: ingredients[ingr], qty: qty, 'on hand': onhand};
+    }
 
-            disable_craft_button = true;
+    const createCraftingActions = (available) => {
+      if (available <= 0) {
+        return '';
+      }
+      var craftNumberSelect;
 
-            next_button_lockout_delay = BUTTON_LOCKOUT_DELAY * Number(craftNumber);
+      const doCraft = async () => {
+        // Disable crafting buttons and craft switching
+        isCrafting = true;
+        $('#crafting-submenu button, #crafting-submenu select').prop('disabled', true).addClass('disabled');
 
-            disable_quick_craft_buttons();
-            enable_quick_craft_buttons();
+        var craftNumber = craftNumberSelect.children('option:selected').val();
 
-            (async function loop() {
-                for (let i = 0; i < craftNumber; i++) {
-                    await new Promise(resolve => setTimeout(function() {
-                        do_craft(craft_name);
-                        take_craft(craft_name);
-
-                        reset_slots();
-                        resolve();
-                    }, CRAFT_TIME));
+        await (async () => {
+          for (let i = 0; i < craftNumber; i++) {
+            await new Promise((resolve) =>
+              setTimeout(function () {
+                reset_slots();
+                for (var j = 0; j < recipe.length / 2; j++) {
+                  var ingr = recipe[2 * j];
+                  for (var k = 0; k < recipe[2 * j + 1].length; k++) {
+                    slots[recipe[2 * j + 1][k]] = ingredients[ingr];
+                    ingredients_available[ingr]--;
+                  }
                 }
-            })();
-        });
-
-        craftButton.html('Craft');
-        craftButton.prop('style', 'margin-left: 5px');
-
-        $("#crafting-submenu").append(craftButton);
-
-        if (disable_craft_button === true) {
-            disable_quick_craft_buttons();
-        }
-    }
-}
-
-function open_crafting_submenu_TEST(craft_name, recipe) {
-    close_crafting_submenu();
-    $("#current_craft_box").append('<div id="crafting-submenu" style="text-align:center"></div>');
-    $("#crafting-submenu").append('<p>' + titleCase(craft_name) + '</p>');
-
-    var currentCraft = {};
-    currentCraft.available = 10000
-    currentCraft.ingredients = [];
-    for (var i = 0; i < recipe.length/2; i++) {
-        var ingr = recipe[2*i];
-        var qty = recipe[2*i+1].length;
-        var onhand = $("#items-wrapper .item[data-item=" + ingredients[ingr] + "] .item_count").text();
-        if (onhand === "") { onhand = $("#items-wrapper .item[data-item=" + ingredients[ingr] + "]").length; };
-        var avail = Math.floor(onhand/qty);
-        if (avail < currentCraft.available) {currentCraft.available = avail};
-        currentCraft.ingredients[i]={ name: ingr, id: ingredients[ingr], qty: qty, "on hand": onhand }};
-    currentCraft.icon = "http://test.test";
-
-    console.log(currentCraft);
-
-    $("#crafting-submenu").append('<p> Ingredients: </p>');
-
-    currentCraft.ingredients.map(ingredient => {
-        $("#crafting-submenu").append('<p style="display: inline">'
-                                      + titleCase(ingredient.name) + ': ' + ingredient.qty + '/' + ingredient["on hand"] + '</p>');
-        $("#crafting-submenu").append('<br />');
-    });
-
-    if (currentCraft.available > 0) {
-        $("#crafting-submenu").append('<select id="craft_number_select">');
-
-        for (i = 1; i <= currentCraft.available; i++) {
-            $("#craft_number_select").append("<option value='" + i + "'>" + i + "</option>");
-        }
-
-        $("#crafting-submenu").append('</select>');
-
-        var craftButton = $("<button>");
-        craftButton.on("click", function() {
-            var craftNumber = $("#craft_number_select").children("option:selected").val();
-
-            disable_craft_button = true;
-
-            next_button_lockout_delay = BUTTON_LOCKOUT_DELAY * Number(craftNumber);
-
-            disable_quick_craft_buttons();
-            enable_quick_craft_buttons();
-
-            (async function loop() {
-                for (let i = 0; i < craftNumber; i++) {
-                    await new Promise(resolve => setTimeout(function() {
-                        reset_slots();
-                        for (var j = 0; j < recipe.length/2; j++) {
-                            var ingr = recipe[2*j];
-                            for (var k = 0; k < recipe[2*j+1].length; k++) {
-                                slots[recipe[2*j+1][k]] = ingredients[ingr]}}
-                        take_craft(craft_name);
-                        resolve();
-                    }, CRAFT_TIME));
+                take_craft(craft_name);
+                if (ingredients_available[result] != undefined) {
+                  ingredients_available[result]++;
                 }
-            })();
-        });
+                resolve();
+              }, CRAFT_TIME),
+            );
+          }
+          isCrafting = false;
+          await open_crafting_submenu(craft_name, recipe, result);
+        })();
+      };
 
-        craftButton.html('Craft');
-        craftButton.prop('style', 'margin-left: 5px');
+      return $(
+        '<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center; align-self: center;">',
+      )
+        .append(
+          (craftNumberSelect = $('<select>').append(
+            Array(currentCraft.available)
+              .fill()
+              .map((_, i) => `<option value="${i + 1}">${i + 1}</option>`),
+          )),
+        )
+        .append($('<button>Craft</button>').click(doCraft))
+        .append(
+          $(
+            '<button class="quick_craft_button">Craft maximum</button>',
+          ).click(function () {
+            if (!$(this).hasClass('quick_craft_button_confirm')) {
+              craftNumberSelect.val(currentCraft.available);
+              $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
+            } else {
+              $(this).text('-- crafting --');
+              doCraft();
+            }
+          }),
+        );
+    };
 
-        $("#crafting-submenu").append(craftButton);
+    const createIngredientLine = (ingredName, qtyFirst, qtySecond) =>
+      $(
+        '<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items; center; align-self: center;">',
+      ).append(
+        $('<a class="quick_craft_button">$</a>')
+          .attr('href', `https://gazellegames.net/shop.php?ItemID=${ingredients[ingredName].replace(/^0+/, '')}`)
+          .attr('target', '_blank')
+          .css({
+            borderRadius: '50%',
+            backgroundColor: 'yellow',
+            color: 'black',
+            cursor: 'pointer',
+            padding: '0 .25rem',
+          }),
+        `${titleCaseFromUnderscored(ingredName)}:`,
+        `<div style="display: inline-flex;" class="ingredient_quantity"><span>${qtyFirst}</span><span>/</span><span>${qtySecond}</span></div>`,
+      );
 
-        if (disable_craft_button === true) {
-            disable_quick_craft_buttons();
-        }
-    }
-}
+    close_crafting_submenu();
+    GM_setValue(gmKeyCurrentCraft, craft_name);
+    $('#current_craft_box').append(
+      (craftingSubmenu = $(
+        '<div id="crafting-submenu" style="text-align:center; margin-bottom: 1em; display: flex; flex-direction: column; row-gap: 1rem;">',
+      )
+        .append(
+          $(`<div style="margin-bottom: .5rem;">${titleCaseFromUnderscored(result)}</div>`).append(
+            ingredients_available[result] !== undefined ? ` (${ingredients_available[result]} in inventory)` : '',
+          ),
+        )
+        .append('<div style="margin-bottom: .5rem;">Ingredients:</div>')
+        .append(
+          $('<div style="display: flex; flex-direction: column;">').append(
+            currentCraft.ingredients.map((ingredient) =>
+              createIngredientLine(ingredient.name, ingredient['on hand'], ingredient.qty),
+            ),
+          ),
+        )
+        .append(`<span style="margin-bottom: 1em;">Max possible craft(s): ${currentCraft.available}</span>`)
+        .append(createCraftingActions(currentCraft.available))),
+    );
+  }
+  //
+  // #endregion Crafting menu and logic
+  //
 
-function close_crafting_submenu() {
-    $("#crafting-submenu").remove();
-}
+  //
+  // #region Create Recipe Book and Recipe buttons
+  //
 
+  var saveDebounce;
 
+  //
+  // Creates a Recipe button.
+  //
+  const createRecipeButton = (book, {name, recipe, result = name.replace(/_/g, ' ')}) => {
+    return $(
+      `<button style="margin-top: 3px; margin-right: 5px" id="${name}">${titleCaseFromUnderscored(name)}</button>`,
+    )
+      .css({
+        backgroundColor: book.bgcolor,
+        color: book.color,
+        border: '2px solid transparent',
+      })
+      .focus(function () {
+        document.getElementById(name).style.border = '2px solid red';
+      })
+      .blur(function () {
+        document.getElementById(name).style.border = '2px solid transparent';
+      })
+      .click(() => open_crafting_submenu(name.replace(/_/g, ' '), recipe, result));
+  };
 
-
-
-
-
-(function() {
-    'use strict';
-
-    $("#crafting_recipes").before(
-        '<div id="quick-crafter" style="border: 1px solid #fff;margin-bottom: 17px;display: block;clear: both;position:relative;background-color:rgba(0,0,0,.7);padding:5px;"></div>');
-
-    const button_color = ["red","green"];
-    const button_display = ["none","inline"];
-
-// Creates a "Recipe Book" on/off button; bgcolor and tcolor are the background and text colors of the associated Recipe (craft) buttons
-
-    class Book_button {
-        constructor(book_name, bgcolor, tcolor) {
-            this.enabled = DEFAULT[book_name] ;
-            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: green;" id="' + book_name + '" class="quick_craft_button">'+ book_name.replace(/_/g," ") +'</button>');
-            document.getElementById(book_name).style.backgroundColor=button_color[this.enabled];
-            document.getElementById(book_name).bgcolor = bgcolor;
-            document.getElementById(book_name).tcolor = tcolor;
-            $("#"+ book_name).click(() => {
-                this.enabled = 1 - this.enabled;
-                console.log(document.getElementById(book_name));
-                document.getElementById(book_name).style.backgroundColor=button_color[this.enabled];
-                var buttons = document.getElementsByClassName("qcbutton_" + book_name);
-                for (var i = 0; i < buttons.length; i++) {buttons[i].style.display = button_display[this.enabled]};
+  $('#crafting_recipes').before(
+    '<div style="clear: both; margin-bottom: 1rem;">',
+    $('<div id="quick-crafter">')
+      .css({
+        display: 'block',
+        margin: '0 auto 1rem',
+        backgroundColor: 'rgba(19,9,0,.7)',
+        padding: '5px',
+        width: '100%',
+        maxWidth: '1100px',
+        minWidth: '200px',
+      })
+      .append(
+        '<div id="current_craft_box">',
+        '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>',
+        $(
+          '<button style="margin-bottom: 1rem; background-color: red;" class="quick_craft_button">Clear</button>',
+        ).click(() => close_crafting_submenu()),
+        $('<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">').append(
+          '<span>Click on the buttons below to show or hide crafting categories - </span>',
+          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(
+            function () {
+              Object.values(books).forEach(({disabled, button}) => {
+                if (!disabled) button.click();
+              });
+            },
+          ),
+          $(
+            '<button style="background-color: green;" class="quick_craft_button">Show all</button>',
+          ).click(function () {
+            Object.values(books).forEach(({disabled, button}) => {
+              if (disabled) button.click();
             });
-        }
-    }
+          }),
+          $('<input type="checkbox" class="quick_craft_button">Blank line between books</input>')
+            .prop('checked', GM_getValue('SEG', false))
+            .change(function () {
+              const checked = $(this).prop('checked');
+              if (checked) {
+                $('head').append(styleExtraBookSpace);
+              } else {
+                styleExtraBookSpace.remove();
+              }
+              GM_setValue('SEG', checked);
+            }),
+          $(
+            '<input type="checkbox" class="quick_craft_button" title="Switches between needed/have and have/needed">NH switch</input>',
+          )
+            .prop('checked', GM_getValue('NHswitch', false))
+            .change(function () {
+              const checked = $(this).prop('checked');
+              if (checked) {
+                styleIngredientQuantity.remove();
+                $('head').append(styleIngredientQuantitySwap);
+              } else {
+                styleIngredientQuantitySwap.remove();
+                $('head').append(styleIngredientQuantity);
+              }
+              GM_setValue('NHswitch', checked);
+            }),
+        ),
+      )
 
+      //
+      // #region Add "Recipe Book" on/off buttons to DOM
+      //
+      .append(
+        $(
+          '<div style="margin-bottom: 2rem; display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">',
+        ).append(
+          Object.keys(books).map((name) => {
+            const book = books[name];
+            const {bgcolor, color, disabled} = book;
 
-// Creates a Recipe button; book_name is the name of the associated Recipe Book button (which impacts the colors, on/off ability and visibility DEFAULT preset)
-// Later I'll add a third "ingredients" parameter and rewrite the crafting code for easier implementation of new recipes
+            book.button = $(`<button id="${name}" class="qcbutton_book">${name.replace(/_/g, ' ')}</button>`)
+              .css({backgroundColor: bgcolor, color: color, opacity: 1})
+              .click(function () {
+                if (saveDebounce) window.clearTimeout(saveDebounce);
+                const button = $(this);
+                const disabled = (book.disabled = !book.disabled);
+                button.css('opacity', disabled ? 0.2 : 1);
+                $(book.section).css('display', disabled ? 'none' : '');
+                book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
+                saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
+              });
+            if (disabled) {
+              book.disabled = false;
+              book.button.click();
+            }
+            return book.button;
+          }),
+        ),
+      )
+      //
+      // #endregion Add "Recipe Book" on/off buttons to DOM
+      //
 
-        class Recipe_button {
-        constructor(book_name, recipe_name) {
-            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;" id="' + recipe_name + '" class="qcbutton_' + book_name + '">'+ titleCase(recipe_name.replace(/_/g," ")) +'</button>');
-            document.getElementById(recipe_name).style.backgroundColor = document.getElementById(book_name).bgcolor;
-            document.getElementById(recipe_name).style.color = document.getElementById(book_name).tcolor;
-            document.getElementById(recipe_name).style.display = button_display[DEFAULT[book_name]];
-            $("#"+ recipe_name).click(() => {
-                open_crafting_submenu(recipe_name.replace(/_/g," "));
-            });
-        }
-    }
+      //
+      // #region Add Recipe buttons to DOM
+      //
+      .append(
+        $('<div class="recipe_buttons">').append(
+          Object.keys(recipes).map((bookKey) => {
+            const book = books[bookKey];
+            book.recipes = [];
+            book.section = $('<div class="recipe_book_section">')
+              .append(
+                recipes[bookKey].map((recipeList) => {
+                  const subsection = $('<div class="recipe_book_subsection">').append(
+                    recipeList.map((recipe) => {
+                      const recipeButton = createRecipeButton(book, recipe);
+                      book.recipes.push(recipeButton);
+                      return recipeButton;
+                    }),
+                  );
+                  return subsection;
+                }),
+              )
+              .css({display: book.disabled ? 'none' : ''});
+            return book.section;
+          }),
+        ),
+      )
+      //
+      // #endregion Add Recipe buttons to DOM
+      //
 
+      .append(
+        `<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${VERSION}</a></p>`,
+      ),
+  );
 
+  // Persist selected recipe
+  $(`#${GM_getValue(gmKeyCurrentCraft).replace(/ /g, '_')}`).click();
+  // Can block, so we prefetch last
+  await get_trade_inv();
 
-/* Creates a Recipe button.
-     book_name is the name of the associated Recipe Book button (which impacts the colors, on/off ability and visibility DEFAULT preset)    Slots: 0 1 2
-     recipe is, well, the recipe, the format being ["ingredient1", [slot1, slot2, ...], ... ]                                                      3 4 5
-                                                                                                                                                   6 7 8
-*/
-        class TEST_Recipe_button {
-        constructor(book_name, recipe_name, recipe) {
-            this.recipe = recipe;
-            $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;" id="' + recipe_name + '" class="qcbutton_' + book_name + '">'+ titleCase(recipe_name.replace(/_/g," ")) +'</button>');
-            document.getElementById(recipe_name).style.backgroundColor = document.getElementById(book_name).bgcolor;
-            document.getElementById(recipe_name).style.color = document.getElementById(book_name).tcolor;
-            document.getElementById(recipe_name).style.display = button_display[DEFAULT[book_name]];
-            $("#"+ recipe_name).click(() => {
-                open_crafting_submenu_TEST(recipe_name.replace(/_/g," "),this.recipe);
-            });
-        }
-    }
+  //
+  // #endregion Create Recipe Book and Recipe buttons
+  //
 
-    $("#quick-crafter").append('<div id="current_craft_box"></div>');
-    $("#quick-crafter").append('<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.');
-    $("#quick-crafter").append('<button style="margin-top:3px;margin-right:5px;background-color: red;" id="clear_button" class="quick_craft_button">Clear</button>');
-    $("#quick-crafter").append('<br /> <br />');
-
-    $("#quick-crafter").append('<span>Show or hide crafting categories:</span>');
-    $("#quick-crafter").append('<br />');
-    new Book_button("TEST", "red", "black");
-    new Book_button("Glass", "white", "black");
-    new Book_button("Basic_Stats", "green", "white");
-    new Book_button("Material_Bars", "purple", "white");
-    new Book_button("Luck", "blue", "white");
-    new Book_button("Food", "wheat", "black");
-    new Book_button("Jewelry", "deeppink", "white");
-    new Book_button("Recast", "gray", "white");
-    new Book_button("Staff_Cards", "#15273F", "white");
-    new Book_button("Portal_Cards", "#3A3F51", "0cf");
-    new Book_button("Mario_Cards", "honeydew", "red");
-
-
-    $("#quick-crafter").append('<br /> <br /> <br />');
-    new TEST_Recipe_button("TEST", "TEST_small_upload_potion", ["vial", [4], "black elder leaves", [2,8], "black elderberries", [5]]);
-    new Recipe_button("Glass", "glass_shards_from_test_tube");
-    new Recipe_button("Glass", "glass_shards_from_sand");
-    new Recipe_button("Glass", "test_tube");
-    new Recipe_button("Glass", "vial");
-    new Recipe_button("Glass", "bowl");
-    new Recipe_button("Glass", "dust_ore_vial");
-    new Recipe_button("Glass", "dust_ore_bowl");
-
-    new Recipe_button("Basic_Stats", "upload_potion_sampler");
-    new Recipe_button("Basic_Stats", "small_upload_potion");
-    new Recipe_button("Basic_Stats", "upload_potion");
-    new Recipe_button("Basic_Stats", "large_upload_potion");
-    new Recipe_button("Basic_Stats", "download-reduction_potion_sampler");
-    new Recipe_button("Basic_Stats", "small_download-reduction_potion");
-    new Recipe_button("Basic_Stats", "download-reduction_potion");
-    new Recipe_button("Basic_Stats", "large_download-reduction_potion");
-    new Recipe_button("Basic_Stats", "garlic_tincture");
-
-    new Recipe_button("Material_Bars", "impure_bronze_bar");
-    new Recipe_button("Material_Bars", "bronze_bar");
-    new Recipe_button("Material_Bars", "iron_bar");
-    new Recipe_button("Material_Bars", "steel_bar");
-    new Recipe_button("Material_Bars", "steel_bar_from_iron_bar");
-    new Recipe_button("Material_Bars", "gold_bar");
-    new Recipe_button("Material_Bars", "mithril_bar");
-    new Recipe_button("Material_Bars", "adamantium_bar");
-    new Recipe_button("Material_Bars", "quartz_bar");
-    new Recipe_button("Material_Bars", "jade_bar");
-    new Recipe_button("Material_Bars", "amethyst_bar");
-
-    new Recipe_button("Luck", "small_luck_potion");
-    new Recipe_button("Luck", "large_luck_potion");
-
-    new Recipe_button("Food", "ruby-grained_baguette");
-    new Recipe_button("Food", "garlic_ruby-baguette");
-    new Recipe_button("Food", "artisan_ruby-baguette");
-    new Recipe_button("Food", "emerald-grained_baguette");
-    new Recipe_button("Food", "garlic_emerald-baguette");
-    new Recipe_button("Food", "artisan_emerald-baguette");
-    new Recipe_button("Food", "gazellian_emerald-baguette");
-
-    new Recipe_button("Jewelry", "carbon-crystalline_quartz_gem");
-    new Recipe_button("Jewelry", "carbon-crystalline_quartz_necklace");
-    new Recipe_button("Jewelry", "exquisite_constellation_of_emeralds");
-    new Recipe_button("Jewelry", "exquisite_constellation_of_sapphires");
-    new Recipe_button("Jewelry", "exquisite_constellation_of_rubies");
-
-    new Recipe_button("Recast", "melt_dwarven_gem");
-
-    new Recipe_button("Staff_Cards", "the_golden_throne");
-    new Recipe_button("Staff_Cards", "biggest_banhammer");
-    new Recipe_button("Staff_Cards", "staff_beauty_parlor");
-    new Recipe_button("Staff_Cards", "random_lvl2_staff_card");
-    new Recipe_button("Staff_Cards", "realm_of_staff");
-
-    new Recipe_button("Portal_Cards", "portal_gun");
-    new Recipe_button("Portal_Cards", "ricks_portal_gun");
-    new Recipe_button("Portal_Cards", "space_wormhole");
-    new Recipe_button("Portal_Cards", "interdimensional_portal");
-
-    new Recipe_button("Mario_Cards", "super_mushroom");
-    new Recipe_button("Mario_Cards", "fire_flower");
-    new Recipe_button("Mario_Cards", "penguin_suit");
-    new Recipe_button("Mario_Cards", "goal_pole");
-
-    $("#quick-crafter").append('<br /><br /><br />');
-    $("#quick-crafter").append('<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">' + VERSION +'</a></p>');
-
-
-    build_on_hand();
-    build_craft_list();
-
-    $("#clear_button").click(function() {
-        close_crafting_submenu();
-    });
-
-})();
+  //
+  // #endregion Main functions
+  //
+})(unsafeWindow || window, (unsafeWindow || window).jQuery, GM_info.script.version);
