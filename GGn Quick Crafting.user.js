@@ -373,6 +373,7 @@
   const books = GM_getValue('selected_books', {
     Glass: {bgcolor: 'white', color: 'black', disabled: true},
     Potions: {bgcolor: 'green', color: 'white', disabled: false},
+    // Luck: {bgcolor: 'blue', color: 'white', disabled: false},
     Food: {bgcolor: 'wheat', color: 'black', disabled: false},
     Dwarven: {bgcolor: 'brown', color: 'beige', disabled: true},
     Material_Bars: {bgcolor: 'purple', color: 'white', disabled: false},
@@ -418,7 +419,6 @@
   //    of the recipe, with "_" replaced with " ".
   //
 
-  const downgradeWarning = 'You are about to downgrade equipment which may result in value lost. Are you sure?';
   // relates book object to list(s) of associated recipes' info
   const recipes = {
     Glass: [
@@ -429,9 +429,9 @@
         {name: 'glass_shards_from_bowl', recipe: ['bowl', [4]], result: '3x glass shards'},
       ],
       [
-        {name: 'test_tube', recipe: ['glass shards', [1, 4]]},
-        {name: 'vial', recipe: ['glass shards', [1, 3, 4, 6, 7]]},
-        {name: 'bowl', recipe: ['glass shards', [0, 1, 2, 3, 5, 6, 7, 8]]},
+        {name: 'test_tube', recipe: ['glass shards', [1, 4]], result: undefined},
+        {name: 'vial', recipe: ['glass shards', [1, 3, 4, 6, 7]], result: undefined},
+        {name: 'bowl', recipe: ['glass shards', [0, 1, 2, 3, 5, 6, 7, 8]], result: undefined},
         {name: 'dust_ore_vial', recipe: ['pile of sand', [4], 'quartz dust', [7]], result: 'vial'},
         {name: 'dust_ore_bowl', recipe: ['pile of sand', [4], 'jade dust', [7]], result: 'bowl'},
       ],
@@ -441,72 +441,86 @@
         {
           name: 'upload_potion_sampler',
           recipe: ['test tube', [4], 'black elderberries', [5], 'black elder leaves', [2]],
+          result: undefined,
         },
         {
           name: 'small_upload_potion',
           recipe: ['vial', [4], 'black elder leaves', [2, 8], 'black elderberries', [5]],
+          result: undefined,
         },
         {
           name: 'upload_potion',
           recipe: ['vial', [4], 'black elder leaves', [0, 2, 3, 6, 8], 'black elderberries', [5]],
+          result: undefined,
         },
         {
           name: 'large_upload_potion',
           recipe: ['bowl', [4], 'upload potion', [3, 5], 'yellow hellebore flower', [1]],
+          result: undefined,
         },
       ],
       [
         {
           name: 'download-reduction_potion_sampler',
           recipe: ['test tube', [4], 'garlic tincture', [5], 'purple angelica flowers', [2]],
+          result: undefined,
         },
         {
           name: 'small_download-reduction_potion',
           recipe: ['vial', [4], 'purple angelica flowers', [2, 8], 'garlic tincture', [5]],
+          result: undefined,
         },
         {
           name: 'download-reduction_potion',
           recipe: ['vial', [4], 'purple angelica flowers', [0, 2, 3, 6, 8], 'garlic tincture', [5]],
+          result: undefined,
         },
         {
           name: 'large_download-reduction_potion',
           recipe: ['bowl', [4], 'download-reduction potion', [3, 5], 'yellow hellebore flower', [1]],
+          result: undefined,
         },
-        {name: 'garlic_tincture', recipe: ['test tube', [4], 'head of garlic', [5]]},
+        {name: 'garlic_tincture', recipe: ['test tube', [4], 'head of garlic', [5]], result: undefined},
       ],
       [
-        {name: 'small_luck_potion', recipe: ['vial', [3], 'black elderberries', [4, 5]]},
+        {name: 'small_luck_potion', recipe: ['vial', [3], 'black elderberries', [4, 5]], result: undefined},
         {
           name: 'large_luck_potion',
           recipe: ['bowl', [4], 'black elderberries', [0, 1, 2, 3, 5], 'yellow hellebore flower', [7]],
+          result: undefined,
         },
       ],
     ],
     Food: [
       [
-        {name: 'ruby-grained_baguette', recipe: ['ruby-flecked wheat', [4, 5]]},
+        {name: 'ruby-grained_baguette', recipe: ['ruby-flecked wheat', [4, 5]], result: undefined},
         {
           name: 'garlic_ruby-baguette',
           recipe: ['ruby-grained baguette', [4], 'head of garlic', [3, 5]],
+          result: undefined,
         },
         {
           name: 'artisan_ruby-baguette',
           recipe: ['garlic ruby-baguette', [3], 'yellow hellebore flower', [4, 5]],
+          result: undefined,
         },
       ],
       [
-        {name: 'emerald-grained_baguette', recipe: ['emerald-flecked wheat', [4, 5]]},
+        {name: 'emerald-grained_baguette', recipe: ['emerald-flecked wheat', [4, 5]], result: undefined},
         {
           name: 'garlic_emerald-baguette',
           recipe: ['emerald-grained baguette', [4], 'head of garlic', [5]],
+          result: undefined,
         },
         {
           name: 'artisan_emerald-baguette',
           recipe: ['garlic emerald-baguette', [3], 'emerald chip', [4], 'yellow hellebore flower', [5]],
+          result: undefined,
         },
         {
           name: 'gazellian_emerald-baguette',
           recipe: ['artisan emerald-baguette', [3], 'emerald chip', [4, 5]],
+          result: undefined,
         },
       ],
     ],
@@ -515,18 +529,22 @@
         {
           name: 'cant_believe_this_is_cherry',
           recipe: ['milk', [0], 'pile of snow', [1], 'cherries', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
         },
         {
           name: 'grape_milkshake',
           recipe: ['milk', [0], 'pile of snow', [1], 'grapes', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
         },
         {
           name: 'coco-cooler_milkshake',
           recipe: ['milk', [0], 'pile of snow', [1], 'coconuts', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
         },
         {
           name: 'cinnamon_milkshake',
           recipe: ['milk', [0], 'pile of snow', [1], 'cinnamon', [2], 'glass shards', [6, 7, 8]],
+          result: undefined,
         },
         {
           name: 'rocky_road_milkshake',
@@ -542,6 +560,7 @@
             'glass shards',
             [6, 7, 8],
           ],
+          result: undefined,
         },
         {
           name: 'neapolitan_milkshake',
@@ -559,431 +578,94 @@
             'glass shards',
             [6, 7, 8],
           ],
+          result: undefined,
         },
       ],
     ],
     Material_Bars: [
       [
-        {name: 'impure_bronze_bar', recipe: ['bronze alloy mix', [0], 'clay', [1]]},
+        {name: 'impure_bronze_bar', recipe: ['bronze alloy mix', [0], 'clay', [1]], result: undefined},
         {name: 'bronze_bar', recipe: ['bronze alloy mix', [0, 1]]},
         {name: 'iron_bar', recipe: ['iron ore', [0, 1]], result: 'iron bar'},
-        {name: 'steel_bar', recipe: ['iron ore', [0, 1], 'lump of coal', [4]]},
+        {name: 'steel_bar', recipe: ['iron ore', [0, 1], 'lump of coal', [4]], result: undefined},
         {name: 'steel_bar_from_iron_bar', recipe: ['iron bar', [1], 'lump of coal', [4]], result: 'steel bar'},
-        {name: 'gold_bar', recipe: ['gold ore', [0, 1]]},
-        {name: 'mithril_bar', recipe: ['mithril ore', [0, 1]]},
-        {name: 'adamantium_bar', recipe: ['adamantium ore', [0, 1]]},
-        {name: 'quartz_bar', recipe: ['quartz dust', [0, 1]]},
-        {name: 'jade_bar', recipe: ['jade dust', [0, 1]]},
-        {name: 'amethyst_bar', recipe: ['amethyst dust', [0, 1]]},
+        {name: 'gold_bar', recipe: ['gold ore', [0, 1]], result: undefined},
+        {name: 'mithril_bar', recipe: ['mithril ore', [0, 1]], result: undefined},
+        {name: 'adamantium_bar', recipe: ['adamantium ore', [0, 1]], result: undefined},
+        {name: 'quartz_bar', recipe: ['quartz dust', [0, 1]], result: undefined},
+        {name: 'jade_bar', recipe: ['jade dust', [0, 1]], result: undefined},
+        {name: 'amethyst_bar', recipe: ['amethyst dust', [0, 1]], result: undefined},
       ],
     ],
     Armor: [
       [
-        {name: 'impure_bronze_cuirass', recipe: ['impure bronze bar', [1, 6]]},
-        {name: 'bronze_cuirass', recipe: ['bronze bar', [1, 6]]},
-        {name: 'iron_cuirass', recipe: ['iron bar', [1, 4, 6, 8]]},
-        {name: 'steel_cuirass', recipe: ['steel bar', [1, 4, 6, 8]]},
-        {name: 'gold_cuirass', recipe: ['gold bar', [1, 4, 6, 8]]},
-        {name: 'mithril_cuirass', recipe: ['mithril bar', [1, 4, 6, 7, 8]]},
-        {name: 'adamantium_cuirass', recipe: ['adamantium bar', [1, 4, 6, 7, 8]]},
+        {name: 'impure_bronze_cuirass', recipe: ['impure bronze bar', [1, 6]], result: undefined},
+        {name: 'bronze_cuirass', recipe: ['bronze bar', [1, 6]], result: undefined},
+        {name: 'iron_cuirass', recipe: ['iron bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'steel_cuirass', recipe: ['steel bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'gold_cuirass', recipe: ['gold bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'mithril_cuirass', recipe: ['mithril bar', [1, 4, 6, 7, 8]], result: undefined},
+        {name: 'adamantium_cuirass', recipe: ['adamantium bar', [1, 4, 6, 7, 8]], result: undefined},
       ],
       [
-        {name: 'quartz_chainmail', recipe: ['quartz bar', [1, 6]]},
-        {name: 'jade_chainmail', recipe: ['jade bar', [1, 4, 6, 8]]},
-        {name: 'amethyst_chainmail', recipe: ['amethyst bar', [1, 4, 6, 7, 8]]},
+        {name: 'quartz_chainmail', recipe: ['quartz bar', [1, 6]], result: undefined},
+        {name: 'jade_chainmail', recipe: ['jade bar', [1, 4, 6, 8]], result: undefined},
+        {name: 'amethyst_chainmail', recipe: ['amethyst bar', [1, 4, 6, 7, 8]], result: undefined},
       ],
       [
-        {name: 'impure_bronze_segmentata', recipe: ['impure bronze bar', [1], 'tongs', [7]]},
-        {name: 'bronze_segmentata', recipe: ['bronze bar', [1], 'tongs', [7]]},
-        {name: 'iron_segmentata', recipe: ['iron bar', [1, 4], 'tongs', [7]]},
-        {name: 'steel_segmentata', recipe: ['steel bar', [1, 4], 'tongs', [7]]},
-        {name: 'gold_segmentata', recipe: ['gold bar', [1, 4], 'tongs', [7]]},
-        {name: 'mithril_segmentata', recipe: ['mithril bar', [1, 4], 'tongs', [7]]},
-        {name: 'adamantium_segmentata', recipe: ['adamantium bar', [1, 4], 'tongs', [7]]},
+        {name: 'impure_bronze_segmentata', recipe: ['impure bronze bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'bronze_segmentata', recipe: ['bronze bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'iron_segmentata', recipe: ['iron bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'steel_segmentata', recipe: ['steel bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'gold_segmentata', recipe: ['gold bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'mithril_segmentata', recipe: ['mithril bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'adamantium_segmentata', recipe: ['adamantium bar', [1, 4], 'tongs', [7]], result: undefined},
       ],
       [
-        {name: 'quartz_lamellar', recipe: ['quartz bar', [1], 'tongs', [7]]},
-        {name: 'jade_lamellar', recipe: ['jade bar', [1, 4], 'tongs', [7]]},
-        {name: 'amethyst_lamellar', recipe: ['amethyst bar', [1, 4], 'tongs', [7]]},
+        {name: 'quartz_lamellar', recipe: ['quartz bar', [1], 'tongs', [7]], result: undefined},
+        {name: 'jade_lamellar', recipe: ['jade bar', [1, 4], 'tongs', [7]], result: undefined},
+        {name: 'amethyst_lamellar', recipe: ['amethyst bar', [1, 4], 'tongs', [7]], result: undefined},
       ],
       [
-        {name: 'impure_bronze_armguards', recipe: ['impure bronze bar', [1], 'tongs', [6, 8]]},
+        {name: 'impure_bronze_armguards', recipe: ['impure bronze bar', [1], 'tongs', [6, 8]], result: undefined},
         {
           name: 'impure_bronze_power_gloves',
           recipe: ['impure bronze bar', [1], 'tongs', [5], 'ruby chip', [6]],
+          result: undefined,
         },
       ],
     ],
     Weapons: [
       [
-        {name: 'impure_bronze_claymore', recipe: ['impure bronze bar', [0, 7]]},
-        {name: 'bronze_claymore', recipe: ['bronze bar', [0, 7]]},
-        {name: 'iron_claymore', recipe: ['iron bar', [0, 2, 4, 7]]},
-        {name: 'steel_claymore', recipe: ['steel bar', [0, 2, 4, 7]]},
-        {name: 'gold_claymore', recipe: ['gold bar', [0, 2, 4, 7]]},
-        {name: 'mithril_claymore', recipe: ['mithril bar', [0, 1, 2, 4, 7]]},
-        {name: 'adamantium_claymore', recipe: ['adamantium bar', [0, 1, 2, 4, 7]]},
+        {name: 'impure_bronze_claymore', recipe: ['impure bronze bar', [0, 7]], result: undefined},
+        {name: 'bronze_claymore', recipe: ['bronze bar', [0, 7]], result: undefined},
+        {name: 'iron_claymore', recipe: ['iron bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'steel_claymore', recipe: ['steel bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'gold_claymore', recipe: ['gold bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'mithril_claymore', recipe: ['mithril bar', [0, 1, 2, 4, 7]], result: undefined},
+        {name: 'adamantium_claymore', recipe: ['adamantium bar', [0, 1, 2, 4, 7]], result: undefined},
       ],
       [
-        {name: 'quartz_khopesh', recipe: ['quartz bar', [0, 7]]},
-        {name: 'jade_khopesh', recipe: ['jade bar', [0, 2, 4, 7]]},
-        {name: 'amethyst_khopesh', recipe: ['amethyst bar', [0, 1, 2, 4, 7]]},
+        {name: 'quartz_khopesh', recipe: ['quartz bar', [0, 7]], result: undefined},
+        {name: 'jade_khopesh', recipe: ['jade bar', [0, 2, 4, 7]], result: undefined},
+        {name: 'amethyst_khopesh', recipe: ['amethyst bar', [0, 1, 2, 4, 7]], result: undefined},
       ],
       [
-        {name: 'impure_bronze_billhook', recipe: ['tongs', [1], 'impure bronze bar', [7]]},
-        {name: 'bronze_billhook', recipe: ['tongs', [1], 'bronze bar', [7]]},
-        {name: 'iron_billhook', recipe: ['tongs', [1], 'iron bar', [4, 7]]},
-        {name: 'steel_billhook', recipe: ['tongs', [1], 'steel bar', [4, 7]]},
-        {name: 'gold_billhook', recipe: ['tongs', [1], 'gold bar', [4, 7]]},
-        {name: 'mithril_billhook', recipe: ['tongs', [1], 'mithril bar', [4, 7]]},
-        {name: 'adamantium_billhook', recipe: ['tongs', [1], 'adamantium bar', [4, 7]]},
+        {name: 'impure_bronze_billhook', recipe: ['tongs', [1], 'impure bronze bar', [7]], result: undefined},
+        {name: 'bronze_billhook', recipe: ['tongs', [1], 'bronze bar', [7]], result: undefined},
+        {name: 'iron_billhook', recipe: ['tongs', [1], 'iron bar', [4, 7]], result: undefined},
+        {name: 'steel_billhook', recipe: ['tongs', [1], 'steel bar', [4, 7]], result: undefined},
+        {name: 'gold_billhook', recipe: ['tongs', [1], 'gold bar', [4, 7]], result: undefined},
+        {name: 'mithril_billhook', recipe: ['tongs', [1], 'mithril bar', [4, 7]], result: undefined},
+        {name: 'adamantium_billhook', recipe: ['tongs', [1], 'adamantium bar', [4, 7]], result: undefined},
       ],
       [
-        {name: 'quartz_guandao', recipe: ['tongs', [1], 'quartz bar', [7]]},
-        {name: 'jade_guandao', recipe: ['tongs', [1], 'jade bar', [4, 7]]},
-        {name: 'amethyst_guandao', recipe: ['tongs', [1], 'amethyst bar', [4, 7]]},
+        {name: 'quartz_guandao', recipe: ['tongs', [1], 'quartz bar', [7]], result: undefined},
+        {name: 'jade_guandao', recipe: ['tongs', [1], 'jade bar', [4, 7]], result: undefined},
+        {name: 'amethyst_guandao', recipe: ['tongs', [1], 'amethyst bar', [4, 7]], result: undefined},
       ],
     ],
     Recasting: [
-      // Upgrade Armor/Weapons
-      [
-        {
-          name: 'upgrade_impure_bronze_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'bronze alloy mix', [3, 5], 'impure bronze claymore', [4]],
-          result: 'bronze claymore',
-        },
-        {
-          name: 'upgrade_impure_bronze_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'bronze alloy mix', [3, 5], 'impure bronze cuirass', [4]]],
-          result: 'bronze cuirass',
-        },
-        {
-          name: 'upgrade_bronze_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'iron bar', [3, 5, 7], 'bronze claymore', [4]],
-          result: 'iron claymore',
-        },
-        {
-          name: 'upgrade_bronze_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'iron bar', [3, 5, 7], 'bronze cuirass', [4]]],
-          result: 'iron cuirass',
-        },
-        {
-          name: 'upgrade_iron_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'lump of coal', [3, 5, 7], 'iron claymore', [4]],
-          result: 'steel claymore',
-        },
-        {
-          name: 'upgrade_iron_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'lump of coal', [3, 5, 7], 'iron cuirass', [4]]],
-          result: 'steel cuirass',
-        },
-      ],
-      [
-        {
-          name: 'upgrade_steel_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'gold bar', [3, 5, 7], 'steel claymore', [4]],
-          result: 'gold claymore',
-        },
-        {
-          name: 'upgrade_steel_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'gold bar', [3, 5, 7], 'steel cuirass', [4]]],
-          result: 'gold cuirass',
-        },
-        {
-          name: 'upgrade_gold_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'mithril bar', [1, 3, 5, 7], 'gold claymore', [4]],
-          result: 'mithril claymore',
-        },
-        {
-          name: 'upgrade_gold_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'mithril bar', [1, 3, 5, 7], 'gold cuirass', [4]]],
-          result: 'mithril cuirass',
-        },
-        {
-          name: 'upgrade_mithril_claymore',
-          recipe: ['flux', [0, 2, 6, 8], 'adamantium bar', [1, 3, 5, 7], 'mithril claymore', [4]],
-          result: 'adamantium claymore',
-        },
-        {
-          name: 'upgrade_mithril_cuirass',
-          recipe: [['flux', [0, 2, 6, 8], 'adamantium bar', [1, 3, 5, 7], 'mithril cuirass', [4]]],
-          result: 'adamantium cuirass',
-        },
-      ],
-      [
-        {
-          name: 'upgrade_quartz_khopesh',
-          recipe: ['flux', [0, 2, 6, 8], 'jade bar', [3, 5, 7], 'quartz khopesh', [4]],
-          result: 'jade khopesh',
-        },
-        {
-          name: 'upgrade_quartz_chainmail',
-          recipe: [['flux', [0, 2, 6, 8], 'jade bar', [3, 5, 7], 'quartz chainmail', [4]]],
-          result: 'jade chainmail',
-        },
-        {
-          name: 'upgrade_jade_khopesh',
-          recipe: ['flux', [0, 2, 6, 8], 'amethyst bar', [1, 3, 5, 7], 'jade khopesh', [4]],
-          result: 'amethyst khopesh',
-        },
-        {
-          name: 'upgrade_jade_chainmail',
-          recipe: [['flux', [0, 2, 6, 8], 'amethyst bar', [1, 3, 5, 7], 'jade chainmail', [4]]],
-          result: 'amethyst chainmail',
-        },
-      ],
-      // Downgrade
-      [
-        {
-          name: 'downgrade_empowered_quartz_loop_of_aggression',
-          recipe: ['flux', [1], 'empowered quartz loop of aggression', [4], 'tongs', [7]],
-          result: 'quartz loop of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_quartz_loop_of_fortune',
-          recipe: ['flux', [1], 'empowered quartz loop of fortune', [4], 'tongs', [7]],
-          result: 'quartz loop of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_quartz_loop_of_luck',
-          recipe: ['flux', [1], 'empowered quartz loop of luck', [4], 'tongs', [7]],
-          result: 'quartz loop of luck',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_loop_of_aggression',
-          recipe: ['flux', [1], 'empowered jade loop of aggression', [4], 'tongs', [7]],
-          result: 'jade loop of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_loop_of_fortune',
-          recipe: ['flux', [1], 'empowered jade loop of fortune', [4], 'tongs', [7]],
-          result: 'jade loop of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_loop_of_luck',
-          recipe: ['flux', [1], 'empowered jade loop of luck', [4], 'tongs', [7]],
-          result: 'jade loop of luck',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_loop_of_aggression',
-          recipe: ['flux', [1], 'empowered amethyst loop of aggression', [4], 'tongs', [7]],
-          result: 'amethyst loop of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_loop_of_fortune',
-          recipe: ['flux', [1], 'empowered amethyst loop of fortune', [4], 'tongs', [7]],
-          result: 'amethyst loop of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_loop_of_luck',
-          recipe: ['flux', [1], 'empowered amethyst loop of luck', [4], 'tongs', [7]],
-          result: 'amethyst loop of luck',
-          warning: downgradeWarning,
-        },
-      ],
-      [
-        {
-          name: 'downgrade_empowered_quartz_prism_of_aggression',
-          recipe: ['flux', [1], 'empowered quartz prism of aggression', [4], 'tongs', [7]],
-          result: 'quartz prism of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_quartz_prism_of_fortune',
-          recipe: ['flux', [1], 'empowered quartz prism of fortune', [4], 'tongs', [7]],
-          result: 'quartz prism of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_quartz_prism_of_luck',
-          recipe: ['flux', [1], 'empowered quartz prism of luck', [4], 'tongs', [7]],
-          result: 'quartz prism of luck',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_trifocal_of_aggression',
-          recipe: ['flux', [1], 'empowered jade trifocal of aggression', [4], 'tongs', [7]],
-          result: 'jade trifocal of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_trifocal_of_fortune',
-          recipe: ['flux', [1], 'empowered jade trifocal of fortune', [4], 'tongs', [7]],
-          result: 'jade trifocal of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_jade_trifocal_of_luck',
-          recipe: ['flux', [1], 'empowered jade trifocal of luck', [4], 'tongs', [7]],
-          result: 'jade trifocal of luck',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_totality_of_aggression',
-          recipe: ['flux', [1], 'empowered amethyst totality of aggression', [4], 'tongs', [7]],
-          result: 'amethyst totality of aggression',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_totality_of_fortune',
-          recipe: ['flux', [1], 'empowered amethyst totality of fortune', [4], 'tongs', [7]],
-          result: 'amethyst totality of fortune',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_empowered_amethyst_totality_of_luck',
-          recipe: ['flux', [1], 'empowered amethyst totality of luck', [4], 'tongs', [7]],
-          result: 'amethyst totality of luck',
-          warning: downgradeWarning,
-        },
-      ],
-      [
-        {
-          name: 'downgrade_impure_bronze_cuirass',
-          recipe: ['flux', [1], 'impure bronze cuirass', [4], 'tongs', [7]],
-          result: 'impure bronze segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_bronze_cuirass',
-          recipe: ['flux', [1], 'bronze cuirass', [4], 'tongs', [7]],
-          result: 'bronze segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_iron_cuirass',
-          recipe: ['flux', [1], 'iron cuirass', [4], 'tongs', [7]],
-          result: 'iron segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_steel_cuirass',
-          recipe: ['flux', [1], 'steel cuirass', [4], 'tongs', [7]],
-          result: 'steel segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_gold_cuirass',
-          recipe: ['flux', [1], 'gold cuirass', [4], 'tongs', [7]],
-          result: 'gold segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_mythril_cuirass',
-          recipe: ['flux', [1], 'mythril cuirass', [4], 'tongs', [7]],
-          result: 'mythril segmentata',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_adamantium_cuirass',
-          recipe: ['flux', [1], 'adamantium cuirass', [4], 'tongs', [7]],
-          result: 'adamantium segmentata',
-          warning: downgradeWarning,
-        },
-      ],
-      [
-        {
-          name: 'downgrade_impure_bronze_claymore',
-          recipe: ['flux', [1], 'impure bronze claymore', [4], 'tongs', [7]],
-          result: 'impure bronze billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_bronze_claymore',
-          recipe: ['flux', [1], 'bronze claymore', [4], 'tongs', [7]],
-          result: 'bronze billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_iron_claymore',
-          recipe: ['flux', [1], 'iron claymore', [4], 'tongs', [7]],
-          result: 'iron billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_steel_claymore',
-          recipe: ['flux', [1], 'steel claymore', [4], 'tongs', [7]],
-          result: 'steel billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_gold_claymore',
-          recipe: ['flux', [1], 'gold claymore', [4], 'tongs', [7]],
-          result: 'gold billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_mythril_claymore',
-          recipe: ['flux', [1], 'mythril claymore', [4], 'tongs', [7]],
-          result: 'mythril billhook',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_adamantium_claymore',
-          recipe: ['flux', [1], 'adamantium claymore', [4], 'tongs', [7]],
-          result: 'adamantium billhook',
-          warning: downgradeWarning,
-        },
-      ],
-      [
-        {
-          name: 'downgrade_quartz_chainmail',
-          recipe: ['flux', [1], 'quartz chainmail', [4], 'tongs', [7]],
-          result: 'quartz lamellar',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_jade_chainmail',
-          recipe: ['flux', [1], 'jade chainmail', [4], 'tongs', [7]],
-          result: 'jade lamellar',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_amethyst_chainmail',
-          recipe: ['flux', [1], 'amethyst chainmail', [4], 'tongs', [7]],
-          result: 'amethyst lamellar',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_quartz_khopesh',
-          recipe: ['flux', [1], 'quartz khopesh', [4], 'tongs', [7]],
-          result: 'quartz guandao',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_jade_khopesh',
-          recipe: ['flux', [1], 'jade khopesh', [4], 'tongs', [7]],
-          result: 'jade guandao',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_amethyst_khopesh',
-          recipe: ['flux', [1], 'amethyst khopesh', [4], 'tongs', [7]],
-          result: 'amethyst guandao',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_mythril_armguards',
-          recipe: ['mythril armguards', [4], 'flux', [7]],
-          result: 'gold armguards',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_adamantium_armguards',
-          recipe: ['adamantium armguards', [4], 'flux', [7]],
-          result: 'gold armguards',
-          warning: downgradeWarning,
-        },
-      ],
-      // Melt
       [
         {
           name: 'impure_bronze_bar_to_ore',
@@ -1012,219 +694,26 @@
     ],
     Jewelry: [
       [
-        {name: 'carbon-crystalline_quartz', recipe: ['quartz bar', [4], 'lump of coal', [5]]},
+        {name: 'carbon-crystalline_quartz', recipe: ['quartz bar', [4], 'lump of coal', [5]], result: undefined},
         {
           name: 'carbon-crystalline_quartz_necklace',
           recipe: ['carbon-crystalline quartz', [4], 'glass shards', [1]],
+          result: undefined,
         },
         {
           name: 'exquisite_constellation_of_emeralds',
           recipe: ['emerald', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
+          result: undefined,
         },
         {
           name: 'exquisite_constellation_of_sapphires',
           recipe: ['sapphire', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
+          result: undefined,
         },
         {
           name: 'exquisite_constellation_of_rubies',
           recipe: ['ruby', [3, 5, 6, 8], 'amethyst bar', [4, 7]],
-        },
-      ],
-      [
-        {
-          name: 'quartz_prism_of_aggression',
-          recipe: [
-            'emerald chip',
-            [0, 2, 3, 5, 6, 8],
-            'quartz bar',
-            [1],
-            'impure bronze bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-          ],
-        },
-        {
-          name: 'quartz_prism_of_fortune',
-          recipe: [
-            'ruby chip',
-            [0, 2, 3, 5, 6, 8],
-            'quartz bar',
-            [1],
-            'impure bronze bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-          ],
-        },
-        {
-          name: 'quartz_prism_of_luck',
-          recipe: [
-            'sapphire chip',
-            [0, 2, 3, 5, 6, 8],
-            'quartz bar',
-            [1],
-            'impure bronze bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-          ],
-        },
-        {
-          name: 'quartz_loop_of_aggression',
-          recipe: ['emerald chip', [1], 'silver ring of gazellia', [4], 'quartz bar', [7]],
-        },
-        {
-          name: 'quartz_loop_of_fortune',
-          recipe: ['ruby chip', [1], 'silver ring of gazellia', [4], 'quartz bar', [7]],
-        },
-        {
-          name: 'quartz_loop_of_luck',
-          recipe: ['sapphire chip', [1], 'silver ring of gazellia', [4], 'quartz bar', [7]],
-        },
-      ],
-      [
-        {
-          name: 'jade_trifocal_of_aggression',
-          recipe: [
-            'jade bar',
-            [0, 1, 2],
-            'emerald',
-            [3, 5],
-            'bronze bar',
-            [7],
-            'carbon-crystalline quartz necklace'[4],
-          ],
-        },
-        {
-          name: 'jade_trifocal_of_fortune',
-          recipe: ['jade bar', [0, 1, 2], 'ruby', [3, 5], 'bronze bar', [7], 'carbon-crystalline quartz necklace'[4]],
-        },
-        {
-          name: 'jade_trifocal_of_luck',
-          recipe: [
-            'jade bar',
-            [0, 1, 2],
-            'sapphire',
-            [3, 5],
-            'bronze bar',
-            [7],
-            'carbon-crystalline quartz necklace'[4],
-          ],
-        },
-        {
-          name: 'jade_loop_of_aggression',
-          recipe: ['emerald', [1], 'silver ring of gazellia', [4], 'jade bar', [3, 5]],
-        },
-        {
-          name: 'jade_loop_of_fortune',
-          recipe: ['ruby', [1], 'silver ring of gazellia', [4], 'jade bar', [3, 5]],
-        },
-        {
-          name: 'jade_loop_of_luck',
-          recipe: ['sapphire', [1], 'silver ring of gazellia', [4], 'jade bar', [3, 5]],
-        },
-      ],
-      [
-        {
-          name: 'amethyst_totality_of_aggression',
-          recipe: [
-            'amethyst bar',
-            [0, 1, 2],
-            'emerald',
-            [3, 5],
-            'gold bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-            'exquisite constellation of emeralds',
-            [6],
-          ],
-        },
-        {
-          name: 'amethyst_totality_of_aggression',
-          recipe: [
-            'amethyst bar',
-            [0, 1, 2],
-            'emerald',
-            [3, 5],
-            'gold bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-            'exquisite constellation of emeralds',
-            [6],
-          ],
-        },
-        {
-          name: 'amethyst_totality_of_aggression',
-          recipe: [
-            'amethyst bar',
-            [0, 1, 2],
-            'emerald',
-            [3, 5],
-            'gold bar',
-            [7],
-            'carbon-crystalline quartz necklace',
-            [4],
-            'exquisite constellation of emeralds',
-            [6],
-          ],
-        },
-        {
-          name: 'amethyst_loop_of_aggression',
-          recipe: ['emerald', [0, 1, 2], 'silver ring of gazellia', [4], 'amethyst bar', [3, 5, 7]],
-        },
-        {
-          name: 'amethyst_loop_of_fortune',
-          recipe: ['ruby', [0, 1, 2], 'silver ring of gazellia', [4], 'amethyst bar', [3, 5, 7]],
-        },
-        {
-          name: 'amethyst_loop_of_luck',
-          recipe: ['sapphire', [0, 1, 2], 'silver ring of gazellia', [4], 'amethyst bar', [3, 5, 7]],
-        },
-      ],
-      [
-        {name: 'empowered_quartz_loop_of_aggression', recipe: ['quartz loop of aggression', [4], 'quartz bar', [7]]},
-        {name: 'empowered_quartz_loop_of_fortune', recipe: ['quartz loop of fortune', [4], 'quartz bar', [7]]},
-        {name: 'empowered_quartz_loop_of_luck', recipe: ['quartz loop of luck', [4], 'quartz bar', [7]]},
-        {name: 'empowered_jade_loop_of_aggression', recipe: ['jade loop of aggression', [4], 'jade bar', [1, 7]]},
-        {name: 'empowered_jade_loop_of_fortune', recipe: ['jade loop of fortune', [4], 'jade bar', [1, 7]]},
-        {name: 'empowered_jade_loop_of_luck', recipe: ['jade loop of luck', [4], 'jade bar', [1, 7]]},
-        {
-          name: 'empowered_amethyst_loop_of_aggression',
-          recipe: ['amethyst loop of aggression', [4], 'amethyst bar', [1, 5, 7]],
-        },
-        {
-          name: 'empowered_amethyst_loop_of_fortune',
-          recipe: ['amethyst loop of fortune', [4], 'amethyst bar', [1, 5, 7]],
-        },
-        {name: 'empowered_amethyst_loop_of_luck', recipe: ['amethyst loop of luck', [4], 'amethyst bar', [1, 5, 7]]},
-      ],
-      [
-        {
-          name: 'empowered_quartz_prism_of_aggression',
-          recipe: ['quartz prism of aggression', [4], 'quartz bar', [3, 5]],
-        },
-        {name: 'empowered_quartz_prism_of_fortune', recipe: ['quartz prism of fortune', [4], 'quartz bar', [3, 5]]},
-        {name: 'empowered_quartz_prism_of_luck', recipe: ['quartz prism of luck', [4], 'quartz bar', [3, 5]]},
-        {
-          name: 'empowered_jade_trifocal_of_aggression',
-          recipe: ['jade trifocal of aggression', [4], 'jade bar', [1, 3, 5]],
-        },
-        {name: 'empowered_jade_trifocal_of_fortune', recipe: ['jade trifocal of fortune', [4], 'jade bar', [1, 3, 5]]},
-        {name: 'empowered_jade_trifocal_of_luck', recipe: ['jade trifocal of luck', [4], 'jade bar', [1, 3, 5]]},
-        {
-          name: 'empowered_amethyst_totality_of_aggression',
-          recipe: ['amethyst totality of aggression', [4], 'amethyst bar', [0, 1, 2, 3, 5]],
-        },
-        {
-          name: 'empowered_amethyst_totality_of_fortune',
-          recipe: ['amethyst totality of fortune', [4], 'amethyst bar', [0, 1, 2, 3, 5]],
-        },
-        {
-          name: 'empowered_amethyst_totality_of_luck',
-          recipe: ['amethyst totality of luck', [4], 'amethyst bar', [0, 1, 2, 3, 5]],
+          result: undefined,
         },
       ],
     ],
@@ -1233,14 +722,17 @@
         {
           name: 'The_Golden_Throne',
           recipe: ['A Wild Artifaxx', [3], 'A Red Hot Flamed', [4], 'The Golden Daedy', [5]],
+          result: undefined,
         },
         {
           name: 'Biggest_Banhammer',
           recipe: ["Stump's Banhammer", [3], 'thewhales Kiss', [4], 'Neos Ratio Cheats', [5]],
+          result: undefined,
         },
         {
           name: 'Staff_Beauty_Parlor',
           recipe: ['Alpaca Out of Nowhere!', [3], 'Nikos Transformation', [4], 'lepik le prick', [5]],
+          result: undefined,
         },
         {
           name: 'random_lvl2_staff_card',
@@ -1252,10 +744,12 @@
             'Ze do Caixao Coffin Joe Card',
             [5],
           ],
+          result: undefined,
         },
         {
           name: 'Realm_of_Staff',
           recipe: ['The Golden Throne', [3], 'Biggest Banhammer', [4], 'Staff Beauty Parlor', [5]],
+          result: undefined,
         },
       ],
       [
@@ -1290,37 +784,41 @@
         {
           name: 'Random_Lootbox',
           recipe: ['Realm of Staff', [0], 'Goal Pole', [4], 'Interdimensional Portal', [6]],
+          result: undefined,
         },
-        {name: 'Dins_Lootbox', recipe: ['Realm of Staff', [0, 6], 'Goal Pole', [4]]},
-        {name: 'Farores_Lootbox', recipe: ['Goal Pole', [0, 6], 'Realm of Staff', [4]]},
-        {name: 'Nayrus_Lootbox', recipe: ['Interdimensional Portal', [0, 6], 'Realm of Staff', [4]]},
+        {name: 'Dins_Lootbox', recipe: ['Realm of Staff', [0, 6], 'Goal Pole', [4]], result: undefined},
+        {name: 'Farores_Lootbox', recipe: ['Goal Pole', [0, 6], 'Realm of Staff', [4]], result: undefined},
+        {name: 'Nayrus_Lootbox', recipe: ['Interdimensional Portal', [0, 6], 'Realm of Staff', [4]], result: undefined},
       ],
     ],
     Xmas_Crafting: [
       [
-        {name: 'Dirt_5', recipe: ['Cyberpunk 2077', [4], 'Watch Dogs Legion', [5]]},
-        {name: 'Gazelle', recipe: ['Genshin Impact', [4], 'Animal Crossing', [5]]},
-        {name: 'Mafia', recipe: ['Dirt 5', [4], 'Gazelle', [5]]},
-        {name: 'Christmas_Bauble_Badge', recipe: ['Broken Bauble Fragment', [1, 2, 4, 5]]},
+        {name: 'Dirt_5', recipe: ['Cyberpunk 2077', [4], 'Watch Dogs Legion', [5]], result: undefined},
+        {name: 'Gazelle', recipe: ['Genshin Impact', [4], 'Animal Crossing', [5]], result: undefined},
+        {name: 'Mafia', recipe: ['Dirt 5', [4], 'Gazelle', [5]], result: undefined},
+        {name: 'Christmas_Bauble_Badge', recipe: ['Broken Bauble Fragment', [1, 2, 4, 5]], result: undefined},
         {
           name: 'Christmas_Impostor_Bauble',
           recipe: ['Red Crewmate Bauble', [3], 'Green Crewmate Bauble', [4], 'Cyan Crewmate Bauble', [5]],
+          result: undefined,
         },
         {
           name: 'lucky_four-leaves_holly',
           recipe: ['Wilted Four-Leaves Holly', [4], 'black elderberries', [2, 5, 8]],
+          result: undefined,
         },
       ],
       [
-        {name: 'snowball', recipe: ['pile of snow', [4, 7]]},
-        {name: 'large_snowball', recipe: ['pile of snow', [1, 3, 5, 7], 'snowball', [4]]},
-        {name: 'hot_chocolate', recipe: ['christmas spices', [1], 'snowball', [4], 'bowl', [7]]},
-        {name: 'peppermint_hot_chocolate', recipe: ['candy cane', [1], 'hot chocolate', [4]]},
+        {name: 'snowball', recipe: ['pile of snow', [4, 7]], result: undefined},
+        {name: 'large_snowball', recipe: ['pile of snow', [1, 3, 5, 7], 'snowball', [4]], result: undefined},
+        {name: 'hot_chocolate', recipe: ['christmas spices', [1], 'snowball', [4], 'bowl', [7]], result: undefined},
+        {name: 'peppermint_hot_chocolate', recipe: ['candy cane', [1], 'hot chocolate', [4]], result: undefined},
         {
           name: 'hyper_realistic_eggnog',
           recipe: ['christmas spices', [7], 'snowball', [4], 'bowl', [1]],
+          result: undefined,
         },
-        {name: 'pile_of_charcoal', recipe: ['lump of coal', [1, 3, 4, 5]]},
+        {name: 'pile_of_charcoal', recipe: ['lump of coal', [1, 3, 4, 5]], result: undefined},
         {
           name: 'snowman',
           recipe: [
@@ -1339,69 +837,77 @@
             'bowl',
             [6],
           ],
+          result: undefined,
         },
       ],
       [
-        {name: 'Abominable_Santa', recipe: ['Perfect Snowball', [4], 'Santa Suit', [5]]},
-        {name: 'Icy_Kisses', recipe: ['Perfect Snowball', [4], 'Mistletoe', [5]]},
-        {name: 'Sexy_Santa', recipe: ['Santa Suit', [4], 'Mistletoe', [5]]},
+        {name: 'Abominable_Santa', recipe: ['Perfect Snowball', [4], 'Santa Suit', [5]], result: undefined},
+        {name: 'Icy_Kisses', recipe: ['Perfect Snowball', [4], 'Mistletoe', [5]], result: undefined},
+        {name: 'Sexy_Santa', recipe: ['Santa Suit', [4], 'Mistletoe', [5]], result: undefined},
         {
           name: 'Christmas_Cheer',
           recipe: ['Abominable Santa', [3], 'Icy Kisses', [4], 'Sexy Santa', [5]],
+          result: undefined,
         },
         {
           name: 'Gingerbread_Doomslayer',
           recipe: ['Gingerbread Kitana', [4], 'Gingerbread Marston', [5]],
+          result: undefined,
         },
         {
           name: 'Mario_Christmas',
           recipe: ['Millenium Falcon Gingerbread', [4], 'Gingerbread AT Walker', [5]],
+          result: undefined,
         },
         {
           name: 'Baby_Yoda_With_Gingerbread',
           recipe: ['Gingerbread Doomslayer', [4], 'Mario Christmas', [5]],
+          result: undefined,
         },
       ],
       [
         {
           name: 'Grievous',
           recipe: ['Santa Claus Is Out There', [3], 'Back to the Future', [4], 'Gremlins', [5]],
+          result: undefined,
         },
-        {name: 'Mando', recipe: ['Picard', [0], 'Braveheart', [1], 'Indy', [2]]},
-        {name: 'Doomguy', recipe: ['Big Lebowski', [6], 'Die Hard', [7], 'Jurassic Park', [8]]},
+        {name: 'Mando', recipe: ['Picard', [0], 'Braveheart', [1], 'Indy', [2]], result: undefined},
+        {name: 'Doomguy', recipe: ['Big Lebowski', [6], 'Die Hard', [7], 'Jurassic Park', [8]], result: undefined},
         {
           name: 'Have_a_Breathtaking_Christmas',
           recipe: ['Grievous', [1], 'Mando', [4], 'Doomguy', [7]],
+          result: undefined,
         },
-        {name: 'Young_Snowman', recipe: ['snowman', [4], 'snowman cookie', [1, 3, 5, 7]]},
+        {name: 'Young_Snowman', recipe: ['snowman', [4], 'snowman cookie', [1, 3, 5, 7]], result: undefined},
       ],
     ],
     Birthday: [
       [
-        {name: 'Future_Gazelle', recipe: ['Ripped Gazelle', [3], 'Gamer Gazelle', [4]]},
-        {name: 'Alien_Gazelle', recipe: ['Ripped Gazelle', [3], 'Fancy Gazelle', [4]]},
-        {name: 'Lucky_Gazelle', recipe: ['Fancy Gazelle', [4], 'Gamer Gazelle', [5]]},
+        {name: 'Future_Gazelle', recipe: ['Ripped Gazelle', [3], 'Gamer Gazelle', [4]], result: undefined},
+        {name: 'Alien_Gazelle', recipe: ['Ripped Gazelle', [3], 'Fancy Gazelle', [4]], result: undefined},
+        {name: 'Lucky_Gazelle', recipe: ['Fancy Gazelle', [4], 'Gamer Gazelle', [5]], result: undefined},
         {
           name: 'Supreme_Gazelle',
           recipe: ['Future Gazelle', [3], 'Alien Gazelle', [4], 'Lucky Gazelle', [5]],
+          result: undefined,
         },
-        {name: 'birthday_licks_badge_-_9th', recipe: ['lick badge bits', [3, 4, 5, 6, 7, 8]]},
+        {name: 'birthday_licks_badge_-_9th', recipe: ['lick badge bits', [3, 4, 5, 6, 7, 8]], result: undefined},
       ],
       [
-        {name: 'A_Fair_Fight', recipe: ['Exodus Truce', [4], 'Gazelle Breaking Bad', [5]]},
-        {name: 'What_an_Adventure', recipe: ['Home Sweet Home', [4], 'Birthday Battle Kart', [5]]},
-        {name: 'After_Party', recipe: ['A Fair Fight', [4], 'What an Adventure', [5]]},
-        {name: 'birthday_gazelle_badge_-_10th', recipe: ['birthday leaves', [0, 2, 3, 5, 6, 8]]},
+        {name: 'A_Fair_Fight', recipe: ['Exodus Truce', [4], 'Gazelle Breaking Bad', [5]], result: undefined},
+        {name: 'What_an_Adventure', recipe: ['Home Sweet Home', [4], 'Birthday Battle Kart', [5]], result: undefined},
+        {name: 'After_Party', recipe: ['A Fair Fight', [4], 'What an Adventure', [5]], result: undefined},
+        {name: 'birthday_gazelle_badge_-_10th', recipe: ['birthday leaves', [0, 2, 3, 5, 6, 8]], result: undefined},
       ],
       [
-        {name: 'Dr_Mario', recipe: ['Bill Rizer', [3], 'Donkey Kong', [4], 'Duck Hunt Dog', [5]]},
-        {name: 'Link', recipe: ['Pit', [3], 'Little Mac', [4], 'Mega Man', [5]]},
-        {name: 'Kirby', recipe: ['Pac-Man', [3], 'Samus Aran', [4], 'Simon Belmont', [5]]},
-        {name: 'Black_Mage', recipe: ['Dr Mario', [0], 'Link', [4], 'Kirby', [8]]},
-        {name: 'birthday_gazelle_badge_-_11th', recipe: ['party pipe badge bit', [0, 4, 5, 8]]},
+        {name: 'Dr_Mario', recipe: ['Bill Rizer', [3], 'Donkey Kong', [4], 'Duck Hunt Dog', [5]], result: undefined},
+        {name: 'Link', recipe: ['Pit', [3], 'Little Mac', [4], 'Mega Man', [5]], result: undefined},
+        {name: 'Kirby', recipe: ['Pac-Man', [3], 'Samus Aran', [4], 'Simon Belmont', [5]], result: undefined},
+        {name: 'Black_Mage', recipe: ['Dr Mario', [0], 'Link', [4], 'Kirby', [8]], result: undefined},
+        {name: 'birthday_gazelle_badge_-_11th', recipe: ['party pipe badge bit', [0, 4, 5, 8]], result: undefined},
       ],
       [
-        {name: '12th_birthday_badge', recipe: ['slice of birthday cake', [0, 2, 4, 6, 8]]},
+        {name: '12th_birthday_badge', recipe: ['slice of birthday cake', [0, 2, 4, 6, 8]], result: undefined},
         {
           name: 'Red_Dragon',
           recipe: [
@@ -1420,6 +926,7 @@
             'Supreme Gazelle',
             [8],
           ],
+          result: undefined,
         },
         {
           name: 'Green_Dragon',
@@ -1439,6 +946,7 @@
             'Supreme Gazelle',
             [8],
           ],
+          result: undefined,
         },
         {
           name: 'Blue_Dragon',
@@ -1458,6 +966,7 @@
             'Supreme Gazelle',
             [8],
           ],
+          result: undefined,
         },
         {
           name: 'Gold_Dragon',
@@ -1477,6 +986,7 @@
             'Supreme Gazelle',
             [8],
           ],
+          result: undefined,
         },
       ],
     ],
@@ -1485,26 +995,32 @@
         {
           name: 'Kirlia_and_Meloetta',
           recipe: ['Sonic and Amy', [3], 'Valentine sugar heart', [4], 'Yoshi and Birdo', [5]],
+          result: undefined,
         },
         {
           name: 'Dom_and_Maria',
           recipe: ['Aerith and Cloud', [3], 'Valentine sugar heart', [4], 'Master Chief and Cortana', [5]],
+          result: undefined,
         },
         {
           name: 'Mr_and_Mrs_Pac_Man',
           recipe: ['Kirlia and Meloetta', [3], 'Valentine sugar heart', [4], 'Dom and Maria', [5]],
+          result: undefined,
         },
         {
           name: 'Angelise_Reiter',
           recipe: ['Chainsaw Chess', [3], 'Valentine chocolate heart', [4], 'Chainsaw Wizard', [5]],
+          result: undefined,
         },
         {
           name: 'Sophitia',
           recipe: ['Ivy Valentine', [3], 'Valentine chocolate heart', [4], 'Jill Valentine', [5]],
+          result: undefined,
         },
         {
           name: 'Yennefer',
           recipe: ['Angelise Reiter', [3], 'Valentine chocolate heart', [4], 'Sophitia', [5]],
+          result: undefined,
         },
       ],
       [
@@ -1513,143 +1029,69 @@
         {
           name: 'Cupids_magical_feather',
           recipe: ['quartz bar', [0, 2], 'jade bar', [1], 'gold ore', [4], 'amethyst dust', [7]],
+          result: undefined,
         },
-        {name: 'Valentine_2022_Badge', recipe: ['rose petals', [0, 2, 4, 6, 8]]},
-        {
-          name: 'special_box',
-          recipe: ['Mr and Mrs Pac Man', [0], 'Black Mage', [2], 'Yennefer', [6], 'King Boo', [8]],
-        },
-      ],
-      // Cupid's Winged Boots
-      [
         {
           name: 'Cupids_winged_boots',
           recipe: ['Symbol of love', [1], 'Old worn boots', [4], 'Cupids magical feather', [6, 8]],
+          result: undefined,
         },
+        {name: 'Valentine_2022_Badge', recipe: ['rose petals', [0, 2, 4, 6, 8]], result: undefined},
         {
-          name: 'cupids_winged_boots_of_aggression',
-          recipe: ['emerald chip', [1], 'cupids winged boots', [4], 'cupids magical feather', [7]],
-        },
-        {
-          name: 'cupids_winged_boots_of_fortune',
-          recipe: ['ruby chip', [1], 'cupids winged boots', [4], 'cupids magical feather', [7]],
-        },
-        {
-          name: 'cupids_winged_boots_of_luck',
-          recipe: ['sapphire chip', [1], 'cupids winged boots', [4], 'cupids magical feather', [7]],
-        },
-      ],
-      [
-        {
-          name: 'downgrade_cupids_winged_boots_of_aggression',
-          recipe: ['flux', [1, 3, 5, 7], 'cupids winged boots of aggression', [4]],
-          result: 'cupids winged boots',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_cupids_winged_boots_of_fortune',
-          recipe: ['flux', [1, 3, 5, 7], 'cupids winged boots of fortune', [4]],
-          result: 'cupids winged boots',
-          warning: downgradeWarning,
-        },
-        {
-          name: 'downgrade_cupids_winged_boots_of_luck',
-          recipe: ['flux', [1, 3, 5, 7], 'cupids winged boots of luck', [4]],
-          result: 'cupids winged boots',
-          warning: downgradeWarning,
-        },
-      ],
-      // Cupid's Wings
-      [
-        {name: 'cupids_gold_wings', recipe: [['sapphire', [0, 2], 'gold bar', [6, 8], 'cupids wings', [4]]]},
-        {
-          name: 'cupids_mythril_wings',
-          recipe: [['sapphire', [0, 1, 2], 'mythril bar', [6, 7, 8], 'cupids wings', [4]]],
-        },
-        {
-          name: 'cupids_adamantium_wings',
-          recipe: [['sapphire', [0, 1, 2, 3], 'adamantium bar', [5, 6, 7, 8], 'cupids wings', [4]]],
-        },
-        {
-          name: 'repair_cupids_wings',
-          recipe: [['sapphire', [1], 'gold bar', [6, 8], 'cupids wings', [4]]],
-          result: 'cupids wings',
-        },
-        {
-          name: 'repair_cupids_gold_wings',
-          recipe: [['sapphire', [1], 'gold bar', [7], 'cupids gold wings', [4]]],
-          result: 'cupids gold wings',
-        },
-        {
-          name: 'repair_cupids_mythril_wings',
-          recipe: [['sapphire', [0, 2], 'mythril bar', [7], 'cupids mythril wings', [4]]],
-          result: 'cupids mythril wings',
-        },
-        {
-          name: 'repair_cupids_adamantium_wings',
-          recipe: [['sapphire', [0, 1, 2], 'adamantium bar', [7], 'cupids adamantium wings', [4]]],
-          result: 'cupids adamantium wings',
-        },
-      ],
-      [
-        {name: 'disassembled_cupids_gold_wings', recipe: ['flux', [1], 'tongs', [7], 'cupids gold wings']},
-        {name: 'disassembled_cupids_mythril_wings', recipe: ['flux', [0, 2], 'tongs', [6, 8], 'cupids mythril wings']},
-        {
-          name: 'disassembled_cupids_adamantium_wings',
-          recipe: ['flux', [0, 1, 2], 'tongs', [6, 7, 8], 'cupids adamantium wings'],
-        },
-        {name: 'cupids_cradle', recipe: ['gods cradle', [4], 'cupids tiara', [5]]},
-        {
-          name: 'disassembled_cupids_cradle',
-          recipe: ['flux', [0, 1, 2, 3], 'tongs', [5, 6, 7, 8], 'cupids cradle', [4]],
+          name: 'special_box',
+          recipe: ['Mr and Mrs Pac Man', [0], 'Black Mage', [2], 'Yennefer', [6], 'King Boo', [8]],
+          result: undefined,
         },
       ],
     ],
     Halloween: [
       [
-        {name: 'Stormrage_Pumpkin', recipe: ['Rotting Pumpkin', [4], 'Carved Pumpkin', [5]]},
-        {name: 'Russian_Pumpkin', recipe: ['Carved Pumpkin', [4], 'Ripe Pumpkin', [5]]},
-        {name: 'Green_Mario_Pumpkin', recipe: ['Ripe Pumpkin', [4], 'Rotting Pumpkin', [5]]},
+        {name: 'Stormrage_Pumpkin', recipe: ['Rotting Pumpkin', [4], 'Carved Pumpkin', [5]], result: undefined},
+        {name: 'Russian_Pumpkin', recipe: ['Carved Pumpkin', [4], 'Ripe Pumpkin', [5]], result: undefined},
+        {name: 'Green_Mario_Pumpkin', recipe: ['Ripe Pumpkin', [4], 'Rotting Pumpkin', [5]], result: undefined},
         {
           name: 'Lame_Pumpkin_Trio',
           recipe: ['Stormrage Pumpkin', [3], 'Russian Pumpkin', [4], 'Green Mario Pumpkin', [5]],
+          result: undefined,
         },
-        {name: 'Halloween_Pumpkin_Badge', recipe: ['pumpkin badge bits', [3, 4, 5, 6, 7, 8]]},
+        {name: 'Halloween_Pumpkin_Badge', recipe: ['pumpkin badge bits', [3, 4, 5, 6, 7, 8]], result: undefined},
       ],
       [
-        {name: 'Memory_Boost', recipe: ['Bloody Mario', [4], 'Mommys Recipe', [5]]},
-        {name: 'Skultilla_The_Cake_Guard', recipe: ['Link Was Here', [4], 'Gohma Sees You', [5]]},
-        {name: 'Who_Eats_Whom', recipe: ['Memory Boost', [4], 'Skultilla The Cake Guard', [5]]},
-        {name: 'Halloween_Cupcake_Badge', recipe: ['cupcake crumbles', [3, 4, 5, 6, 7, 8]]},
+        {name: 'Memory_Boost', recipe: ['Bloody Mario', [4], 'Mommys Recipe', [5]], result: undefined},
+        {name: 'Skultilla_The_Cake_Guard', recipe: ['Link Was Here', [4], 'Gohma Sees You', [5]], result: undefined},
+        {name: 'Who_Eats_Whom', recipe: ['Memory Boost', [4], 'Skultilla The Cake Guard', [5]], result: undefined},
+        {name: 'Halloween_Cupcake_Badge', recipe: ['cupcake crumbles', [3, 4, 5, 6, 7, 8]], result: undefined},
       ],
       [
-        {name: 'Ghostbusters', recipe: ['Blinky', [3], 'Clyde', [4]]},
-        {name: 'Boo', recipe: ['Pinky', [3], 'Inky', [4]]},
-        {name: 'King_Boo', recipe: ['Ghostbusters', [3], 'Boo', [4]]},
-        {name: 'Tombstone_Badge', recipe: ['haunted tombstone shard', [0, 1, 2, 6, 7, 8]]},
+        {name: 'Ghostbusters', recipe: ['Blinky', [3], 'Clyde', [4]], result: undefined},
+        {name: 'Boo', recipe: ['Pinky', [3], 'Inky', [4]], result: undefined},
+        {name: 'King_Boo', recipe: ['Ghostbusters', [3], 'Boo', [4]], result: undefined},
+        {name: 'Tombstone_Badge', recipe: ['haunted tombstone shard', [0, 1, 2, 6, 7, 8]], result: undefined},
       ],
     ],
     Adventure_Club: [
       [
-        {name: 'regenerate', recipe: ['glowing leaves', [4]]},
-        {name: 'hypnosis', recipe: ['glowing leaves', [3, 4, 5]]},
-        {name: 'muddle', recipe: ['glowing leaves', [1, 4, 7]]},
-        {name: 'parasite', recipe: ['glowing leaves', [0, 1, 2, 6, 7, 8]]},
-        {name: 'burst_of_light', recipe: ['condensed light', [4]]},
-        {name: 'dark_orb', recipe: ['bottled ghost', [4]]},
-        {name: 'burning_ash_cloud', recipe: ['glowing ash', [1, 3, 4, 5, 7]]},
+        {name: 'regenerate', recipe: ['glowing leaves', [4]], result: undefined},
+        {name: 'hypnosis', recipe: ['glowing leaves', [3, 4, 5]], result: undefined},
+        {name: 'muddle', recipe: ['glowing leaves', [1, 4, 7]], result: undefined},
+        {name: 'parasite', recipe: ['glowing leaves', [0, 1, 2, 6, 7, 8]], result: undefined},
+        {name: 'burst_of_light', recipe: ['condensed light', [4]], result: undefined},
+        {name: 'dark_orb', recipe: ['bottled ghost', [4]], result: undefined},
+        {name: 'burning_ash_cloud', recipe: ['glowing ash', [1, 3, 4, 5, 7]], result: undefined},
       ],
       [
-        {name: '3_backpack_slots', recipe: ['cloth', [4], 'hide', [3, 5]]},
-        {name: '4_backpack_slots', recipe: ['cloth', [4], 'hide', [1, 3, 5, 7]]},
+        {name: '3_backpack_slots', recipe: ['cloth', [4], 'hide', [3, 5]], result: undefined},
+        {name: '4_backpack_slots', recipe: ['cloth', [4], 'hide', [1, 3, 5, 7]], result: undefined},
         {
           name: '6_backpack_slots',
           recipe: ['cloth', [0, 2, 6, 8], 'hide', [1, 3, 5, 7], 'advanced hide', [4]],
+          result: undefined,
         },
-        {name: 'scrappy_gauntlets', recipe: ['scrap', [1, 4, 7]]},
+        {name: 'scrappy_gauntlets', recipe: ['scrap', [1, 4, 7]], result: undefined},
         {
           name: 'troll_tooth_necklace',
           recipe: ['scrap', [7], 'hide', [1], 'troll tooth', [3, 4, 5]],
+          result: undefined,
         },
       ],
     ],
@@ -1673,18 +1115,20 @@
             'carbon-crystalline quartz',
             [6, 7, 8],
           ],
+          result: undefined,
         },
         {
           name: 'Flame_Badge',
           recipe: ['Dins flame', [0], 'Farores flame', [7], 'Nayrus flame', [2], 'flawless amethyst', [4]],
+          result: undefined,
         },
-        {name: 'Nayrus_Username', recipe: ['Nayrus flame', [3], 'green onyx gem', [4]]},
-        {name: 'Farores_Username', recipe: ['Farores flame', [3], 'green onyx gem', [4]]},
-        {name: 'Dins_Username', recipe: ['Dins flame', [3], 'green onyx gem', [4]]},
-        {name: 'Dwarven_Discoball', recipe: ['dwarven gem', [0, 1, 2, 3, 4, 5, 6, 7, 8]]},
-        {name: 'irc_voice_8w', recipe: ['irc voice 2w', [3, 4, 5]]},
+        {name: 'Nayrus_Username', recipe: ['Nayrus flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Farores_Username', recipe: ['Farores flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Dins_Username', recipe: ['Dins flame', [3], 'green onyx gem', [4]], result: undefined},
+        {name: 'Dwarven_Discoball', recipe: ['dwarven gem', [0, 1, 2, 3, 4, 5, 6, 7, 8]], result: undefined},
+        {name: 'irc_voice_8w', recipe: ['irc voice 2w', [3, 4, 5]], result: undefined},
         {name: 'irc_voice_8w_-_low_cost', recipe: ['irc voice 2w - low cost', [1, 3, 4, 5]], result: 'irc voice 8w'},
-        {name: 'irc_voice_1y', recipe: ['irc voice 8w', [0, 1, 2, 3, 4, 5], 'sapphire', [7]]},
+        {name: 'irc_voice_1y', recipe: ['irc voice 8w', [0, 1, 2, 3, 4, 5], 'sapphire', [7]], result: undefined},
       ],
     ],
   };
@@ -1843,9 +1287,8 @@ a.disabled {
       if (ingredients_available[ingr] !== undefined) {
         var onhand = ingredients_available[ingr];
       } else {
-        onhand =
-          $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
-          $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
+        onhand = $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
+            $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
       }
       ingredients_available[ingr] = onhand;
       var avail = Math.floor(onhand / qty);
@@ -1905,7 +1348,9 @@ a.disabled {
         )
         .append($('<button>Craft</button>').click(doCraft))
         .append(
-          $('<button class="quick_craft_button">Craft maximum</button>').click(function () {
+          $(
+            '<button class="quick_craft_button">Craft maximum</button>',
+          ).click(function () {
             if (!$(this).hasClass('quick_craft_button_confirm')) {
               craftNumberSelect.val(currentCraft.available);
               $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
@@ -2009,12 +1454,16 @@ a.disabled {
         ).click(() => close_crafting_submenu()),
         $('<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">').append(
           '<span>Click on the buttons below to show or hide crafting categories - </span>',
-          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(function () {
-            Object.values(books).forEach(({disabled, button}) => {
-              if (!disabled) button.click();
-            });
-          }),
-          $('<button style="background-color: green;" class="quick_craft_button">Show all</button>').click(function () {
+          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(
+            function () {
+              Object.values(books).forEach(({disabled, button}) => {
+                if (!disabled) button.click();
+              });
+            },
+          ),
+          $(
+            '<button style="background-color: green;" class="quick_craft_button">Show all</button>',
+          ).click(function () {
             Object.values(books).forEach(({disabled, button}) => {
               if (disabled) button.click();
             });
