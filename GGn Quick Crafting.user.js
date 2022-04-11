@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.3
+// @version      2.3.1
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -392,7 +392,7 @@
   const oldBooks = GM_getValue('BOOKS_SAVE');
   if (oldBooks && typeof (oldBooks[0] !== 'object')) {
     for (var i = 0; i < oldBooks.length / 2; i++) {
-      books[i].disabled = oldBooks[2 * i] === 0;
+      books[Object.keys(books)[i]].disabled = oldBooks[2 * i + 1] === 0;
     }
     GM_deleteValue('BOOKS_SAVE');
   }
@@ -2067,7 +2067,7 @@ a.disabled {
                 const disabled = (book.disabled = !book.disabled);
                 button.css('opacity', disabled ? 0.2 : 1);
                 $(book.section).css('display', disabled ? 'none' : '');
-                book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
+                if (book.hasOwnProperty('recipes')) book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
                 saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
               });
             if (disabled) {
