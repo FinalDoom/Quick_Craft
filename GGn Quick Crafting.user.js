@@ -814,7 +814,7 @@ a.disabled {
     background-color: red;
 }
 .recipe_buttons {
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
 }
@@ -896,7 +896,7 @@ a.disabled {
       }
     }
 
-    const currentCraft = {available: 10000, ingredients: []};
+    const currentCraft = {available: 10000, max: 0, ingredients: []};
     for (var i = 0; i < recipe.length / 2; ++i) {
       const ingr = recipe[2 * i];
       const qty = recipe[2 * i + 1].length;
@@ -908,9 +908,12 @@ a.disabled {
           $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
       }
       ingredients_available[ingr] = onhand;
-      var avail = Math.floor(onhand / qty);
+      const avail = Math.floor(onhand / qty);
       if (avail < currentCraft.available) {
         currentCraft.available = avail;
+      }
+      if (avail > currentCraft.max) {
+        currentCraft.max = avail;
       }
       currentCraft.ingredients[i] = {name: ingr, id: ingredients[ingr], qty: qty, 'on hand': onhand};
     }
@@ -953,9 +956,8 @@ a.disabled {
         })();
       };
 
-      return $(
-        '<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center; align-self: center;">',
-      )
+      return $('<div>')
+        .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center', alignSelf: 'center'})
         .append(
           (craftNumberSelect = $('<select>').append(
             Array(currentCraft.available)
@@ -977,44 +979,63 @@ a.disabled {
         );
     };
 
-    const createIngredientLine = (ingredName, qtyFirst, qtySecond) =>
-      $(
-        '<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items; center; align-self: center;">',
-      ).append(
-        $('<a class="quick_craft_button">$</a>')
-          .attr('href', `https://gazellegames.net/shop.php?ItemID=${ingredients[ingredName].replace(/^0+/, '')}`)
-          .attr('target', '_blank')
-          .css({
-            borderRadius: '50%',
-            backgroundColor: 'yellow',
-            color: 'black',
-            cursor: 'pointer',
-            padding: '0 .25rem',
-          }),
-        `${titleCaseFromUnderscored(ingredName)}:`,
-        `<div style="display: inline-flex;" class="ingredient_quantity"><span>${qtyFirst}</span><span>/</span><span>${qtySecond}</span></div>`,
-      );
+    const createIngredientLine = (ingredName, qtyOnHand, qtyPerCraft, qtyMaxCraftable) =>
+      $('<div>')
+        .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center', alignSelf: 'center'})
+        .append(
+          $('<a class="quick_craft_button">$</a>')
+            .attr('href', `https://gazellegames.net/shop.php?ItemID=${ingredients[ingredName].replace(/^0+/, '')}`)
+            .attr('target', '_blank')
+            .css({
+              borderRadius: '50%',
+              backgroundColor: 'yellow',
+              color: 'black',
+              cursor: 'pointer',
+              padding: '0 .25rem',
+            }),
+          `${titleCaseFromUnderscored(ingredName)}:`,
+          `<div style="display: inline-flex;" class="ingredient_quantity"><span>${qtyOnHand}</span><span>/</span><span>${qtyPerCraft}</span></div>`,
+          qtyMaxCraftable > Math.floor(qtyOnHand / qtyPerCraft)
+            ? `<span title="Needed for max possible crafts"> (+${qtyMaxCraftable * qtyPerCraft - qtyOnHand})</span>`
+            : '',
+        );
 
     close_crafting_submenu();
     GM_setValue(gmKeyCurrentCraft, craft_name);
     $('#current_craft_box').append(
-      (craftingSubmenu = $(
-        '<div id="crafting-submenu" style="text-align:center; margin-bottom: 1em; display: flex; flex-direction: column; row-gap: 1rem;">',
-      )
+      (craftingSubmenu = $('<div id="crafting-submenu">')
+        .css({textAlign: 'center', marginBottom: '1rem', display: 'flex', flexDirection: 'column', rowGap: '1rem'})
         .append(
-          $(`<div style="margin-bottom: .5rem;">${titleCaseFromUnderscored(result)}</div>`).append(
-            ingredients_available[result] !== undefined ? ` (${ingredients_available[result]} in inventory)` : '',
-          ),
+          $('<div>')
+            .text(titleCaseFromUnderscored(result))
+            .css({marginBottom: '.5rem'})
+            .append(
+              ingredients_available[result] !== undefined ? ` (${ingredients_available[result]} in inventory)` : '',
+            ),
         )
         .append('<div style="margin-bottom: .5rem;">Ingredients:</div>')
         .append(
-          $('<div style="display: flex; flex-direction: column;">').append(
-            currentCraft.ingredients.map((ingredient) =>
-              createIngredientLine(ingredient.name, ingredient['on hand'], ingredient.qty),
+          $('<div>')
+            .css({display: 'flex', flexDirection: 'column'})
+            .append(
+              currentCraft.ingredients.map((ingredient) =>
+                createIngredientLine(ingredient.name, ingredient['on hand'], ingredient.qty, currentCraft.max),
+              ),
             ),
-          ),
         )
-        .append(`<span style="margin-bottom: 1em;">Max possible craft(s): ${currentCraft.available}</span>`)
+        .append(
+          $(`<span>`)
+            .text(`Max available craft(s): ${currentCraft.available}`)
+            .css({marginBottom: '1rem'})
+            .append(
+              currentCraft.available !== currentCraft.max
+                ? $(`<span>`)
+                    .text(`Max possible: (${currentCraft.max})`)
+                    .prop('title', 'Max possible if additional ingredients are purchased')
+                    .css({marginLeft: '10px'})
+                : '',
+            ),
+        )
         .append(createCraftingActions(currentCraft.available))),
     );
   }
@@ -1032,13 +1053,13 @@ a.disabled {
   // Creates a Recipe button.
   //
   const createRecipeButton = (book, {name, recipe, result = name.replace(/_/g, ' ')}) => {
-    return $(
-      `<button style="margin-top: 3px; margin-right: 5px" id="${name}">${titleCaseFromUnderscored(name)}</button>`,
-    )
+    return $(`<button id="${name}">${titleCaseFromUnderscored(name)}</button>`)
       .css({
         backgroundColor: book.bgcolor,
         color: book.color,
         border: '2px solid transparent',
+        marginTop: '3px',
+        marginRight: '5px',
       })
       .focus(function () {
         document.getElementById(name).style.border = '2px solid red';
@@ -1064,79 +1085,86 @@ a.disabled {
       .append(
         '<div id="current_craft_box">',
         '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>',
-        $(
-          '<button style="margin-bottom: 1rem; background-color: red;" class="quick_craft_button">Clear</button>',
-        ).click(() => close_crafting_submenu()),
-        $('<div style="display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">').append(
-          '<span>Click on the buttons below to show or hide crafting categories - </span>',
-          $('<button style="background-color: red;" class="quick_craft_button">Hide all</button>').click(function () {
-            Object.values(books).forEach(({disabled, button}) => {
-              if (!disabled) button.click();
-            });
-          }),
-          $('<button style="background-color: green;" class="quick_craft_button">Show all</button>').click(function () {
-            Object.values(books).forEach(({disabled, button}) => {
-              if (disabled) button.click();
-            });
-          }),
-          $('<input type="checkbox" class="quick_craft_button">Blank line between books</input>')
-            .prop('checked', GM_getValue('SEG', false))
-            .change(function () {
-              const checked = $(this).prop('checked');
-              if (checked) {
-                $('head').append(styleExtraBookSpace);
-              } else {
-                styleExtraBookSpace.remove();
-              }
-              GM_setValue('SEG', checked);
-            }),
-          $(
-            '<input type="checkbox" class="quick_craft_button" title="Switches between needed/have and have/needed">NH switch</input>',
-          )
-            .prop('checked', GM_getValue('NHswitch', false))
-            .change(function () {
-              const checked = $(this).prop('checked');
-              if (checked) {
-                styleIngredientQuantity.remove();
-                $('head').append(styleIngredientQuantitySwap);
-              } else {
-                styleIngredientQuantitySwap.remove();
-                $('head').append(styleIngredientQuantity);
-              }
-              GM_setValue('NHswitch', checked);
-            }),
-        ),
+        $('<button class="quick_craft_button">Clear</button>')
+          .css({marginBottom: '1rem', backgroundColor: 'red'})
+          .click(() => close_crafting_submenu()),
+        $('<div>')
+          .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
+          .append(
+            '<span>Click on the buttons below to show or hide crafting categories - </span>',
+            $('<button class="quick_craft_button">Hide all</button>')
+              .css({backgroundColor: 'red'})
+              .click(function () {
+                Object.values(books).forEach(({disabled, button}) => {
+                  if (!disabled) button.click();
+                });
+              }),
+            $('<button class="quick_craft_button">Show all</button>')
+              .css({backgroundColor: 'green'})
+              .click(function () {
+                Object.values(books).forEach(({disabled, button}) => {
+                  if (disabled) button.click();
+                });
+              }),
+            $('<input type="checkbox" class="quick_craft_button">Blank line between books</input>')
+              .prop('checked', GM_getValue('SEG', false))
+              .change(function () {
+                const checked = $(this).prop('checked');
+                if (checked) {
+                  $('head').append(styleExtraBookSpace);
+                } else {
+                  styleExtraBookSpace.remove();
+                }
+                GM_setValue('SEG', checked);
+              }),
+            $(
+              '<input type="checkbox" class="quick_craft_button" title="Switches between needed/have and have/needed">NH switch</input>',
+            )
+              .prop('checked', GM_getValue('NHswitch', false))
+              .change(function () {
+                const checked = $(this).prop('checked');
+                if (checked) {
+                  styleIngredientQuantity.remove();
+                  $('head').append(styleIngredientQuantitySwap);
+                } else {
+                  styleIngredientQuantitySwap.remove();
+                  $('head').append(styleIngredientQuantity);
+                }
+                GM_setValue('NHswitch', checked);
+              }),
+          ),
       )
 
       //
       // #region Add "Recipe Book" on/off buttons to DOM
       //
       .append(
-        $(
-          '<div style="margin-bottom: 2rem; display: flex; flex-direction: row; column-gap: .25rem; align-items: center;">',
-        ).append(
-          Object.keys(books).map((name) => {
-            const book = books[name];
-            const {bgcolor, color, disabled} = book;
+        $('<div>')
+          .css({marginBottom: '2rem', display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
+          .append(
+            Object.keys(books).map((name) => {
+              const book = books[name];
+              const {bgcolor, color, disabled} = book;
 
-            book.button = $(`<button id="${name}" class="qcbutton_book">${name.replace(/_/g, ' ')}</button>`)
-              .css({backgroundColor: bgcolor, color: color, opacity: 1})
-              .click(function () {
-                if (saveDebounce) window.clearTimeout(saveDebounce);
-                const button = $(this);
-                const disabled = (book.disabled = !book.disabled);
-                button.css('opacity', disabled ? 0.2 : 1);
-                $(book.section).css('display', disabled ? 'none' : '');
-                if (book.hasOwnProperty('recipes')) book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
-                saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
-              });
-            if (disabled) {
-              book.disabled = false;
-              book.button.click();
-            }
-            return book.button;
-          }),
-        ),
+              book.button = $(`<button id="${name}" class="qcbutton_book">${name.replace(/_/g, ' ')}</button>`)
+                .css({backgroundColor: bgcolor, color: color, opacity: 1})
+                .click(function () {
+                  if (saveDebounce) window.clearTimeout(saveDebounce);
+                  const button = $(this);
+                  const disabled = (book.disabled = !book.disabled);
+                  button.css('opacity', disabled ? 0.2 : 1);
+                  $(book.section).css('display', disabled ? 'none' : '');
+                  if (book.hasOwnProperty('recipes'))
+                    book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
+                  saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
+                });
+              if (disabled) {
+                book.disabled = false;
+                book.button.click();
+              }
+              return book.button;
+            }),
+          ),
       )
       //
       // #endregion Add "Recipe Book" on/off buttons to DOM
