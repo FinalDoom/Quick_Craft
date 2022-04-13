@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 (async function (window, $, VERSION) {
-  'use strict';
+  ('use strict');
 
   //
   // #region >>>BEGIN<<< User adjustable variables
@@ -373,6 +373,7 @@
   const books = GM_getValue('selected_books', {
     Glass: {bgcolor: 'white', color: 'black', disabled: true},
     Potions: {bgcolor: 'green', color: 'white', disabled: false},
+    // Luck: {bgcolor: 'blue', color: 'white', disabled: false},
     Food: {bgcolor: 'wheat', color: 'black', disabled: false},
     Dwarven: {bgcolor: 'brown', color: 'beige', disabled: true},
     Material_Bars: {bgcolor: 'purple', color: 'white', disabled: false},
@@ -418,7 +419,6 @@
   //    of the recipe, with "_" replaced with " ".
   //
 
-  const downgradeWarning = 'You are about to downgrade equipment which may result in value lost. Are you sure?';
   // relates book object to list(s) of associated recipes' info
   // prettier-ignore
   const recipes = {
@@ -559,6 +559,24 @@
       ],
     ],
     Recasting: [
+      // Melt
+      [
+        {name: 'impure_bronze_bar_to_ore', recipe: ['impure bronze bar', [4], 'flux', [3, 5]], result: 'bronze alloy mix'},
+        {name: 'bronze_bar_to_ore', recipe: ['bronze bar', [4], 'flux', [3, 5]], result: '2x bronze alloy mix'},
+        {name: 'iron_bar_to_ore', recipe: ['iron bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
+        {name: 'steel_bar_to_ore', recipe: ['steel bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
+        {name: 'gold_bar_to_ore', recipe: ['gold bar', [4], 'flux', [3, 5]], result: '2x gold ore'},
+        {name: 'mithril_bar_to_ore', recipe: ['mithril bar', [4], 'flux', [3, 5]], result: '2x mithril ore'},
+        {name: 'adamantium_bar_to_ore', recipe: ['adamantium bar', [4], 'flux', [3, 5]], result: '2x adamantium ore'},
+      ],
+      [
+        {name: 'quartz_bar_to_dust', recipe: ['quartz bar', [4], 'flux', [3, 5]], result: '2x quartz dust'},
+        {name: 'jade_bar_to_dust', recipe: ['jade bar', [4], 'flux', [3, 5]], result: '2x jade dust'},
+        {name: 'amethyst_bar_to_dust', recipe: ['amethyst bar', [4], 'flux', [3, 5]], result: '2x amethyst dust'},
+        {name: 'downgrade_bronze_bar', recipe: ['bronze bar', [4], 'flux', [7], 'clay', [3, 5]], result: '2x impure bronze bar'},
+        {name: 'downgrade_steel_bar', recipe: ['steel bar', [4], 'flux', [7]], result: 'iron bar'},
+        {name: 'melt_dwarven_gem', recipe: ['dwarven gem', [4], 'flux', [7]], result: 'pile of sand'},
+      ],
       // Upgrade Armor/Weapons
       [
         {name: 'upgrade_impure_bronze_claymore', recipe: ['flux', [0, 2, 6, 8], 'bronze alloy mix', [3, 5], 'impure bronze claymore', [4]], result: 'bronze claymore'},
@@ -632,24 +650,6 @@
         {name: 'downgrade_amethyst_khopesh', recipe: ['flux', [1], 'amethyst khopesh', [4], 'tongs', [7]], result: 'amethyst guandao', warning: downgradeWarning},
         {name: 'downgrade_mythril_armguards', recipe: ['mythril armguards', [4], 'flux', [7]], result: 'gold armguards', warning: downgradeWarning},
         {name: 'downgrade_adamantium_armguards', recipe: ['adamantium armguards', [4], 'flux', [7]], result: 'gold armguards', warning: downgradeWarning},
-      ],
-      // Melt
-      [
-        {name: 'impure_bronze_bar_to_ore', recipe: ['impure bronze bar', [4], 'flux', [3, 5]], result: 'bronze alloy mix'},
-        {name: 'bronze_bar_to_ore', recipe: ['bronze bar', [4], 'flux', [3, 5]], result: '2x bronze alloy mix'},
-        {name: 'iron_bar_to_ore', recipe: ['iron bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
-        {name: 'steel_bar_to_ore', recipe: ['steel bar', [4], 'flux', [3, 5]], result: '2x iron ore'},
-        {name: 'gold_bar_to_ore', recipe: ['gold bar', [4], 'flux', [3, 5]], result: '2x gold ore'},
-        {name: 'mithril_bar_to_ore', recipe: ['mithril bar', [4], 'flux', [3, 5]], result: '2x mithril ore'},
-        {name: 'adamantium_bar_to_ore', recipe: ['adamantium bar', [4], 'flux', [3, 5]], result: '2x adamantium ore'},
-      ],
-      [
-        {name: 'quartz_bar_to_dust', recipe: ['quartz bar', [4], 'flux', [3, 5]], result: '2x quartz dust'},
-        {name: 'jade_bar_to_dust', recipe: ['jade bar', [4], 'flux', [3, 5]], result: '2x jade dust'},
-        {name: 'amethyst_bar_to_dust', recipe: ['amethyst bar', [4], 'flux', [3, 5]], result: '2x amethyst dust'},
-        {name: 'downgrade_bronze_bar', recipe: ['bronze bar', [4], 'flux', [7], 'clay', [3, 5]], result: '2x impure bronze bar'},
-        {name: 'downgrade_steel_bar', recipe: ['steel bar', [4], 'flux', [7]], result: 'iron bar'},
-        {name: 'melt_dwarven_gem', recipe: ['dwarven gem', [4], 'flux', [7]], result: 'pile of sand'},
       ],
     ],
     Jewelry: [
