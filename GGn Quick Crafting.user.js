@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.3.1
+// @version      2.4.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
