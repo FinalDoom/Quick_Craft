@@ -392,7 +392,7 @@
   // Migrate old saves
   const oldBooks = GM_getValue('BOOKS_SAVE');
   if (oldBooks && typeof (oldBooks[0] !== 'object')) {
-    for (var i = 0; i < oldBooks.length / 2; i++) {
+    for (let i = 0; i < oldBooks.length / 2; i++) {
       books[Object.keys(books)[i]].disabled = oldBooks[2 * i + 1] === 0;
     }
     GM_deleteValue('BOOKS_SAVE');
@@ -837,12 +837,12 @@ a.disabled {
 
   const gmKeyCurrentCraft = 'current_craft';
 
-  const ingredients_available = [];
-  var craftingSubmenu;
-  var isCrafting = false;
+  const ingredientsAvailable = [];
+  let craftingSubmenu;
+  let isCrafting = false;
 
-  var tradeInventory;
-  var fetching = false;
+  let tradeInventory;
+  let fetching = false;
 
   async function get_trade_inv() {
     if (fetching || tradeInventory) {
@@ -881,42 +881,41 @@ a.disabled {
     }
   }
 
-  async function open_crafting_submenu(craft_name, recipe, result, purchasable) {
+  async function open_crafting_submenu(craftName, recipe, result, purchasable) {
     if (isCrafting) return;
 
-    if (ingredients_available[result] === undefined) {
+    if (ingredientsAvailable[result] === undefined) {
       if (ingredients[result] !== undefined) {
-        ingredients_available[result] =
+        ingredientsAvailable[result] =
           $(`#items-wrapper .item[data-item='${ingredients[result]}'] .item_count`).text() ||
           $(`#items-wrapper .item[data-item='${ingredients[result]}']`).length;
       } else if (non_ingredients[result] !== undefined) {
-        ingredients_available[result] = (
+        ingredientsAvailable[result] = (
           (await get_trade_inv()).match(RegExp(`data-item='${non_ingredients[result]}'`, 'g')) || []
         ).length;
       }
     }
 
     const currentCraft = {available: Number.MAX_SAFE_INTEGER, ingredients: []};
-    for (var i = 0; i < recipe.length / 2; ++i) {
-      const ingr = recipe[2 * i];
-      const qty = recipe[2 * i + 1].length;
-      if (ingredients_available[ingr] !== undefined) {
-        var onhand = ingredients_available[ingr];
-      } else {
-        onhand =
-          $(`#items-wrapper .item[data-item='${ingredients[ingr]}'] .item_count`).text() ||
-          $(`#items-wrapper .item[data-item='${ingredients[ingr]}']`).length;
-      }
-      ingredients_available[ingr] = onhand;
-      const avail = Math.floor(onhand / qty);
+    for (let i = 0; i < recipe.length / 2; ++i) {
+      const name = recipe[2 * i];
+      const perCraft = recipe[2 * i + 1].length;
+      const onHand =
+        ingredientsAvailable[name] !== undefined
+          ? ingredientsAvailable[name]
+          : $(`#items-wrapper .item[data-item='${ingredients[name]}'] .item_count`).text() ||
+            $(`#items-wrapper .item[data-item='${ingredients[name]}']`).length;
+
+      ingredientsAvailable[name] = onHand;
+      const avail = Math.floor(onHand / perCraft);
       if (avail < currentCraft.available) {
         currentCraft.available = avail;
       }
       currentCraft.ingredients[i] = {
-        name: ingr,
-        id: ingredients[ingr],
-        qty: qty,
-        'on hand': onhand,
+        name: name,
+        id: ingredients[name],
+        qty: perCraft,
+        onHand: onHand,
       };
     }
 
@@ -924,37 +923,37 @@ a.disabled {
       if (available <= 0) {
         return '';
       }
-      var craftNumberSelect;
+      let craftNumberSelect;
 
       const doCraft = async () => {
         // Disable crafting buttons and craft switching
         isCrafting = true;
         $('#crafting-submenu button, #crafting-submenu select').prop('disabled', true).addClass('disabled');
 
-        var craftNumber = craftNumberSelect.children('option:selected').val();
+        let craftNumber = craftNumberSelect.children('option:selected').val();
 
         await (async () => {
           for (let i = 0; i < craftNumber; i++) {
             await new Promise((resolve) =>
               setTimeout(function () {
                 reset_slots();
-                for (var j = 0; j < recipe.length / 2; j++) {
-                  var ingr = recipe[2 * j];
-                  for (var k = 0; k < recipe[2 * j + 1].length; k++) {
+                for (let j = 0; j < recipe.length / 2; j++) {
+                  let ingr = recipe[2 * j];
+                  for (let k = 0; k < recipe[2 * j + 1].length; k++) {
                     slots[recipe[2 * j + 1][k]] = ingredients[ingr];
-                    ingredients_available[ingr]--;
+                    ingredientsAvailable[ingr]--;
                   }
                 }
-                take_craft(craft_name);
-                if (ingredients_available[result] != undefined) {
-                  ingredients_available[result]++;
+                take_craft(craftName);
+                if (ingredientsAvailable[result] != undefined) {
+                  ingredientsAvailable[result]++;
                 }
                 resolve();
               }, CRAFT_TIME),
             );
           }
           isCrafting = false;
-          await open_crafting_submenu(craft_name, recipe, result, purchasable);
+          await open_crafting_submenu(craftName, recipe, result, purchasable);
         })();
       };
 
@@ -974,7 +973,7 @@ a.disabled {
               craftNumberSelect.val(currentCraft.available);
               $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
             } else {
-              $(this).text('-- crafting --');
+              $(this).text('-- Crafting --');
               doCraft();
             }
           }),
@@ -982,10 +981,10 @@ a.disabled {
     };
 
     close_crafting_submenu();
-    GM_setValue(gmKeyCurrentCraft, craft_name);
+    GM_setValue(gmKeyCurrentCraft, craftName);
 
     const createIngredientLine = (ingredient, maxWithPurchase) => {
-      const {name: ingredName, 'on hand': qtyOnHand, qty: qtyPerCraft} = ingredient;
+      const {name: ingredName, onHand: qtyOnHand, qty: qtyPerCraft} = ingredient;
       return $('<div>')
         .css({
           // Color ingredients marked purchased
@@ -1019,7 +1018,7 @@ a.disabled {
             purchasable = purchasable.flat();
           } else if (purchasable.length < currentCraft.ingredients.length - 1) purchasable.push(ingredName);
           close_crafting_submenu();
-          open_crafting_submenu(craft_name, recipe, result, purchasable);
+          open_crafting_submenu(craftName, recipe, result, purchasable);
         });
     };
 
@@ -1028,7 +1027,7 @@ a.disabled {
           ...currentCraft.ingredients.map((ingredient) =>
             purchasable.includes(ingredient.name)
               ? Number.MAX_SAFE_INTEGER
-              : Math.floor(ingredient['on hand'] / ingredient.qty),
+              : Math.floor(ingredient.onHand / ingredient.qty),
           ),
         )
       : currentCraft.available;
@@ -1041,7 +1040,7 @@ a.disabled {
             .text(titleCaseFromUnderscored(result))
             .css({marginBottom: '.5rem'})
             .append(
-              ingredients_available[result] !== undefined ? ` (${ingredients_available[result]} in inventory)` : '',
+              ingredientsAvailable[result] !== undefined ? ` (${ingredientsAvailable[result]} in inventory)` : '',
             ),
         )
         .append('<div style="margin-bottom: .5rem;">Ingredients:</div>')
@@ -1082,7 +1081,7 @@ a.disabled {
   // #region Create Recipe Book and Recipe buttons
   //
 
-  var saveDebounce;
+  let saveDebounce;
 
   //
   // Creates a Recipe button.
