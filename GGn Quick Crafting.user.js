@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.4.0
+// @version      2.4.1
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -881,7 +881,7 @@ a.disabled {
     }
   }
 
-  async function open_crafting_submenu(craft_name, recipe, result) {
+  async function open_crafting_submenu(craft_name, recipe, result, purchasable) {
     if (isCrafting) return;
 
     if (ingredients_available[result] === undefined) {
@@ -896,7 +896,7 @@ a.disabled {
       }
     }
 
-    const currentCraft = {available: 10000, max: 0, ingredients: []};
+    const currentCraft = {available: Number.MAX_SAFE_INTEGER, ingredients: []};
     for (var i = 0; i < recipe.length / 2; ++i) {
       const ingr = recipe[2 * i];
       const qty = recipe[2 * i + 1].length;
@@ -912,10 +912,12 @@ a.disabled {
       if (avail < currentCraft.available) {
         currentCraft.available = avail;
       }
-      if (avail > currentCraft.max) {
-        currentCraft.max = avail;
-      }
-      currentCraft.ingredients[i] = {name: ingr, id: ingredients[ingr], qty: qty, 'on hand': onhand};
+      currentCraft.ingredients[i] = {
+        name: ingr,
+        id: ingredients[ingr],
+        qty: qty,
+        'on hand': onhand,
+      };
     }
 
     const createCraftingActions = (available) => {
@@ -952,7 +954,7 @@ a.disabled {
             );
           }
           isCrafting = false;
-          await open_crafting_submenu(craft_name, recipe, result);
+          await open_crafting_submenu(craft_name, recipe, result, purchasable);
         })();
       };
 
@@ -979,9 +981,21 @@ a.disabled {
         );
     };
 
-    const createIngredientLine = (ingredName, qtyOnHand, qtyPerCraft, qtyMaxCraftable) =>
-      $('<div>')
-        .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center', alignSelf: 'center'})
+    close_crafting_submenu();
+    GM_setValue(gmKeyCurrentCraft, craft_name);
+
+    const createIngredientLine = (ingredient, maxWithPurchase) => {
+      const {name: ingredName, 'on hand': qtyOnHand, qty: qtyPerCraft} = ingredient;
+      return $('<div>')
+        .css({
+          // Color ingredients marked purchased
+          ...(purchasable.includes(ingredName) ? {color: 'lightGreen'} : {}),
+          display: 'flex',
+          flexDirection: 'row',
+          columnGap: '.25rem',
+          alignItems: 'center',
+          alignSelf: 'center',
+        })
         .append(
           $('<a class="quick_craft_button">$</a>')
             .attr('href', `https://gazellegames.net/shop.php?ItemID=${ingredients[ingredName].replace(/^0+/, '')}`)
@@ -995,13 +1009,30 @@ a.disabled {
             }),
           `${titleCaseFromUnderscored(ingredName)}:`,
           `<div style="display: inline-flex;" class="ingredient_quantity"><span>${qtyOnHand}</span><span>/</span><span>${qtyPerCraft}</span></div>`,
-          qtyMaxCraftable > Math.floor(qtyOnHand / qtyPerCraft)
-            ? `<span title="Needed for max possible crafts"> (+${qtyMaxCraftable * qtyPerCraft - qtyOnHand})</span>`
+          maxWithPurchase > qtyOnHand / qtyPerCraft
+            ? `<span title="Needed for max possible crafts"> (+${maxWithPurchase * qtyPerCraft - qtyOnHand})</span>`
             : '',
-        );
+        )
+        .click(() => {
+          if (purchasable.includes(ingredName)) {
+            delete purchasable[purchasable.indexOf(ingredName)];
+            purchasable = purchasable.flat();
+          } else if (purchasable.length < currentCraft.ingredients.length - 1) purchasable.push(ingredName);
+          close_crafting_submenu();
+          open_crafting_submenu(craft_name, recipe, result, purchasable);
+        });
+    };
 
-    close_crafting_submenu();
-    GM_setValue(gmKeyCurrentCraft, craft_name);
+    const maxWithPurchase = purchasable.length
+      ? Math.min(
+          ...currentCraft.ingredients.map((ingredient) =>
+            purchasable.includes(ingredient.name)
+              ? Number.MAX_SAFE_INTEGER
+              : Math.floor(ingredient['on hand'] / ingredient.qty),
+          ),
+        )
+      : currentCraft.available;
+
     $('#current_craft_box').append(
       (craftingSubmenu = $('<div id="crafting-submenu">')
         .css({textAlign: 'center', marginBottom: '1rem', display: 'flex', flexDirection: 'column', rowGap: '1rem'})
@@ -1017,23 +1048,27 @@ a.disabled {
         .append(
           $('<div>')
             .css({display: 'flex', flexDirection: 'column'})
-            .append(
-              currentCraft.ingredients.map((ingredient) =>
-                createIngredientLine(ingredient.name, ingredient['on hand'], ingredient.qty, currentCraft.max),
-              ),
-            ),
+            .append(currentCraft.ingredients.map((ingredient) => createIngredientLine(ingredient, maxWithPurchase))),
         )
         .append(
           $(`<span>`)
             .text(`Max available craft(s): ${currentCraft.available}`)
             .css({marginBottom: '1rem'})
             .append(
-              currentCraft.available !== currentCraft.max
+              currentCraft.available !== maxWithPurchase
                 ? $(`<span>`)
-                    .text(`Max possible: (${currentCraft.max})`)
+                    .text(`(${maxWithPurchase})`)
                     .prop('title', 'Max possible if additional ingredients are purchased')
-                    .css({marginLeft: '10px'})
+                    .css({marginLeft: '5px'})
                 : '',
+              $('<a>')
+                .text('?')
+                .attr(
+                  'title',
+                  'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.',
+                )
+                .wrap('<sup>')
+                .parent(),
             ),
         )
         .append(createCraftingActions(currentCraft.available))),
@@ -1067,7 +1102,7 @@ a.disabled {
       .blur(function () {
         document.getElementById(name).style.border = '2px solid transparent';
       })
-      .click(() => open_crafting_submenu(name.replace(/_/g, ' '), recipe, result));
+      .click(() => open_crafting_submenu(name.replace(/_/g, ' '), recipe, result, []));
   };
 
   $('#crafting_recipes').before(
