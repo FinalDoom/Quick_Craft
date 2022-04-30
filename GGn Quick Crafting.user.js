@@ -817,16 +817,6 @@
   //
   // #region Main functions
   //
-  const authKey = new URLSearchParams($('link[rel="alternate"]').attr('href')).get('authkey');
-  const urlBase = (customRecipe) =>
-    `https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=${customRecipe}&auth=${authKey}`;
-  const blankSlot = 'EEEEE';
-
-  function titleCaseFromUnderscored(str) {
-    return str.replace(/_/g, ' ').replace(/(?:^|\s)\w/g, function (match) {
-      return match.toUpperCase();
-    });
-  }
 
   //
   // #region Stylesheets
@@ -916,17 +906,19 @@ a.disabled {
     }
   }
 
-  function take_craft(recipe) {
+  async function take_craft(recipe) {
     const name = recipe.name || ingredients[recipe.itemId].name;
-    $.get(urlBase(recipe.recipe), function (data) {
-      console.log(data);
-      console.log(data.EquipID);
-
-      if (data === '{}' || data.EquipId !== '') {
-        window.noty({type: 'success', text: `${name} was crafted successfully.`});
-      } else {
-        window.noty({type: 'error', text: `${name} failed.`});
+    return await apiCall({
+      data: {request: 'items', type: 'crafting_result', action: 'take', recipe: recipe.recipe},
+    }).then((data) => {
+      const status = data.status;
+      if (status !== 'success' || !'response' in data) {
+        window.noty({type: 'error', text: `${name} crafting failed.`});
         alert(`Crafting failed. Response from server: ${data}`);
+        return false;
+      } else {
+        window.noty({type: 'success', text: `${name} was crafted successfully.`});
+        return true;
       }
     });
   }
@@ -938,6 +930,7 @@ a.disabled {
     }
   }
 
+  const blankSlot = 'EEEEE';
   async function open_crafting_submenu(recipe, purchasable) {
     if (isCrafting) return;
 
@@ -986,13 +979,14 @@ a.disabled {
         await (async () => {
           for (let i = 0; i < craftNumber; i++) {
             await new Promise((resolve) =>
-              setTimeout(function () {
-                Object.entries(currentCraft.ingredients).forEach(([id, {perCraft}]) => (inventory[id] -= perCraft));
-                take_craft(recipe);
-                if (recipe.itemId in inventory) {
-                  inventory[recipe.itemId]++;
-                } else {
-                  inventory[recipe.itemId] = 1;
+              setTimeout(async function () {
+                if (await take_craft(recipe)) {
+                  Object.entries(currentCraft.ingredients).forEach(([id, {perCraft}]) => (inventory[id] -= perCraft));
+                  if (recipe.itemId in inventory) {
+                    inventory[recipe.itemId]++;
+                  } else {
+                    inventory[recipe.itemId] = 1;
+                  }
                 }
                 resolve();
               }, CRAFT_TIME),
@@ -1089,7 +1083,7 @@ a.disabled {
       })
       .append(
         $('<h3 id="crafting-panel-title">')
-          .text(titleCaseFromUnderscored(recipe.name || ingredients[recipe.itemId].name))
+          .text(recipe.name || ingredients[recipe.itemId].name)
           .css({
             marginBottom: '.5rem',
             marginTop: 0,
