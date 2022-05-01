@@ -11,7 +11,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
-// @require      https://code.jquery.com/jquery-3.6.0.min.js
+// @require      https://code.jquery.com/jquery-3.6.0.js
 // ==/UserScript==
 
 (async function (window, $, VERSION) {
@@ -26,6 +26,14 @@
 
   const CRAFT_TIME = 1000;
   const TEN_SECOND_DELAY_MILLIS = 11000;
+
+  //
+  // #endregion >>>END<<< user adjustable variables
+  //
+
+  //
+  // #region Helper functions
+  //
 
   // Query the user for an API key. This is only done once, and the result is stored in script storage
   function getApiKey() {
@@ -46,7 +54,6 @@
 
     return key;
   }
-
   const API_KEY = getApiKey();
 
   // Execute an API call and also handle throttling to 5 calls per 10 seconds
@@ -85,6 +92,48 @@
     });
   }
 
+  let inventoryAmounts;
+  let fetching = false;
+  async function getInventoryAmounts() {
+    if (fetching || inventoryAmounts) {
+      while (!inventoryAmounts) await new Promise((r) => setTimeout(r, 30));
+      return inventoryAmounts;
+    } else {
+      fetching = true;
+      return await apiCall({data: {request: 'items', type: 'inventory'}})
+        .then((data) => {
+          const status = data.status;
+          if (status !== 'success' || !'response' in data) {
+            error(`API returned unsuccessful: ${status}`, data);
+            page = -1;
+            return;
+          }
+          inventoryAmounts = Object.fromEntries(
+            Object.values(data.response).map((item) => [item.itemid, parseInt(item.amount)]),
+          );
+          return inventoryAmounts;
+        })
+        .catch((reason) => console.error(reason));
+    }
+  }
+
+  async function takeCraft(recipe) {
+    const name = recipe.name || ingredients[recipe.itemId].name;
+    return await apiCall({
+      data: {request: 'items', type: 'crafting_result', action: 'take', recipe: recipe.recipe},
+    }).then((data) => {
+      const status = data.status;
+      if (status !== 'success' || !'response' in data) {
+        window.noty({type: 'error', text: `${name} crafting failed.`});
+        alert(`Crafting failed. Response from server: ${data}`);
+        return false;
+      } else {
+        window.noty({type: 'success', text: `${name} was crafted successfully.`});
+        return true;
+      }
+    });
+  }
+
   function logToConsole(logMethod, ...args) {
     const resolvedArgs = args.map((arg) => (typeof arg === 'function' ? arg() : arg));
     logMethod(...resolvedArgs);
@@ -106,13 +155,12 @@
   function error(message, ...args) {
     logToConsole(console.error, `[GGn Quick Crafting] ${message}`, ...args);
   }
+  //
+  // #endregion Helper functions
+  //
 
   //
-  // #endregion >>>END<<< user adjustable variables
-  //
-
-  //
-  // #region >>>BEGIN<<< Rarely updated data
+  // #region Static site data (generated/api-intense)
   //
   // Recipes, books, items, etc. that will need to be updated
   // when new recipes are added, but not otherwise
@@ -811,11 +859,11 @@
   // #endregion Recipe definitions
   //
   //
-  // #endregion >>>BEGIN<<< Rarely updated data
+  // #endregion Static site data (generated/api-intense)
   //
 
   //
-  // #region Main functions
+  // #region Document building
   //
 
   //
@@ -823,40 +871,51 @@
   //
   const styleExtraBookSpace = $(`<style>
 .recipe_buttons {
-    row-gap: 1rem;
+  row-gap: 1rem;
 }
 </style>`);
   const styleIngredientQuantity = $(`<style>
-.ingredient_quantity {
-    flex-direction: row;
+.crafting-info__ingredient-quantity {
+  flex-direction: row;
 }
 </style>`);
   const styleIngredientQuantitySwap = $(`<style>
-.ingredient_quantity {
-    flex-direction: row-reverse;
+.crafting-info__ingredient-quantity {
+  flex-direction: row-reverse;
 }
 </style>`);
   const head = $('head');
   head.append(`<style>
+.crafting-info__ingredient-quantity {
+  display: flex;
+}
+.crafting-clear {
+  clear: both;
+  margin-bottom: 1rem
+}
 .disabled {
-    background-color: #333 !important;
-    color: #666 !important;
-    pointer-events: none;
+  background-color: #333 !important;
+  color: #666 !important;
+  pointer-events: none;
 }
 a.disabled {
-    pointer-events: none;
+  pointer-events: none;
 }
 .quick_craft_button {
-    margin-left: 2rem;
-    background-color: orange;
+  margin-left: 2rem;
+  background-color: orange;
 }
 .quick_craft_button_confirm {
-    background-color: red;
+  background-color: red;
 }
 .recipe_buttons {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.crafting-info__ingredient--purchasable,
+.crafting-info__available-with-purchase--purchasable {
+  color: lightGreen;
 }
 </style>`);
   if (GM_getValue('SEG', false)) {
@@ -872,372 +931,198 @@ a.disabled {
   //
 
   //
-  // #region Crafting menu and logic
+  // #region DOM functions
   //
-
   const gmKeyCurrentCraft = 'current_craft';
+  const dataChangeEvent = 'changeData';
 
-  let craftingSubmenu;
-  let isCrafting = false;
+  let isCrafting;
+  let saveDebounce;
+  let craftingPanelTitle;
+  let craftingPanelSlots;
+  let craftingPanelResult;
+  let craftingPanelRequirement;
+  let craftingIngredients;
+  let craftingInfoActions;
+  let craftingAvailability;
+  let craftingActionsMenu;
+  let craftNumberSelect;
 
-  let inventoryAmounts;
-  let fetching = false;
-
-  async function getInventoryAmounts() {
-    if (fetching || inventoryAmounts) {
-      while (!inventoryAmounts) await new Promise((r) => setTimeout(r, 30));
-      return inventoryAmounts;
-    } else {
-      fetching = true;
-      return await apiCall({data: {request: 'items', type: 'inventory'}})
-        .then((data) => {
-          const status = data.status;
-          if (status !== 'success' || !'response' in data) {
-            error(`API returned unsuccessful: ${status}`, data);
-            page = -1;
-            return;
-          }
-          inventoryAmounts = Object.fromEntries(
-            Object.values(data.response).map((item) => [item.itemid, parseInt(item.amount)]),
-          );
-          return inventoryAmounts;
-        })
-        .catch((reason) => console.error(reason));
-    }
-  }
-
-  async function take_craft(recipe) {
-    const name = recipe.name || ingredients[recipe.itemId].name;
-    return await apiCall({
-      data: {request: 'items', type: 'crafting_result', action: 'take', recipe: recipe.recipe},
-    }).then((data) => {
-      const status = data.status;
-      if (status !== 'success' || !'response' in data) {
-        window.noty({type: 'error', text: `${name} crafting failed.`});
-        alert(`Crafting failed. Response from server: ${data}`);
-        return false;
-      } else {
-        window.noty({type: 'success', text: `${name} was crafted successfully.`});
-        return true;
-      }
-    });
-  }
-
-  function close_crafting_submenu() {
-    if (craftingSubmenu) {
-      craftingSubmenu.empty();
-      GM_deleteValue(gmKeyCurrentCraft);
-    }
+  function resetQuickCraftingMenu() {
+    // set all the IDs to 0/reset
+    craftingPanelTitle.data({name: undefined, available: 0}).trigger(dataChangeEvent);
+    craftingPanelSlots.add(craftingPanelResult).data({id: 0}).trigger(dataChangeEvent);
+    craftingPanelRequirement.data({requirement: 0}).trigger(dataChangeEvent);
+    craftingIngredients.data({id: 0, count: 0, available: 0, purchasable: -1}).trigger(dataChangeEvent);
+    craftingInfoActions.data({available: 0, purchasable: -1}).trigger(dataChangeEvent);
+    GM_deleteValue(gmKeyCurrentCraft);
   }
 
   const blankSlot = 'EEEEE';
-  async function open_crafting_submenu(recipe, purchasable) {
+  async function setRecipe(info) {
     if (isCrafting) return;
 
     const inventory = await getInventoryAmounts();
-    const currentCraft = {
-      recipe: recipe,
-      name: recipe.name || ingredients[recipe.itemId].name,
-      ingredients: recipe.recipe.match(/.{5}/g).reduce((ingredients, item, slot) => {
-        if (item !== blankSlot) {
-          const itemId = parseInt(item);
-          if (itemId in ingredients) {
-            ++ingredients[itemId].perCraft;
-            ingredients[itemId].slots.push(slot);
-          } else {
-            ingredients[itemId] = {perCraft: 1, onHand: inventory[itemId] || 0, slots: [slot]};
-          }
+    const {itemId, name, recipe, requirement} = info;
+    const counts = {};
+
+    GM_setValue(gmKeyCurrentCraft, name || ingredients[itemId].name);
+
+    craftingPanelTitle
+      .data({name: name || ingredients[itemId].name, available: inventory[itemId] || 0})
+      .trigger(dataChangeEvent);
+    craftingPanelResult.data({id: itemId}).trigger(dataChangeEvent);
+    craftingPanelRequirement.data({requirement: requirement}).trigger(dataChangeEvent);
+
+    const orderedIngredients = recipe
+      .match(/.{5}/g)
+      .map((item, i) => {
+        const itemId = item === blankSlot ? 0 : parseInt(item);
+        craftingPanelSlots.eq(i).data({id: itemId});
+        if (!(itemId in counts)) {
+          counts[itemId] = 1;
+          return itemId;
+        } else {
+          counts[itemId]++;
         }
-        return ingredients;
-      }, {}),
-    };
-    currentCraft.available = Math.floor(
-      Math.min(...Object.values(currentCraft.ingredients).map(({onHand, perCraft}) => (onHand || 0) / perCraft)),
-    );
-    currentCraft.maxWithPurchase =
-      Math.floor(
-        Math.min(
-          ...Object.entries(currentCraft.ingredients)
-            .filter(([id, _]) => !purchasable.includes(id))
-            .map(([_, {onHand, perCraft}]) => (onHand || 0) / perCraft),
-        ),
-      ) || currentCraft.available;
-
-    const createCraftingActions = (recipe) => {
-      if (currentCraft.available <= 0) {
-        return '';
-      }
-      let craftNumberSelect;
-
-      const doCraft = async () => {
-        // Disable crafting buttons and craft switching
-        isCrafting = true;
-        $('#crafting-submenu button, #crafting-submenu select').prop('disabled', true).addClass('disabled');
-
-        let craftNumber = craftNumberSelect.children('option:selected').val();
-
-        await (async () => {
-          for (let i = 0; i < craftNumber; i++) {
-            await new Promise((resolve) =>
-              setTimeout(async function () {
-                if (await take_craft(recipe)) {
-                  Object.entries(currentCraft.ingredients).forEach(([id, {perCraft}]) => (inventory[id] -= perCraft));
-                  if (recipe.itemId in inventory) {
-                    inventory[recipe.itemId]++;
-                  } else {
-                    inventory[recipe.itemId] = 1;
-                  }
-                }
-                resolve();
-              }, CRAFT_TIME),
-            );
-          }
-          isCrafting = false;
-          await open_crafting_submenu(recipe, purchasable);
-        })();
-      };
-
-      return $('<div>')
-        .css({
-          display: 'flex',
-          flexDirection: 'row',
-          columnGap: '.25rem',
-          alignItems: 'center',
-          alignSelf: 'center',
-        })
-        .append(
-          (craftNumberSelect = $('<select>').append(
-            Array(currentCraft.available)
-              .fill()
-              .map((_, i) => `<option value="${i + 1}">${i + 1}</option>`),
-          )),
-          $('<button>Craft</button>').click(doCraft),
-        )
-        .add(
-          $('<button class="quick_craft_button">Craft maximum</button>')
-            .css({width: '100%', marginLeft: 0})
-            .click(function () {
-              if (!$(this).hasClass('quick_craft_button_confirm')) {
-                craftNumberSelect.val(currentCraft.available);
-                $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
-              } else {
-                $(this).text('-- Crafting --');
-                doCraft();
-              }
-            }),
-        );
-    };
-
-    close_crafting_submenu();
-    GM_setValue(gmKeyCurrentCraft, recipe.name || ingredients[recipe.itemId].name);
-
-    const createIngredientLine = (ingredientId) => {
-      const {onHand, perCraft} = currentCraft.ingredients[ingredientId];
-      return $('<div>')
-        .css({
-          // Color ingredients marked purchased
-          ...(purchasable.includes(ingredientId) ? {color: 'lightGreen'} : {}),
-          display: 'flex',
-          flexDirection: 'row',
-          columnGap: '.25rem',
-          alignItems: 'center',
-          alignSelf: 'center',
-        })
-        .append(
-          $('<a>')
-            .text('$')
-            .attr('href', `https://gazellegames.net/shop.php?ItemID=${ingredientId}`)
-            .attr('target', '_blank')
-            .css({
-              borderRadius: '50%',
-              backgroundColor: 'yellow',
-              color: 'black',
-              cursor: 'pointer',
-              padding: '0 .25rem',
-            }),
-          `${ingredients[ingredientId].name}:`,
-          `<div style="display: inline-flex;" class="ingredient_quantity"><span>${onHand}</span><span>/</span><span>${perCraft}</span></div>`,
-          currentCraft.maxWithPurchase > onHand / perCraft
-            ? `<span title="Needed for max possible crafts"> (+${
-                currentCraft.maxWithPurchase * perCraft - onHand
-              })</span>`
-            : '',
-        )
-        .click(() => {
-          if (purchasable.includes(ingredientId)) {
-            delete purchasable[purchasable.indexOf(ingredientId)];
-            purchasable = purchasable.flat();
-          } else if (purchasable.length < Object.values(currentCraft.ingredients).length - 1) {
-            purchasable.push(ingredientId);
-          }
-          close_crafting_submenu();
-          open_crafting_submenu(recipe, purchasable);
-        });
-    };
-
-    craftingSubmenu = $('#current_craft_box')
-      .css({
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
       })
-      .append(
-        $('<h3 id="crafting-panel-title">')
-          .text(recipe.name || ingredients[recipe.itemId].name)
-          .css({
-            marginBottom: '.5rem',
-            marginTop: 0,
-            ...$('.item:first').css(['text-shadow', 'font-weight', 'color']),
-          })
-          .append(recipe.itemId in inventory ? ` (${inventory[recipe.itemId]} in inventory)` : ''),
-        $('<div id="crafting-panel-row">')
-          .css({display: 'flex', flexDirection: 'row', gap: '1rem'})
-          .append(
-            $('<div>')
-              .css({height: '277.5px', width: '412.5px'})
-              .append(
-                $('<div id="crafting-panel">')
-                  .css({
-                    background: `url('/static/styles/game_room/images/shop/crafting_panel.jpg')`,
-                    height: '370px',
-                    width: '550px',
-                    position: 'relative',
-                    transform: 'scale(0.75)', // TODO use scale factor against height width of this and parent
-                    transformOrigin: 'top left',
-                  })
-                  .append(
-                    ...new Array(9).fill(null).map((_, i) =>
-                      $(`<div id="craft-slot-${i}">`)
-                        .css({
-                          position: 'absolute',
-                          width: '106px', // TODO pull widths and margins from existing UI/style
-                          height: '106px',
-                          left: `${13 + (i % 3) * 119}px`,
-                          top: `${13 + Math.floor(i / 3) * 119}px`,
-                          background: 'transparent',
-                        })
-                        .data({id: 0}),
-                    ),
-                    $('<div id="craft-slot-result">')
-                      .css({
-                        position: 'absolute',
-                        width: '106px', // TODO pull widths and margins from existing UI/style
-                        height: '106px',
-                        left: `${13 + 2 * 119 + 180}px`,
-                        top: `${13 + 119}px`,
-                        background: 'transparent',
-                      })
-                      .data({id: 0}),
-                    $('<div id="craft-slot-requirement">')
-                      .css({
-                        position: 'absolute',
-                        width: '106px', // TODO pull widths and margins from existing UI/style
-                        height: '106px',
-                        left: `${13 + 2 * 119 + 180}px`,
-                        top: `${13 + 2 * 119}px`,
-                        background: 'transparent',
-                      })
-                      .data({requirement: 0}),
-                  ),
-              ),
-            $('<div id="crafting-ingredients">')
-              .css({display: 'flex', flexDirection: 'column', gap: '0.25rem'})
-              .append(
-                '<div style="margin-bottom: .5rem;">Ingredients:</div>',
-                ...new Array(9).fill(null).map((_, i) => $(`<div id="craft-ingredient-${i}">`).data({id: 0, count: 0})),
-                $(`<span>`)
-                  .text(`Max available craft(s): ${currentCraft.available}`)
-                  .css({marginBottom: '1rem'})
-                  .append(
-                    currentCraft.available !== currentCraft.maxWithPurchase
-                      ? $(`<span>`)
-                          .text(`(${currentCraft.maxWithPurchase})`)
-                          .prop('title', 'Max possible if additional ingredients are purchased')
-                          .css({marginLeft: '5px'})
-                      : '',
-                    $('<a>')
-                      .text('?')
-                      .attr(
-                        'title',
-                        'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.',
-                      )
-                      .wrap('<sup>')
-                      .parent(),
-                  ),
-                $('<div id="crafting-submenu">')
-                  .css({
-                    textAlign: 'center',
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.25rem',
-                  })
-                  .append(createCraftingActions(recipe)),
-              ),
-          ),
-      );
-    Object.keys(currentCraft.ingredients).forEach((ingredientId, i) => {
-      $(`#craft-ingredient-${i}`).html(createIngredientLine(ingredientId));
-      currentCraft.ingredients[ingredientId].slots.forEach((slot) =>
-        $(`#craft-slot-${slot}`).css({
-          background: `url('${ingredients[ingredientId].image}')`,
-          backgroundPosition: 'center',
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-        }),
-      );
-    });
-    $('#craft-slot-result').css({
-      background: `url('${ingredients[recipe.itemId].image}')`,
-      backgroundPosition: 'center',
-      backgroundSize: 'contain',
-      backgroundRepeat: 'no-repeat',
-    });
-    console.log(recipe);
-    if (recipe.requirement)
-      $('#craft-slot-requirement').css({
-        background: $(`#${recipe.requirement === 3 ? 'campfire' : recipe.requirement === 1 ? 'forge' : 'enchanting'}`)
-          .css('background')
-          .replace('..', `/static/styles/${$('link[rel="stylesheet"][title]').attr('title')}`),
-        backgroundPosition: 'center',
-        backgroundSize: 'contain',
-        backgroundRepeat: 'no-repeat',
+      .filter((itemId) => itemId);
+    craftingPanelSlots.trigger(dataChangeEvent);
+
+    orderedIngredients.length = 9;
+    Array.from(orderedIngredients).forEach((itemId, i) => {
+      craftingIngredients.eq(i).data({
+        id: itemId || 0,
+        count: (itemId && counts[itemId]) || 0,
+        available: (itemId && inventory[itemId]) || 0,
+        purchasable: -1,
       });
+    });
+    craftingIngredients.removeClass('crafting-info__ingredient--purchasable').trigger(dataChangeEvent);
+
+    const available = Math.floor(
+      Math.min(
+        ...Object.entries(counts)
+          .filter(([itemId, _]) => parseInt(itemId))
+          .map(([itemId, count]) => (inventory[itemId] || 0) / count),
+      ),
+    );
+    craftingInfoActions.data({available: available, purchasable: -1}).trigger(dataChangeEvent);
+  }
+  // TODO just centralize the data.. passing it all over the place is kinda dumb
+
+  function updatePurchasable() {
+    const validIngredientsData = craftingIngredients
+      .map(function () {
+        return $(this).data();
+      })
+      .toArray()
+      .filter(({id}) => id);
+    const nonPurchasableIngredientData = validIngredientsData.filter(({purchasable}) => !~purchasable);
+
+    const maxWithPurchase =
+      // -1 if nothing is purchasable
+      nonPurchasableIngredientData.length === validIngredientsData.length
+        ? -1
+        : Math.floor(Math.min(...nonPurchasableIngredientData.map(({available, count}) => (available || 0) / count)));
+    craftingInfoActions.data({purchasable: maxWithPurchase}).trigger(dataChangeEvent);
+    console.log('upd', nonPurchasableIngredientData, maxWithPurchase);
+
+    craftingIngredients
+      .each(function () {
+        const elem = $(this);
+        const {count, available, purchasable} = elem.data();
+        elem.data({
+          purchasable: ~purchasable ? Math.max(maxWithPurchase * count - available, 0) : purchasable,
+        });
+      })
+      .trigger(dataChangeEvent);
+  }
+
+  function togglePurchasable() {
+    const elem = $(this);
+    // -1 means not purchasable, else number to purchase (before clicked)
+    const {purchasable: beforeClickPurchasable} = elem.data();
+    const afterClickPurchasable = !~beforeClickPurchasable;
+
+    const filledIngredients = craftingIngredients
+      .map(function () {
+        return $(this).data();
+      })
+      .toArray()
+      .filter(({id}) => id);
+    const purchasableIngredients = filledIngredients.filter(({purchasable}) => ~purchasable).length;
+    // Only allow selecting n-1 as purchasable if we're marking something purchasable
+    if (afterClickPurchasable && filledIngredients.length - 1 <= purchasableIngredients) return;
+
+    // Set now for max calculations
+    elem.data({purchasable: afterClickPurchasable ? 0 : -1});
+    elem.toggleClass('crafting-info__ingredient--purchasable', afterClickPurchasable);
+
+    updatePurchasable();
+  }
+
+  async function doCraft() {
+    // Disable crafting buttons and craft switching
+    isCrafting = true;
+    craftingActionsMenu.find('button, select').prop('disabled', true).addClass('disabled');
+
+    const craftNumber = craftNumberSelect.children('option:selected').val();
+    const {recipe} = craftingActionsMenu.data();
+
+    await (async () => {
+      for (let i = 0; i < craftNumber; i++) {
+        await new Promise((resolve) =>
+          setTimeout(async function () {
+            let available = craftingInfoActions.data().available;
+            if (await takeCraft(recipe)) {
+              craftingIngredients.each((_, elem) => {
+                const ingredient = $(elem);
+                const {id, count} = ingredient.data();
+                if (id) {
+                  ingredient.data({available: (inventory[id] -= count)}).trigger(dataChangeEvent);
+                  available = Math.min(available, Math.floor(inventory[id] / count));
+                }
+              });
+              if (!(recipe.itemId in inventory)) {
+                inventory[recipe.itemId] = 0;
+              }
+              // Set in inventory and on title
+              craftingPanelTitle.data({available: ++inventory[recipe.itemId]}).trigger(dataChangeEvent);
+              updatePurchasable();
+            }
+            // Recalculate available for live display
+            craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
+            resolve();
+          }, CRAFT_TIME),
+        );
+      }
+      craftingActionsMenu.find('button, select').prop('disabled', false).removeClass('disabled');
+      isCrafting = false;
+    })();
+  }
+
+  function tryDoMaximumCraft() {
+    if (!$(this).hasClass('quick_craft_button_confirm')) {
+      craftNumberSelect.val(craftingInfoActions.data().available);
+      $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
+    } else {
+      $(this).text('-- Crafting --');
+      doCraft(); // TODO make sure to set back the text after
+    }
   }
   //
-  // #endregion Crafting menu and logic
+  // #endregion DOM functions
   //
 
   //
-  // #region Create Recipe Book and Recipe buttons
+  // #region DOM population
   //
-
-  let saveDebounce;
-
-  //
-  // Creates a Recipe button.
-  //
-  const createRecipeButton = (book, recipe) => {
-    return $(`<button>${recipe.name || ingredients[recipe.itemId].name}</button>`)
-      .css({
-        backgroundColor: book.bgcolor,
-        color: book.color,
-        border: '2px solid transparent',
-        marginTop: '3px',
-        marginRight: '5px',
-      })
-      .focus(function () {
-        $(this).css({border: '2px solid red'});
-      })
-      .blur(function () {
-        $(this).css({border: '2px solid transparent'});
-      })
-      .click(() => open_crafting_submenu(recipe, []));
-  };
-
   $('#crafting_recipes').before(
-    '<div style="clear: both; margin-bottom: 1rem;">',
-    $('<div id="quick-crafter">')
+    // float separator/spacer
+    $('<div class="crafting-clear">'),
+    // main quick craft box
+    $('<div class="quick-crafter">')
       .css({
         display: 'block',
         margin: '0 auto 1rem',
@@ -1248,11 +1133,165 @@ a.disabled {
         minWidth: '200px',
       })
       .append(
-        '<div id="current_craft_box">',
+        //
+        // #region Selected craft display
+        //
+        (currentCraftBox = $('<div id="current_craft_box">')
+          .css({
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+          })
+          .append(
+            (craftingPanelTitle = $('<h3 class="crafting-panel-title">').css({
+              marginBottom: '.5rem',
+              marginTop: 0,
+              ...$('.item:first').css(['text-shadow', 'font-weight', 'color']),
+            })),
+            $('<div id="crafting-panel-row">')
+              .css({display: 'flex', flexDirection: 'row', gap: '1rem'})
+              .append(
+                //
+                // #region Crafting grid display
+                //
+                $('<div>')
+                  .css({height: '277.5px', width: '412.5px'})
+                  .append(
+                    $('<div id="crafting-panel">')
+                      .css({
+                        background: `url('/static/styles/game_room/images/shop/crafting_panel.jpg')`,
+                        height: '370px',
+                        width: '550px',
+                        position: 'relative',
+                        transform: 'scale(0.75)', // TODO use scale factor against height width of this and parent
+                        transformOrigin: 'top left',
+                      })
+                      .append(
+                        ...(craftingPanelSlots = $(
+                          Array.from(new Array(9)).map(
+                            (_, i) =>
+                              $('<div>').css({
+                                position: 'absolute',
+                                width: '106px', // TODO pull widths and margins from existing UI/style
+                                height: '106px',
+                                left: `${13 + (i % 3) * 119}px`,
+                                top: `${13 + Math.floor(i / 3) * 119}px`,
+                                background: 'transparent',
+                              })[0],
+                          ),
+                        )).toArray(),
+                        (craftingPanelResult = $('<div id="craft-slot-result">').css({
+                          position: 'absolute',
+                          width: '106px', // TODO pull widths and margins from existing UI/style
+                          height: '106px',
+                          left: `${13 + 2 * 119 + 180}px`,
+                          top: `${13 + 119}px`,
+                          background: 'transparent',
+                        })),
+                        (craftingPanelRequirement = $('<div id="craft-slot-requirement">').css({
+                          position: 'absolute',
+                          width: '106px', // TODO pull widths and margins from existing UI/style
+                          height: '106px',
+                          left: `${13 + 2 * 119 + 180}px`,
+                          top: `${13 + 2 * 119}px`,
+                          background: 'transparent',
+                        })),
+                      ),
+                  ),
+                //
+                // #endregion Crafting grid display
+                //
+                //
+                // #region Crafting text/actions display
+                //
+                (craftingInfoActions = $('<div id="crafting-info-actions">')
+                  .css({display: 'flex', flexDirection: 'column', gap: '0.25rem'})
+                  .append(
+                    '<div style="margin-bottom: .5rem;" class="crafting-info__ingredients-header">Ingredients:</div>',
+                    ...(craftingIngredients = $(
+                      Array.from(new Array(9)).map(() => $(`<div class="crafting-info__ingredient">`)[0]),
+                    )
+                      .css({
+                        display: 'flex',
+                        flexDirection: 'row',
+                        columnGap: '0.25rem',
+                        alignItems: 'center',
+                        alignSelf: 'left',
+                      })
+                      .append(
+                        $('<a class="crafting-info__ingredient-shop-link">')
+                          .text('$')
+                          .attr('target', '_blank')
+                          .css({
+                            borderRadius: '50%',
+                            backgroundColor: 'yellow',
+                            color: 'black',
+                            padding: '0 0.25rem',
+                          })
+                          .click((event) => event.stopPropagation()),
+                        $('<span class="crafting-info__ingredient-name"></span>'),
+                        $('<div class="crafting-info__ingredient-quantity">').append(
+                          '<span class="crafting-info__ingredient-quantity-on-hand"></span>',
+                          '/',
+                          '<span class="crafting-info__ingredient-quantity-per-craft"></span>',
+                        ),
+                        $(
+                          '<span title="Needed for max possible crafts" class="crafting-info__ingredient-quantity-purchasable">',
+                        ).append(
+                          ' (+',
+                          '<span class="crafting-info__ingredient-quantity-purchasable-value"></span>',
+                          ')',
+                        ),
+                      )
+                      .click(togglePurchasable)).toArray(),
+                    (craftingAvailability = $(`<span id="crafting-info-availability">`)
+                      .css({marginBottom: '1rem'})
+                      .append(
+                        `Max available craft(s): <span class="crafting-info__available"></span>`,
+                        $(
+                          `<span class="crafting-info__available-with-purchase crafting-info__available-with-purchase--purchasable">`,
+                        ).prop('title', 'Max possible if additional ingredients are purchased'),
+                        $('<sup><a>?</a></sup>').attr(
+                          'title',
+                          'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.',
+                        ),
+                      )),
+                    (craftingActionsMenu = $('<div id="crafting-info-actions">')
+                      .css({
+                        textAlign: 'center',
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.25rem',
+                      })
+                      .append(
+                        $('<div id="crafting-info-actions__craft-row">')
+                          .css({
+                            display: 'flex',
+                            flexDirection: 'row',
+                            columnGap: '.25rem',
+                            alignItems: 'center',
+                            alignSelf: 'center',
+                          })
+                          .append((craftNumberSelect = $('<select>')), $('<button>Craft</button>').click(doCraft)),
+                        $('<button class="quick_craft_button">Craft maximum</button>')
+                          .css({width: '100%', marginLeft: 0})
+                          .click(tryDoMaximumCraft),
+                      )),
+                  )),
+                //
+                // #endregion Crafting text/actions display
+                //
+                // TODO also settings here
+              ),
+          )),
+        //
+        // #endregion Selected craft display
+        //
         '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>',
         $('<button class="quick_craft_button">Clear</button>')
           .css({marginBottom: '1rem', backgroundColor: 'red'})
-          .click(() => close_crafting_submenu()),
+          .click(() => resetQuickCraftingMenu()),
         $('<div>')
           .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
           .append(
@@ -1298,12 +1337,10 @@ a.disabled {
                 GM_setValue('NHswitch', checked);
               }),
           ),
-      )
 
-      //
-      // #region Add "Recipe Book" on/off buttons to DOM
-      //
-      .append(
+        //
+        // #region Add "Recipe Book" on/off buttons to DOM
+        //
         $('<div>')
           .css({marginBottom: '2rem', display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
           .append(
@@ -1330,15 +1367,13 @@ a.disabled {
               return book.button;
             }),
           ),
-      )
-      //
-      // #endregion Add "Recipe Book" on/off buttons to DOM
-      //
+        //
+        // #endregion Add "Recipe Book" on/off buttons to DOM
+        //
 
-      //
-      // #region Add Recipe buttons to DOM
-      //
-      .append(
+        //
+        // #region Add Recipe buttons to DOM
+        //
         $('<div class="recipe_buttons">').append(
           Object.keys(recipes).map((bookKey) => {
             const book = books[bookKey];
@@ -1346,24 +1381,166 @@ a.disabled {
             book.section = $('<div class="recipe_book_section">')
               .append(
                 recipes[bookKey].map((recipe) => {
-                  const recipeButton = createRecipeButton(book, recipe);
-                  book.recipes.push(recipeButton);
+                  const recipeButton = $(`<button>${recipe.name || ingredients[recipe.itemId].name}</button>`)
+                    .css({
+                      backgroundColor: book.bgcolor,
+                      color: book.color,
+                      border: '2px solid transparent',
+                      marginTop: '3px',
+                      marginRight: '5px',
+                    })
+                    .focus(function () {
+                      $(this).css({border: '2px solid red'});
+                    })
+                    .blur(function () {
+                      $(this).css({border: '2px solid transparent'});
+                    })
+                    .click(() => setRecipe(recipe));
+                  book.recipes.push(recipeButton); // TODO redo this into general sorting/filtering
                   return recipeButton;
                 }),
               )
-              .css({display: book.disabled ? 'none' : ''});
+              .css({display: book.disabled ? 'none' : ''}); // TODO redo this into general sorting/filtering
             return book.section;
           }),
         ),
-      )
-      //
-      // #endregion Add Recipe buttons to DOM
-      //
+        //
+        // #endregion Add Recipe buttons to DOM
+        //
 
-      .append(
         `<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${VERSION}</a></p>`,
       ),
   );
+  //
+  // #endregion DOM population
+  //
+
+  //
+  // #region DOM Data and Mutation observers
+  //
+  craftingPanelTitle
+    .data({name: undefined, available: 0})
+    .on(dataChangeEvent, function () {
+      const elem = $(this);
+      const {name, available} = elem.data();
+      if (name) {
+        elem.text(`${name}${available ? ' (' + available + ' in inventory)' : ''}`).show();
+      } else elem.hide();
+    })
+    .trigger(dataChangeEvent);
+
+  craftingPanelSlots
+    .data({id: 0})
+    .on(dataChangeEvent, function () {
+      const elem = $(this);
+      const {id} = elem.data();
+      if (id) {
+        elem.css({
+          background: `transparent url('${ingredients[id].image}') no-repeat center center`,
+          backgroundSize: 'contain',
+        });
+      } else elem.css({background: 'transparent'});
+    })
+    .trigger(dataChangeEvent);
+
+  craftingPanelResult
+    .data({id: 0})
+    .on(dataChangeEvent, function () {
+      const elem = $(this);
+      const {id} = elem.data();
+      if (id) {
+        elem.css({
+          background: `transparent url('${ingredients[id].image}') no-repeat center center`,
+          backgroundSize: 'contain',
+        });
+      } else elem.css({background: 'transparent'});
+    })
+    .trigger(dataChangeEvent);
+
+  craftingPanelRequirement.data({requirement: 0}).on(dataChangeEvent, function () {
+    const elem = $(this);
+    const {requirement} = elem.data();
+    if (requirement) {
+      // TODO a better way to get these images
+      const requirementSymbolId = `#${requirement === 1 ? 'forge' : requirement === 2 ? 'enchanting' : 'campfire'}`;
+      const requirementImage = $(requirementSymbolId)
+        .css('background')
+        .match(/url\((['"])([^\1]+)\1\)/)[2]
+        .replace('..', `/static/styles/${$('link[rel="stylesheet"][title]').attr('title')}`);
+      elem.css({
+        background: `transparent url('${requirementImage}') no-repeat center center`,
+        backgroundSize: 'contain',
+      });
+    } else elem.css({background: 'transparent'});
+  });
+
+  craftingIngredients
+    .data({id: 0, count: 0, available: 0, purchasable: -1})
+    .on(dataChangeEvent, function () {
+      const elem = $(this);
+      const link = elem.find('.crafting-info__ingredient-shop-link');
+      const nameNode = elem.find('.crafting-info__ingredient-name');
+      const onHand = elem.find('.crafting-info__ingredient-quantity-on-hand');
+      const perCraft = elem.find('.crafting-info__ingredient-quantity-per-craft');
+      const purchaseWrapper = elem.find('.crafting-info__ingredient-quantity-purchasable');
+      const purchaseNeeded = elem.find('.crafting-info__ingredient-quantity-purchasable-value');
+      const {id, count, available, purchasable} = elem.data();
+      if (id && count) {
+        link.attr('href', `https://gazellegames.net/shop.php?ItemID=${id}`);
+        nameNode.text(`${ingredients[id].name}:`);
+        onHand.text(available);
+        perCraft.text(count);
+        purchaseNeeded.text(~purchasable ? purchasable : undefined);
+        if (!~purchasable) purchaseWrapper.hide();
+        else purchaseWrapper.show();
+        elem.show();
+        currentCraftBox.show();
+      } else {
+        elem.hide();
+        if (
+          craftingIngredients
+            .map(function () {
+              return $(this).data();
+            })
+            .toArray()
+            .filter(({id}) => id).length
+        ) {
+          currentCraftBox.show();
+        } else {
+          currentCraftBox.hide();
+        }
+      }
+    })
+    .trigger(dataChangeEvent);
+
+  craftingInfoActions
+    .data({available: 0, purchasable: 0})
+    .on(dataChangeEvent, function () {
+      const elem = $(this);
+      const availableNode = craftingAvailability.find('.crafting-info__available');
+      const purchasableNode = craftingAvailability.find('.crafting-info__available-with-purchase');
+      const {available, purchasable} = elem.data();
+      availableNode.text(available);
+      if (available) {
+        craftNumberSelect.empty().append(
+          Array(available)
+            .fill()
+            .map((_, i) => `<option value="${i + 1}">${i + 1}</option>`),
+        );
+        craftingActionsMenu.show();
+      } else craftingActionsMenu.hide();
+
+      if (~purchasable) purchasableNode.text(` (${purchasable})`).show();
+      else purchasableNode.hide();
+    })
+    .trigger(dataChangeEvent);
+  //
+  // #endregion DOM Data and Mutation observers
+  //
+
+  //
+  // #endregion Document building
+  //
 
   // Persist selected recipe
   $('button')
@@ -1373,12 +1550,4 @@ a.disabled {
     .click();
   // Can block, so we prefetch last
   await getInventoryAmounts();
-
-  //
-  // #endregion Create Recipe Book and Recipe buttons
-  //
-
-  //
-  // #endregion Main functions
-  //
 })(unsafeWindow || window, jQuery || (unsafeWindow || window).jQuery, GM_info.script.version);
