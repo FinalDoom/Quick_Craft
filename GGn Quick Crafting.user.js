@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.6.2
+// @version      2.7.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -116,6 +116,7 @@
         .catch((reason) => console.error(reason));
     }
   }
+  await getInventoryAmounts();
 
   function resolveNames(...potentialNames) {
     return $('<textarea />')
@@ -1000,20 +1001,33 @@
   margin-top: 1rem;
   background-color: red;
 }
+.crafting-panel-search {
+  margin-top: .25rem;
+}
+.crafting-panel-search__searchbox {
+  flex-grow: 1;
+  max-width: 402.5px;
+}
+.crafting-panel-search__include-ingredients {
+
+}
+.crafting-panel-actions__clear input {
+  display: none;
+}
 .crafting-panel-options,
 .crafting-panel-filters {
   display: flex;
   flex-direction: column;
   flex: 1;
   gap: .5rem;
+  margin-bottom: .125rem;
 }
 .crafting-panel-settings-sorts {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
   gap: .5rem;
 }
 .crafting-panel-sorts__wrapper {
-  order: -1;
   gap: .25rem;
 }
 .crafting-panel-sorts__wrapper,
@@ -1092,6 +1106,8 @@
 .crafting-panel-filters__types-type input {
   display: none;
 }
+.crafting-panel-search__searchbox,
+.crafting-panel-actions__clear,
 .crafting-panel-filters__craftable-option,
 .crafting-panel-filters__books-button,
 .crafting-panel-filters__books-show,
@@ -1176,6 +1192,8 @@ a.disabled {
     ),
     types: [],
     craftable: 0,
+    search: undefined,
+    includeIngredients: true,
   });
   const initialSort = GM_getValue(gmKeyRecipeSort, 'books');
   const sorts = {
@@ -1479,11 +1497,30 @@ a.disabled {
                     $('<button class="crafting-panel-actions__max-craft-button">Craft maximum</button>').click(
                       tryDoMaximumCraft,
                     ),
-                    $('<button class="crafting-panel-actions__clear-craft-button">Clear</button>').click(() =>
-                      resetQuickCraftingMenu(),
-                    ),
                   )),
+                  $('<button class="crafting-panel-actions__clear-craft-button">Clear</button>').click(() =>
+                    resetQuickCraftingMenu(),
+                  ),
                 )),
+              ),
+              $('<div class="crafting-panel-search crafting-panel__row">').append(
+                $('<input type="text" placeholder="Search" class="crafting-panel-search__searchbox" />')
+                  .val(initialFilters.search)
+                  .change(function () {
+                    const {filters} = recipeButtons.data();
+                    filters.search = $(this).val();
+                    recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                  }),
+                $('<label class="crafting-panel-search__include-ingredients">').append(
+                  'Include ingredients',
+                  $('<input type="checkbox" />')
+                    .attr('checked', initialFilters.includeIngredients)
+                    .change(function () {
+                      const {filters} = recipeButtons.data();
+                      filters.includeIngredients = $(this).prop('checked');
+                      recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                    }),
+                ),
               ),
             ),
             //
@@ -1822,8 +1859,8 @@ a.disabled {
       const elem = $(this);
       const {name, available} = elem.data();
       if (name) {
-        elem.text(`${name}${available ? ' (' + available + ' in inventory)' : ''}`).show();
-      } else elem.hide();
+        elem.text(`${name}${available ? ' (' + available + ' in inventory)' : ''}`).css('visible', '');
+      } else elem.html('&nbsp;').css('visible', 'hidden');
     })
     .trigger(dataChangeEvent);
 
@@ -1959,20 +1996,27 @@ a.disabled {
     })
     .on(filterChangeEvent, async function () {
       const {filters} = $(this).data();
-      const {books, categories, types, craftable} = filters;
+      const {books, categories, craftable, includeIngredients, search, types} = filters;
       const inventory = await getInventoryAmounts();
+      const allIngredients = ingredients;
       $(this)
         .find('.recipes__recipe')
         .each(function () {
           const recipeLabel = $(this);
-          const {book, category, ingredients, purchasable, type} = recipeLabel.data();
+          const {book, category, ingredients, purchasable, recipe, type} = recipeLabel.data();
           if (
             books.includes(book) &&
             categories.includes(category) &&
             (!craftable ||
               Object.entries(ingredients).every(([id, count]) => inventory[id] >= count) ||
-              (craftable === 2 && purchasable)) //&&
-            //types.includes(type)
+              (craftable === 2 && purchasable)) &&
+            //types.includes(type) && // TODO implement
+            (!search ||
+              allIngredients[recipe.itemId].name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
+              (includeIngredients &&
+                Object.keys(ingredients).some((id) =>
+                  allIngredients[id].name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+                )))
           )
             $(`.recipe-buttons__book-section--${book.toLocaleLowerCase().replace(/ /g, '-')}`)
               .add(recipeLabel)
@@ -2001,6 +2045,4 @@ a.disabled {
       return $(this).text() === GM_getValue(gmKeyCurrentCraft);
     })
     .click();
-  // Can block, so we prefetch last
-  await getInventoryAmounts();
 })(unsafeWindow || window, jQuery || (unsafeWindow || window).jQuery, GM_info.script.version);
