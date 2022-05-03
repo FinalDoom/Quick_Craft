@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.7.0
+// @version      2.8.0
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -123,6 +123,8 @@
       .html(potentialNames.find((name) => name))
       .text();
   }
+
+  const recipeToItemsRegex = /.{5}/g;
 
   async function takeCraft(recipe) {
     const name = resolveNames(recipe.name, ingredients[recipe.itemId].name);
@@ -569,14 +571,6 @@
   //
   // Used to create enable/disable buttons
   // bgcolor and color are also used for the associated recipe buttons
-  // Keys must match top-level keys in recipes
-  //
-
-  //
-  // Other object properties are:
-  //  button: the jQuery object referring to the associated button
-  //  recipes: an array of associated recipe buttons (jQuery objs)
-  //  section: the jQuery object for the element wrapping associated recipe buttons
   //
   GM_deleteValue('selected_books');
   const books = {
@@ -615,8 +609,9 @@
   //  name (optional) is the recipe display name. Item's name (via itemId) is used if omitted
   //
   // prettier-ignore
-  const recipes = {
-    Glass: [
+  const recipes = [
+    // Glass
+    ...[
       {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEEEEEEEEEEEE', requirement: 1, name: 'Glass Shards From Sand'},
       {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE00125EEEEEEEEEEEEEEEEEEEE', requirement: '', name: 'Glass Shards From Test Tube'},
       {itemId: 2436, recipe: 'EEEEEEEEEEEEEEEEEEEE00124EEEEEEEEEEEEEEEEEEEE', requirement: '', name: 'Glass Shards From Vial'},
@@ -626,8 +621,9 @@
       {itemId: 126, recipe: '01988019880198801988EEEEE01988019880198801988', requirement: 1},
       {itemId: 124, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02230EEEEE', requirement: 1, name: 'Dust Ore Vial'},
       {itemId: 126, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02231EEEEE', requirement: 1, name: 'Dust Ore Bowl'},
-    ],
-    Potions: [
+    ].map((recipe) => ((recipe.book = 'Glass') && recipe)),
+    // Potions
+    ...[
       {itemId: 66, recipe: 'EEEEEEEEEE00115EEEEE0012500114EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 98, recipe: 'EEEEEEEEEE00115EEEEE0012400114EEEEEEEEEE00115', requirement: ''},
       {itemId: 99, recipe: '00115EEEEE0011500115001240011400115EEEEE00115', requirement: ''},
@@ -639,8 +635,9 @@
       {itemId: 127, recipe: 'EEEEEEEEEEEEEEEEEEEE0012500112EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2433, recipe: 'EEEEEEEEEEEEEEE001240011400114EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2434, recipe: '001140011400114001140012600114EEEEE00113EEEEE', requirement: ''},
-    ],
-    Food: [
+    ].map((recipe) => ((recipe.book = 'Potions') && recipe)),
+    // Food
+    ...[
       {itemId: 2580, recipe: 'EEEEEEEEEEEEEEEEEEEE0257902579EEEEEEEEEEEEEEE', requirement: 3},
       {itemId: 2581, recipe: 'EEEEEEEEEEEEEEE001120258000112EEEEEEEEEEEEEEE', requirement: 3},
       {itemId: 2582, recipe: 'EEEEEEEEEEEEEEE025810011300113EEEEEEEEEEEEEEE', requirement: 3},
@@ -648,16 +645,18 @@
       {itemId: 2719, recipe: 'EEEEEEEEEEEEEEEEEEEE0271800112EEEEEEEEEEEEEEE', requirement: 3},
       {itemId: 2720, recipe: 'EEEEEEEEEEEEEEE027190255100113EEEEEEEEEEEEEEE', requirement: 3},
       {itemId: 2721, recipe: 'EEEEEEEEEEEEEEE027200255102551EEEEEEEEEEEEEEE', requirement: 3},
-    ],
-    Dwarven: [
+    ].map((recipe) => ((recipe.book = 'Food') && recipe)),
+    // Dwarven
+    ...[
       {itemId: 2822, recipe: '032180229503219EEEEEEEEEEEEEEE019880198801988', requirement: '', name: 'Cant Believe This Is Cherry'},
       {itemId: 3226, recipe: '032180229503220EEEEEEEEEEEEEEE019880198801988', requirement: '', name: 'Grape Milkshake'},
       {itemId: 3227, recipe: '032180229503221EEEEEEEEEEEEEEE019880198801988', requirement: '', name: 'Coco-Cooler Milkshake'},
       {itemId: 3228, recipe: '032180229503241EEEEEEEEEEEEEEE019880198801988', requirement: ''},
       {itemId: 3229, recipe: '0321802295EEEEE0322303222EEEEE019880198801988', requirement: ''},
       {itemId: 3230, recipe: '0321802295EEEEE032230322403225019880198801988', requirement: ''},
-    ],
-    'Material Bars': [
+    ].map((recipe) => ((recipe.book = 'Dwarven') && recipe)),
+    // Material Bars
+    ...[
       {itemId: 2236, recipe: '0222502234EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2235, recipe: '0222502225EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2237, recipe: '0222602226EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
@@ -669,8 +668,9 @@
       {itemId: 2242, recipe: '0223002230EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2243, recipe: '0223102231EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2244, recipe: '0223202232EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
-    ],
-    Armor: [
+    ].map((recipe) => ((recipe.book = 'Material Bars') && recipe)),
+    // Armor
+    ...[
       {itemId: 2261, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02236EEEEEEEEEE', requirement: 1},
       {itemId: 2262, recipe: 'EEEEE02235EEEEEEEEEEEEEEEEEEEE02235EEEEEEEEEE', requirement: 1},
       {itemId: 2263, recipe: 'EEEEE02237EEEEEEEEEE02237EEEEE02237EEEEE02237', requirement: 1},
@@ -693,8 +693,9 @@
       {itemId: 2851, recipe: 'EEEEE02244EEEEEEEEEE02244EEEEEEEEEE02627EEEEE', requirement: 1},
       {itemId: 2862, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02627EEEEE02627', requirement: 1},
       {itemId: 2908, recipe: 'EEEEE02236EEEEEEEEEEEEEEE0262702550EEEEEEEEEE', requirement: 1},
-    ],
-    Weapons: [
+    ].map((recipe) => ((recipe.book = 'Armor') && recipe)),
+    // Weapons
+    ...[
       {itemId: 2641, recipe: '02236EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02236EEEEE', requirement: 1},
       {itemId: 2642, recipe: '02235EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02235EEEEE', requirement: 1},
       {itemId: 2643, recipe: '02237EEEEE02237EEEEE02237EEEEEEEEEE02237EEEEE', requirement: 1},
@@ -715,8 +716,9 @@
       {itemId: 2859, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02242EEEEE', requirement: 1},
       {itemId: 2860, recipe: 'EEEEE02627EEEEEEEEEE02243EEEEEEEEEE02243EEEEE', requirement: 1},
       {itemId: 2861, recipe: 'EEEEE02627EEEEEEEEEE02244EEEEEEEEEE02244EEEEE', requirement: 1},
-    ],
-    Recasting: [
+    ].map((recipe) => ((recipe.book = 'Weapons') && recipe)),
+    // Recasting
+    ...[
       {itemId: 2225, recipe: 'EEEEEEEEEEEEEEE026530223602653EEEEEEEEEEEEEEE', requirement: 1, name: 'Impure Bronze Bar To Ore'},
       {itemId: 2666, recipe: 'EEEEEEEEEEEEEEE026530223502653EEEEEEEEEEEEEEE', requirement: 1, name: 'Bronze Bar To Ore'},
       {itemId: 2668, recipe: 'EEEEEEEEEEEEEEE026530223702653EEEEEEEEEEEEEEE', requirement: 1, name: 'Iron Bar To Ore'},
@@ -730,15 +732,17 @@
       {itemId: 2656, recipe: 'EEEEEEEEEEEEEEE022340223502234EEEEE02653EEEEE', requirement: 1, name: 'Downgrade Bronze Bar'},
       {itemId: 2237, recipe: 'EEEEEEEEEEEEEEEEEEEE02238EEEEEEEEEE02653EEEEE', requirement: 1, name: 'Downgrade Steel Bar'},
       {itemId: 1987, recipe: 'EEEEEEEEEEEEEEEEEEEE02508EEEEEEEEEE02653EEEEE', requirement: 1, name: 'Melt Dwarven Gem'},
-    ],
-    Jewelry: [
+    ].map((recipe) => ((recipe.book = 'Recasting') && recipe)),
+    // Jewelry
+    ...[
       {itemId: 2537, recipe: 'EEEEEEEEEEEEEEEEEEEE0224202233EEEEEEEEEEEEEEE', requirement: 2},
       {itemId: 2538, recipe: 'EEEEE01988EEEEEEEEEE02537EEEEEEEEEEEEEEEEEEEE', requirement: 2},
       {itemId: 2565, recipe: 'EEEEEEEEEEEEEEE001160224400116001160224400116', requirement: 2},
       {itemId: 2564, recipe: 'EEEEEEEEEEEEEEE025490224402549025490224402549', requirement: 2},
       {itemId: 2563, recipe: 'EEEEEEEEEEEEEEE023230224402323023230224402323', requirement: 2},
-    ],
-    'Trading Decks': [
+    ].map((recipe) => ((recipe.book = 'Jewelry') && recipe)),
+    // Trading Decks
+    ...[
       {itemId: 2369, recipe: 'EEEEEEEEEEEEEEE023580235902357EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2370, recipe: 'EEEEEEEEEEEEEEE023650236402366EEEEEEEEEEEEEEE', requirement: '', name: 'Biggest Banhammer'},
       {itemId: 2371, recipe: 'EEEEEEEEEEEEEEE023610236702368EEEEEEEEEEEEEEE', requirement: '', name: 'Staff Beauty Parlor'},
@@ -756,8 +760,9 @@
       {itemId: 2421, recipe: '02372EEEEEEEEEEEEEEE02404EEEEE02372EEEEEEEEEE', requirement: 2, name: 'Dins Lootbox'},
       {itemId: 2465, recipe: '02404EEEEEEEEEEEEEEE02372EEEEE02404EEEEEEEEEE', requirement: 2, name: 'Farores Lootbox'},
       {itemId: 2466, recipe: '02385EEEEEEEEEEEEEEE02372EEEEE02385EEEEEEEEEE', requirement: 2, name: 'Nayrus Lootbox'},
-    ],
-    'Xmas Crafting': [
+    ].map((recipe) => ((recipe.book = 'Trading Decks') && recipe)),
+    // Xmas Crafting
+    ...[
       {itemId: 3107, recipe: 'EEEEEEEEEEEEEEEEEEEE0310503106EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3111, recipe: 'EEEEEEEEEEEEEEEEEEEE0310703110EEEEEEEEEEEEEEE', requirement: ''},
@@ -783,8 +788,9 @@
       {itemId: 3339, recipe: 'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE033300333503336', requirement: '', name: 'Doomguy'},
       {itemId: 3341, recipe: 'EEEEE03340EEEEEEEEEE03338EEEEEEEEEE03339EEEEE', requirement: ''},
       {itemId: 3322, recipe: 'EEEEE03313EEEEE033130230703313EEEEE03313EEEEE', requirement: ''},
-    ],
-    Birthday: [
+    ].map((recipe) => ((recipe.book = 'Xmas Crafting') && recipe)),
+    // Birthday
+    ...[
       {itemId: 2833, recipe: 'EEEEEEEEEEEEEEE0282902831EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2834, recipe: 'EEEEEEEEEEEEEEE0282902830EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2835, recipe: 'EEEEEEEEEEEEEEEEEEEE0283002831EEEEEEEEEEEEEEE', requirement: ''},
@@ -804,8 +810,9 @@
       {itemId: 3371, recipe: '029510297603029EEEEE02153EEEEE025950270402836', requirement: 2},
       {itemId: 3370, recipe: '029510297603029EEEEE02154EEEEE025950270402836', requirement: 2},
       {itemId: 3373, recipe: '029510297603029EEEEE03384EEEEE025950270402836', requirement: 2},
-    ],
-    Valentines: [
+    ].map((recipe) => ((recipe.book = 'Birthday') && recipe)),
+    // Valentines
+    ...[
       {itemId: 2988, recipe: 'EEEEEEEEEEEEEEE029860300002987EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2991, recipe: 'EEEEEEEEEEEEEEE029890300002990EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2992, recipe: 'EEEEEEEEEEEEEEE029880300002991EEEEEEEEEEEEEEE', requirement: '', name: 'Mr and Mrs Pac Man'},
@@ -818,8 +825,9 @@
       {itemId: 3136, recipe: 'EEEEE03143EEEEEEEEEE03144EEEEE03145EEEEE03145', requirement: 2, name: 'Valentine 2022 Badge'},
       {itemId: 3358, recipe: '03359EEEEE03359EEEEE03359EEEEE03359EEEEE03359', requirement: '', name: 'Special Box'},
       {itemId: 3004, recipe: '02992EEEEE03163EEEEEEEEEEEEEEE02999EEEEE03270', requirement: '', name: 'Cupids Winged Boots'},
-    ],
-    Halloween: [
+    ].map((recipe) => ((recipe.book = 'Valentines') && recipe)),
+    // Halloween
+    ...[
       {itemId: 2592, recipe: 'EEEEEEEEEEEEEEEEEEEE0259002591EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2593, recipe: 'EEEEEEEEEEEEEEEEEEEE0259102589EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2594, recipe: 'EEEEEEEEEEEEEEEEEEEE0258902590EEEEEEEEEEEEEEE', requirement: ''},
@@ -833,8 +841,9 @@
       {itemId: 3269, recipe: 'EEEEEEEEEEEEEEE0326603267EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3270, recipe: 'EEEEEEEEEEEEEEE0326803269EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3264, recipe: '032810328103281EEEEEEEEEEEEEEE032810328103281', requirement: '', name: 'Tombstone Badge'},
-    ],
-    'Adventure Club': [
+    ].map((recipe) => ((recipe.book = 'Halloween') && recipe)),
+    // Adventure Club
+    ...[
       {itemId: 2772, recipe: 'EEEEEEEEEEEEEEEEEEEE02844EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2774, recipe: 'EEEEEEEEEEEEEEE028440284402844EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2775, recipe: 'EEEEE02844EEEEEEEEEE02844EEEEEEEEEE02844EEEEE', requirement: ''},
@@ -847,8 +856,9 @@
       {itemId: 2803, recipe: '028140281602814028160289402816028140281602814', requirement: ''},
       {itemId: 2847, recipe: 'EEEEE02813EEEEEEEEEE02813EEEEEEEEEE02813EEEEE', requirement: ''},
       {itemId: 2901, recipe: 'EEEEE02816EEEEE028930289302893EEEEE02813EEEEE', requirement: ''},
-    ],
-    Bling: [
+    ].map((recipe) => ((recipe.book = 'Adventure Club') && recipe)),
+    // Bling
+    ...[
       {itemId: 2554, recipe: '021550215302154022390012102243025370253702537', requirement: 2, name: 'Unity Necklace'},
       {itemId: 2584, recipe: '021550215302154022390253902243025850253702585', requirement: 2, name: 'Unity Band'},
       {itemId: 2915, recipe: '02155EEEEE02154EEEEE00121EEEEEEEEEE02153EEEEE', requirement: 2},
@@ -859,8 +869,8 @@
       {itemId: 2212, recipe: 'EEEEEEEEEEEEEEE000720007200072EEEEEEEEEEEEEEE', requirement: 2, name: 'Irc Voice 8w'},
       {itemId: 2212, recipe: 'EEEEE00175EEEEE001750017500175EEEEEEEEEEEEEEE', requirement: 2, name: 'Irc Voice 8w - Low Cost'},
       {itemId: 3368, recipe: '022120221202212022120221202212EEEEE02549EEEEE', requirement: 2, name: 'Irc Voice 1y'},
-    ],
-  };
+    ].map((recipe) => ((recipe.book = 'Bling') && recipe)),
+  ];
   ///
   // #endregion Recipe definitions
   //
@@ -985,8 +995,10 @@
   display: flex;
   flex-direction: row;
   gap: .25rem;
-  align-items: center;
-  align-self: center;
+}
+.crafting-panel-actions__number-select,
+.crafting-panel-actions__craft-button {
+  flex: 1;
 }
 .crafting-panel-actions__max-craft-button {
   width: 100%;
@@ -1004,9 +1016,30 @@
 .crafting-panel-search {
   margin-top: .25rem;
 }
+.crafting-panel-search__searchbox-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-grow: 1;
+  align-items: center;
+  max-width: 412.5px;
+}
+.crafting-panel-search__searchbox-wrapper span {
+  position: absolute;
+  display: block;
+  right: 3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: gray;
+  opacity: .7;
+  font: 13px monospace;
+  text-align: center;
+  line-height: 1em;
+  cursor: pointer;
+}
 .crafting-panel-search__searchbox {
   flex-grow: 1;
-  max-width: 402.5px;
 }
 .crafting-panel-search__include-ingredients {
 
@@ -1123,6 +1156,9 @@
   padding: 2px 5px;
   background: gray;
 }
+.crafting-panel-search__searchbox {
+  padding-right: 18px;
+}
 .crafting-panel-filters__books-show,
 .crafting-panel-filters__categories-all,
 .crafting-panel-filters__types-all {
@@ -1185,11 +1221,7 @@ a.disabled {
 
   const initialFilters = GM_getValue(gmKeyRecipeFilters, {
     books: ['Potions', 'Food', 'Material Bars'],
-    categories: Array.from(
-      new Set(
-        Object.values(recipes).flatMap((recipes) => recipes.map((recipe) => ingredients[recipe.itemId].category)),
-      ),
-    ),
+    categories: Array.from(new Set(recipes.map((recipe) => ingredients[recipe.itemId].category))),
     types: [],
     craftable: 0,
     search: undefined,
@@ -1243,7 +1275,7 @@ a.disabled {
     craftingPanelRequirement.data({requirement: requirement}).trigger(dataChangeEvent);
 
     const orderedIngredients = recipe
-      .match(/.{5}/g)
+      .match(recipeToItemsRegex)
       .map((item, i) => {
         const itemId = item === blankSlot ? 0 : parseInt(item);
         craftingPanelSlots.eq(i).data({id: itemId});
@@ -1329,6 +1361,33 @@ a.disabled {
     updatePurchasable();
   }
 
+  async function resolveCraft(recipe, available) {
+    const inventory = await getInventoryAmounts();
+
+    recipe.recipe
+      .match(recipeToItemsRegex)
+      .filter((item) => item !== blankSlot)
+      .map((item) => parseInt(item))
+      .forEach((item) => {
+        // Update data on relevant craftingIngredient item if one matches
+        const ingredient = $(craftingIngredients.toArray().find((elem) => $(elem).data().id === item));
+        const {count} = ingredient.data();
+        ingredient.data({available: --inventory[item]}).trigger(dataChangeEvent);
+        available = Math.min(available, Math.floor(inventory[item] / count));
+      });
+    if (!(recipe.itemId in inventory)) {
+      inventory[recipe.itemId] = 0;
+    }
+    ++inventory[recipe.itemId];
+    if (recipe.itemId === craftingPanelResult.data().id) {
+      // Set in inventory and on title
+      craftingPanelTitle.data({available: inventory[recipe.itemId]}).trigger(dataChangeEvent);
+    }
+
+    updatePurchasable();
+    return available;
+  }
+
   async function doCraft() {
     // Disable crafting buttons and craft switching
     isCrafting = true;
@@ -1343,20 +1402,7 @@ a.disabled {
           setTimeout(async function () {
             let available = craftingInfoActions.data().available;
             if (await takeCraft(recipe)) {
-              craftingIngredients.each((_, elem) => {
-                const ingredient = $(elem);
-                const {id, count} = ingredient.data();
-                if (id) {
-                  ingredient.data({available: (inventory[id] -= count)}).trigger(dataChangeEvent);
-                  available = Math.min(available, Math.floor(inventory[id] / count));
-                }
-              });
-              if (!(recipe.itemId in inventory)) {
-                inventory[recipe.itemId] = 0;
-              }
-              // Set in inventory and on title
-              craftingPanelTitle.data({available: ++inventory[recipe.itemId]}).trigger(dataChangeEvent);
-              updatePurchasable();
+              available = resolveCraft(recipe, available);
             }
             // Recalculate available for live display
             craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
@@ -1479,7 +1525,7 @@ a.disabled {
                       ),
                     )
                     .click(togglePurchasable)).toArray(),
-                  (craftingAvailability = $(`<span id="crafting-panel-info__availability">`).append(
+                  (craftingAvailability = $(`<span class="crafting-panel-info__availability">`).append(
                     `Max available craft(s): <span class="crafting-panel-info__available"></span>`,
                     $(
                       `<span class="crafting-panel-info__available-with-purchase crafting-panel-info__available-with-purchase--purchasable">`,
@@ -1490,7 +1536,7 @@ a.disabled {
                     ),
                   )),
                   (craftingActionsMenu = $('<div class="crafting-panel-actions">').append(
-                    $('<div id="crafting-panel-actions__craft-row">').append(
+                    $('<div class="crafting-panel-actions__craft-row">').append(
                       (craftNumberSelect = $('<select class="crafting-panel-actions__number-select">')),
                       $('<button class="crafting-panel-actions__craft-button">Craft</button>').click(doCraft),
                     ),
@@ -1504,13 +1550,18 @@ a.disabled {
                 )),
               ),
               $('<div class="crafting-panel-search crafting-panel__row">').append(
-                $('<input type="text" placeholder="Search" class="crafting-panel-search__searchbox" />')
-                  .val(initialFilters.search)
-                  .change(function () {
-                    const {filters} = recipeButtons.data();
-                    filters.search = $(this).val();
-                    recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                $('<span class="crafting-panel-search__searchbox-wrapper">').append(
+                  $('<input type="text" placeholder="Search..." class="crafting-panel-search__searchbox" />')
+                    .val(initialFilters.search)
+                    .change(function () {
+                      const {filters} = recipeButtons.data();
+                      filters.search = $(this).val();
+                      recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                    }),
+                  $('<span>x</span>').click(function () {
+                    $(this).prev('input').val('').trigger('change').focus();
                   }),
+                ),
                 $('<label class="crafting-panel-search__include-ingredients">').append(
                   'Include ingredients',
                   $('<input type="checkbox" />')
@@ -1678,13 +1729,7 @@ a.disabled {
                       () => $('.crafting-panel-filters__categories-category input').prop('checked', false).change(),
                     ),
                   ),
-                  ...Array.from(
-                    new Set(
-                      Object.values(recipes).flatMap((recipes) =>
-                        recipes.map((recipe) => ingredients[recipe.itemId].category),
-                      ),
-                    ),
-                  )
+                  ...Array.from(new Set(recipes.map((recipe) => ingredients[recipe.itemId].category)))
                     .sort()
                     .map((category) =>
                       $('<label class="crafting-panel-filters__categories-category">')
@@ -1788,61 +1833,55 @@ a.disabled {
         (recipeButtons = $('<div class="recipe-buttons recipe-buttons--book-sort">')
           .toggleClass('recipe-buttons--extra-space', GM_getValue('SEG', false))
           .append(
-            Object.keys(recipes).map((bookKey) => {
-              const book = books[bookKey];
-              book.recipes = [];
-              book.section = $(
+            // Make sections to add books to (in filter/sort)
+            ...Object.keys(books).map(
+              (bookKey) =>
                 `<div class="recipe-buttons__book-section recipe-buttons__book-section--${bookKey
                   .toLocaleLowerCase()
                   .replace(/ /g, '-')}">`,
+            ),
+            // Make books
+            ...recipes.map((recipe, i) => {
+              const item = ingredients[recipe.itemId];
+              const data = {
+                book: recipe.book,
+                category: item.category,
+                gold: item.gold,
+                ingredients: recipe.recipe
+                  .match(recipeToItemsRegex)
+                  .filter((item) => item !== blankSlot)
+                  .map((item) => parseInt(item))
+                  .reduce((counts, id) => {
+                    if (!(id in counts)) counts[id] = 0;
+                    counts[id]++;
+                    return counts;
+                  }, {}),
+                purchasable: recipe.recipe
+                  .match(recipeToItemsRegex)
+                  .filter((item) => item !== blankSlot)
+                  .map((item) => parseInt(item))
+                  .every((itemId) => ingredients[itemId].infStock),
+                order: i,
+                recipe: recipe,
+                type: 'unknown',
+              };
+              const book = books[recipe.book];
+              const recipeButton = $(
+                `<button class="recipes__recipe" />${resolveNames(recipe.name || item.name)}</button>`,
               )
-                .append(
-                  recipes[bookKey].map((recipe, i) => {
-                    const item = ingredients[recipe.itemId];
-                    const data = {
-                      book: bookKey,
-                      category: item.category,
-                      gold: item.gold,
-                      ingredients: recipe.recipe
-                        .match(/.{5}/g)
-                        .filter((item) => item !== blankSlot)
-                        .map((item) => parseInt(item))
-                        .reduce((counts, id) => {
-                          if (!(id in counts)) counts[id] = 0;
-                          counts[id]++;
-                          return counts;
-                        }, {}),
-                      purchasable: recipe.recipe
-                        .match(/.{5}/g)
-                        .filter((item) => item !== blankSlot)
-                        .map((item) => parseInt(item))
-                        .every((itemId) => ingredients[itemId].infStock),
-                      order: i,
-                      recipe: recipe,
-                      type: 'unknown',
-                    };
-                    const recipeButton = $(
-                      `<button class="recipes__recipe" />${resolveNames(recipe.name || item.name)}</button>`,
-                    )
-                      .data(data)
-                      .css({
-                        backgroundColor: book.bgcolor,
-                        color: book.color,
-                      })
-                      .click(setRecipe);
-                    book.recipes.push(recipeButton);
-                    return recipeButton;
-                  }),
-                )
-                .css({display: book.disabled ? 'none' : ''});
-              return book.section;
+                .data(data)
+                .css({
+                  backgroundColor: book.bgcolor,
+                  color: book.color,
+                })
+                .click(setRecipe);
+              return recipeButton;
             }),
           )),
         //
         // #endregion Add Recipe buttons to DOM
         //
 
-        '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>', // TODO remove this after implementing "normal" crafting hook
         `<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${VERSION}</a></p>`,
       ),
   );
@@ -2038,6 +2077,24 @@ a.disabled {
   //
   // #endregion Document building
   //
+
+  // Hook "manual" crafting to also update our data
+  let manualCraftRecipe;
+  const oldTakeCraftingResult = window.takeCraftingResult;
+  const oldCleanupCraftingResult = window.cleanupCraftingResult;
+
+  window.takeCraftingResult = (recipe) => {
+    manualCraftRecipe = recipe;
+    oldTakeCraftingResult(recipe);
+  };
+
+  window.cleanupCraftingResult = async () => {
+    oldCleanupCraftingResult();
+    const recipe = recipes.find(({recipe}) => recipe === manualCraftRecipe);
+    craftingInfoActions
+      .data('available', await resolveCraft(recipe, craftingInfoActions.data().available))
+      .trigger(dataChangeEvent);
+  };
 
   // Persist selected recipe
   $('.recipes__recipe')
