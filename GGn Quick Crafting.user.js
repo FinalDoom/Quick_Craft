@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.4.1
+// @version      2.6.2
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -117,8 +117,14 @@
     }
   }
 
+  function resolveNames(...potentialNames) {
+    return $('<textarea />')
+      .html(potentialNames.find((name) => name))
+      .text();
+  }
+
   async function takeCraft(recipe) {
-    const name = recipe.name || ingredients[recipe.itemId].name;
+    const name = resolveNames(recipe.name, ingredients[recipe.itemId].name);
     return await apiCall({
       data: {request: 'items', type: 'crafting_result', action: 'take', recipe: recipe.recipe},
     }).then((data) => {
@@ -155,6 +161,21 @@
   function error(message, ...args) {
     logToConsole(console.error, `[GGn Quick Crafting] ${message}`, ...args);
   }
+
+  function chunkArray(chunkSize) {
+    return (resultArray, item, index) => {
+      const chunkIndex = Math.floor(index / chunkSize);
+
+      if (!resultArray[chunkIndex]) {
+        resultArray[chunkIndex] = []; // start a new chunk
+      }
+
+      resultArray[chunkIndex].push(item);
+
+      return resultArray;
+    };
+  }
+
   //
   // #endregion Helper functions
   //
@@ -173,379 +194,370 @@
   //
   // prettier-ignore
   const ingredients = {
-    66: {name: 'Upload Potion Sampler', image: 'static/common/items/Items/Potions/sample_green.png'},
-    72: {name: 'IRC Voice (2 Weeks)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png'},
-    98: {name: 'Small Upload Potion', image: 'static/common/items/Items/Potions/small_green.png'},
-    99: {name: 'Upload Potion', image: 'static/common/items/Items/Potions/green.png'},
-    100: {name: 'Large Upload Potion', image: 'static/common/items/Items/Potions/large_green.png'},
-    104: {name: 'Download-Reduction Potion Sampler', image: 'static/common/items/Items/Potions/sample_red.png'},
-    105: {name: 'Small Download-Reduction Potion', image: 'static/common/items/Items/Potions/small_red.png'},
-    106: {name: 'Download-Reduction Potion', image: 'static/common/items/Items/Potions/red.png'},
-    107: {name: 'Large Download-Reduction Potion', image: 'static/common/items/Items/Potions/large_red.png'},
-    111: {name: 'Purple Angelica Flowers', image: 'static/common/items/Items/Plants/angelica_flowers.png'},
-    112: {name: 'Head of Garlic', image: 'static/common/items/Items/Plants/garlic.png'},
-    113: {name: 'Yellow Hellebore Flower', image: 'static/common/items/Items/Plants/hellebore_flower.png'},
-    114: {name: 'Black Elderberries', image: 'static/common/items/Items/Plants/black_elder_berries.png'},
-    115: {name: 'Black Elder Leaves', image: 'static/common/items/Items/Plants/black_elder_leaves.png'},
-    116: {name: 'Emerald', image: 'static/common/items/Items/Gems/emerald.png'},
-    120: {name: 'Green Onyx Gem', image: 'static/common/items/Items/Gems/green_onyx.png'},
-    121: {name: 'Flawless Amethyst', image: 'static/common/items/Items/Gems/flawless_amethyst.png'},
-    124: {name: 'Vial', image: 'static/common/items/Items/Vials/vial.png'},
-    125: {name: 'Test Tube', image: 'static/common/items/Items/Vials/test_tube.png'},
-    126: {name: 'Bowl', image: 'static/common/items/Items/Vials/bowl.png'},
-    127: {name: 'Garlic Tincture', image: 'static/common/items/Items/Plants/garlic_tincture.png'},
-    175: {name: 'IRC Voice (2 Weeks) - Low Cost Option', image: 'static/common/items/Items/Buff/irc_voice_cheap.png'},
-    1987: {name: 'Pile of Sand', image: 'static/common/items/Items/Vials/sand.png'},
-    1988: {name: 'Glass Shards', image: 'static/common/items/Items/Vials/shards.png'},
-    2153: {name: 'Farore&#39;s Flame', image: 'static/common/items/Items/Bling/flame_green.png'},
-    2154: {name: 'Nayru&#39;s Flame', image: 'static/common/items/Items/Bling/flame_blue.png'},
-    2155: {name: 'Din&#39;s Flame', image: 'static/common/items/Items/Bling/flame_red.png'},
-    2212: {name: 'IRC Voice (8 Weeks)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png'},
-    2225: {name: 'Bronze Alloy Mix', image: 'static/common/items/Items/Ore/bronze.png'},
-    2226: {name: 'Iron Ore', image: 'static/common/items/Items/Ore/iron.png'},
-    2227: {name: 'Gold Ore', image: 'static/common/items/Items/Ore/gold.png'},
-    2228: {name: 'Mithril Ore', image: 'static/common/items/Items/Ore/mithril.png'},
-    2229: {name: 'Adamantium Ore', image: 'static/common/items/Items/Ore/adamantium.png'},
-    2230: {name: 'Quartz Dust', image: 'static/common/items/Items/Ore/quartz.png'},
-    2231: {name: 'Jade Dust', image: 'static/common/items/Items/Ore/jade.png'},
-    2232: {name: 'Amethyst Dust', image: 'static/common/items/Items/Ore/amethyst.png'},
-    2233: {name: 'Lump of Coal', image: 'static/common/items/Items/Ore/coal.png'},
-    2234: {name: 'Lump of Clay', image: 'static/common/items/Items/Ore/clay.png'},
-    2235: {name: 'Bronze Bar', image: 'static/common/items/Items/Ore/bronze_bar.png'},
-    2236: {name: 'Impure Bronze Bar', image: 'static/common/items/Items/Ore/impure_bronze_bar.png'},
-    2237: {name: 'Iron Bar', image: 'static/common/items/Items/Ore/iron_bar.png'},
-    2238: {name: 'Steel Bar', image: 'static/common/items/Items/Ore/steel_bar.png'},
-    2239: {name: 'Gold Bar', image: 'static/common/items/Items/Ore/gold_bar.png'},
-    2240: {name: 'Mithril Bar', image: 'static/common/items/Items/Ore/mithril_bar.png'},
-    2241: {name: 'Adamantium Bar', image: 'static/common/items/Items/Ore/adamantium_bar.png'},
-    2242: {name: 'Quartz Bar', image: 'static/common/items/Items/Ore/quartz_bar.png'},
-    2243: {name: 'Jade Bar', image: 'static/common/items/Items/Ore/jade_bar.png'},
-    2244: {name: 'Amethyst Bar', image: 'static/common/items/Items/Ore/amethyst_bar.png'},
-    2261: {name: 'Impure Bronze Cuirass', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Cuirass.png'},
-    2262: {name: 'Bronze Cuirass', image: 'https://ptpimg.me/3mf3lw.png'},
-    2263: {name: 'Iron Cuirass', image: 'static/common/items/Cover/Body Armor/Iron_Cuirass.png'},
-    2264: {name: 'Steel Cuirass', image: 'static/common/items/Cover/Body Armor/Steel_Cuirass.png'},
-    2265: {name: 'Gold Cuirass', image: 'static/common/items/Cover/Body Armor/Gold_Cuirass.png'},
-    2266: {name: 'Mithril Cuirass', image: 'static/common/items/Cover/Body Armor/Mithril_Cuirass.png'},
-    2267: {name: 'Adamantium Cuirass', image: 'static/common/items/Cover/Body Armor/Adamantium_Cuirass.png'},
-    2268: {name: 'Quartz Chainmail', image: 'static/common/items/Cover/Body Armor/Quartz_Chainmail.png'},
-    2269: {name: 'Jade Chainmail', image: 'static/common/items/Cover/Body Armor/Jade_Chainmail.png'},
-    2270: {name: 'Amethyst Chainmail', image: 'static/common/items/Cover/Body Armor/Amethyst_Chainmail.png'},
-    2295: {name: 'Pile of Snow', image: 'static/common/items/Items/Christmas/snow.png'},
-    2296: {name: 'Snowball', image: 'static/common/items/Items/Christmas/snowball_small.png'},
-    2297: {name: 'Candy Cane', image: 'static/common/items/Items/Christmas/candycane.png'},
-    2298: {name: 'Hot Chocolate', image: 'static/common/items/Items/Christmas/hotchoc.png'},
-    2299: {name: 'Peppermint Hot Chocolate', image: 'static/common/items/Items/Christmas/peremint_hotchoc.png'},
-    2300: {name: 'Pile of Charcoal', image: 'static/common/items/Items/Christmas/charcoal.png'},
-    2303: {name: 'Hyper Realistic Eggnog', image: 'static/common/items/Items/Christmas/eggnog.png'},
-    2305: {name: 'Large Snowball', image: 'static/common/items/Items/Christmas/snowball.png'},
-    2306: {name: 'Carrot', image: 'static/common/items/Items/Christmas/carrot.png'},
-    2307: {name: 'Snowman', image: 'static/common/items/Items/Christmas/snowman.png'},
-    2323: {name: 'Ruby', image: 'static/common/items/Items/Gems/ruby.png'},
-    2357: {name: 'The Golden Daedy', image: 'static/common/items/Items/Card/Staff_The_Golden_Daedy.png'},
-    2358: {name: 'A Wild Artifaxx', image: 'static/common/items/Items/Card/Staff_A_Wild_Artifaxx.png'},
-    2359: {name: 'A Red Hot Flamed', image: 'static/common/items/Items/Card/Staff_A_Red_Hot_Flamed.png'},
-    2361: {name: 'Alpaca Out of Nowhere!', image: 'static/common/items/Items/Card/Staff_Alpaca_Out_of_Nowhere.png'},
-    2364: {name: 'thewhale&#39;s Kiss', image: 'static/common/items/Items/Card/Staff_thewhales_Kiss.png'},
-    2365: {name: 'Stump&#39;s Banhammer', image: 'static/common/items/Items/Card/Staff_Stumps_Banhammer.png'},
-    2366: {name: 'Neo&#39;s Ratio Cheats', image: 'static/common/items/Items/Card/Staff_Neos_Ratio_Cheats.png'},
-    2367: {name: 'Niko&#39;s Transformation', image: 'static/common/items/Items/Card/Staff_Nikos_Transformation.png'},
-    2368: {name: 'lepik le prick', image: 'static/common/items/Items/Card/Staff_lepik_le_prick.png'},
-    2369: {name: 'The Golden Throne', image: 'static/common/items/Items/Card/Staff_The_Golden_Throne.png'},
-    2370: {name: 'The Biggest Banhammer', image: 'static/common/items/Items/Card/Staff_The_Biggest_Banhammer.png'},
-    2371: {name: 'The Staff Beauty Parlor', image: 'static/common/items/Items/Card/Staff_The_Staff_Beauty_Parlor.png'},
-    2372: {name: 'The Realm of Staff', image: 'static/common/items/Items/Card/Staff_The_Realm_of_Staff.png'},
-    2373: {name: 'Cake', image: 'static/common/items/Items/Card/Portal_Cake.png'},
-    2374: {name: 'GLaDOS', image: 'static/common/items/Items/Card/Portal_GLaDOS.png'},
-    2375: {name: 'Companion Cube', image: 'static/common/items/Items/Card/Portal_Companion_Cube.png'},
-    2376: {name: 'Portal Gun', image: 'static/common/items/Items/Card/Portal_Portal_Gun.png'},
-    2377: {name: 'A Scared Morty', image: 'static/common/items/Items/Card/Portal_A_Scared_Morty.png'},
-    2378: {name: 'Rick Sanchez', image: 'static/common/items/Items/Card/Portal_Rick_Sanchez.png'},
-    2379: {name: 'Mr. Poopy Butthole', image: 'static/common/items/Items/Card/Portal_Mr_Poopy_Butthole.png'},
-    2380: {name: 'Rick&#39;s Portal Gun', image: 'static/common/items/Items/Card/Portal_Ricks_Portal_Gun.png'},
-    2381: {name: 'Nyx class Supercarrier', image: 'static/common/items/Items/Card/Portal_Nyx_class_Supercarrier.png'},
-    2382: {name: 'Chimera Schematic', image: 'static/common/items/Items/Card/Portal_Chimera_Schematic.png'},
-    2383: {name: 'Covetor Mining Ship', image: 'static/common/items/Items/Card/Portal_Covetor_Mining_Ship.png'},
-    2384: {name: 'Space Wormhole', image: 'static/common/items/Items/Card/Portal_Space_Wormhole.png'},
-    2385: {name: 'Interdimensional Portal', image: 'static/common/items/Items/Card/Portal_Interdimensional_Portal.png'},
-    2388: {name: 'MuffledSilence&#39;s Headphones', image: 'static/common/items/Items/Card/Staff_MuffledSilences_Headphones.png'},
-    2390: {name: 'Mario', image: 'static/common/items/Items/Card/Mario_Mario.png'},
-    2391: {name: 'Luigi', image: 'static/common/items/Items/Card/Mario_Luigi.png'},
-    2392: {name: 'Princess Peach', image: 'static/common/items/Items/Card/Mario_Princess_Peach.png'},
-    2393: {name: 'Toad', image: 'static/common/items/Items/Card/Mario_Toad.png'},
-    2394: {name: 'Yoshi', image: 'static/common/items/Items/Card/Mario_Yoshi.png'},
-    2395: {name: 'Bowser', image: 'static/common/items/Items/Card/Mario_Bowser.png'},
-    2396: {name: 'Goomba', image: 'static/common/items/Items/Card/Mario_Goomba.png'},
-    2397: {name: 'Koopa Troopa', image: 'static/common/items/Items/Card/Mario_Koopa_Troopa.png'},
-    2398: {name: 'Wario', image: 'static/common/items/Items/Card/Mario_Wario.png'},
-    2400: {name: 'LinkinsRepeater Bone Hard Card', image: 'static/common/items/Items/Card/Staff_LinkinsRepeater_Bone_Hard_Card.png'},
-    2401: {name: 'Super Mushroom', image: 'static/common/items/Items/Card/Mario_Super_Mushroom.png'},
-    2402: {name: 'Fire Flower', image: 'static/common/items/Items/Card/Mario_Fire_Flower.png'},
-    2403: {name: 'Penguin Suit', image: 'static/common/items/Items/Card/Mario_Penguin_Suit.png'},
-    2404: {name: 'Goal Pole', image: 'static/common/items/Items/Card/Mario_Goal_Pole.png'},
-    2410: {name: 'Z&eacute; do Caix&atilde;o Coffin Joe Card', image: 'static/common/items/Items/Card/Staff_Ze_do_Caixao_Coffin_Joe_Card.png'},
-    2421: {name: 'Din&#39;s Lootbox', image: 'static/common/items/Items/Pack/Dins_Lootbox.png'},
-    2433: {name: 'Small Luck Potion', image: 'static/common/items/Items/Potions/small_purple.png'},
-    2434: {name: 'Large Luck Potion', image: 'static/common/items/Items/Potions/large_purple.png'},
-    2436: {name: 'Glass Shards x2', image: 'static/common/items/Items/Vials/shards.png'},
-    2437: {name: 'Glass Shards x3', image: 'static/common/items/Items/Vials/shards.png'},
-    2438: {name: 'Random Lvl2 Staff Card', image: 'static/common/items/Items/Pack/Random_Lvl2_Staff_Card.png'},
-    2465: {name: 'Farore&#39;s Lootbox', image: 'static/common/items/Items/Pack/Farores_Lootbox.png'},
-    2466: {name: 'Nayru&#39;s Lootbox', image: 'static/common/items/Items/Pack/Nayrus_Lootbox.png'},
-    2468: {name: 'Random Lootbox (Din, Farore, or Nayru)', image: 'static/common/items/Items/Pack/Random_Lootbox.png'},
-    2508: {name: 'Dwarven Gem', image: 'static/common/items/Items/Gems/dwarven_gem.png'},
-    2537: {name: 'Carbon-Crystalline Quartz', image: 'static/common/items/Items/Gems/carbonquartz.png'},
-    2538: {name: 'Carbon-Crystalline Quartz Necklace', image: 'static/common/items/Cover/Jewelry/crystalline.png'},
-    2539: {name: 'Silver Ring of Gazellia', image: 'static/common/items/Cover/Jewelry/silvering.png'},
-    2549: {name: 'Sapphire', image: 'static/common/items/Items/Gems/sapphire.png'},
-    2550: {name: 'Ruby Chip', image: 'static/common/items/Items/Gems/chip_ruby.png'},
-    2551: {name: 'Emerald Chip', image: 'static/common/items/Items/Gems/chip_emerald.png'},
-    2552: {name: 'Sapphire Chip', image: 'static/common/items/Items/Gems/chip_sapphire.png'},
-    2554: {name: 'Unity Flame Necklet', image: 'static/common/items/Cover/Jewelry/unityneck.png'},
-    2563: {name: 'Exquisite Constellation of Rubies', image: 'static/common/items/Items/Jewelry/constellation_ruby.png'},
-    2564: {name: 'Exquisite Constellation of Sapphires', image: 'static/common/items/Items/Jewelry/constellation_sapphire.png'},
-    2565: {name: 'Exquisite Constellation of Emeralds', image: 'static/common/items/Items/Jewelry/constellation_emerald.png'},
-    2579: {name: 'Ruby-Flecked Wheat', image: 'static/common/items/Items/Food/wheat_ruby.png'},
-    2580: {name: 'Ruby-Grained Baguette', image: 'static/common/items/Items/Food/baguette_ruby.png'},
-    2581: {name: 'Garlic Ruby-Baguette', image: 'static/common/items/Items/Food/garlic_ruby.png'},
-    2582: {name: 'Artisan Ruby-Baguette', image: 'static/common/items/Items/Food/artisan_ruby.png'},
-    2584: {name: 'Unity Flame Band', image: 'static/common/items/Cover/Jewelry/unityring.png'},
-    2585: {name: 'Amethyst', image: 'static/common/items/Items/Gems/amethyst.png'},
-    2589: {name: 'Ripe Pumpkin', image: 'static/common/items/Items/Card/Halloween_Ripe_Pumpkin.png'},
-    2590: {name: 'Rotting Pumpkin', image: 'static/common/items/Items/Card/Halloween_Rotting_Pumpkin.png'},
-    2591: {name: 'Carved Pumpkin', image: 'static/common/items/Items/Card/Halloween_Carved_Pumpkin.png'},
-    2592: {name: 'Stormrage Pumpkin', image: 'static/common/items/Items/Card/Halloween_Stormrage_Pumpkin.png'},
-    2593: {name: 'Russian Pumpkin', image: 'static/common/items/Items/Card/Halloween_Russian_Pumpkin.png'},
-    2594: {name: 'Green Mario Pumpkin', image: 'static/common/items/Items/Card/Halloween_Green_Mario_Pumpkin.png'},
-    2595: {name: 'Lame Pumpkin Trio', image: 'static/common/items/Items/Card/Halloween_Lame_Pumpkin_Trio.png'},
-    2600: {name: 'Pumpkin Badge Bits', image: 'static/common/items/Items/Halloween/pumpkin_bits.png'},
-    2601: {name: 'Halloween Pumpkin Badge', image: 'static/common/items/Items/Badges/Halloween_Pumpkin_Badge.png'},
-    2627: {name: 'Blacksmith Tongs', image: 'static/common/items/Items/Recast/blacksmith_tongs.png'},
-    2639: {name: 'Dwarven Disco Ball', image: 'static/common/items/Cover/Clothing/disco_ball.png'},
-    2641: {name: 'Impure Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Claymore.png'},
-    2642: {name: 'Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Claymore.png'},
-    2643: {name: 'Iron Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Claymore.png'},
-    2644: {name: 'Steel Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Claymore.png'},
-    2645: {name: 'Gold Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Claymore.png'},
-    2646: {name: 'Mithril Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Claymore.png'},
-    2647: {name: 'Adamantium Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Claymore.png'},
-    2648: {name: 'Quartz Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Khopesh.png'},
-    2649: {name: 'Jade Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Khopesh.png'},
-    2650: {name: 'Amethyst Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Khopesh.png'},
-    2653: {name: 'Flux', image: 'static/common/items/Items/Recast/flux.png'},
-    2656: {name: 'Impure Bronze Bar x2', image: 'static/common/items/Items/Ore/impure_bronze_bar.png'},
-    2666: {name: 'Bronze Alloy Mix x2', image: 'static/common/items/Items/Ore/bronze.png'},
-    2668: {name: 'Iron Ore x2', image: 'static/common/items/Items/Ore/iron.png'},
-    2670: {name: 'Gold Ore x2', image: 'static/common/items/Items/Ore/gold.png'},
-    2671: {name: 'Mithril Ore x2', image: 'static/common/items/Items/Ore/mithril.png'},
-    2672: {name: 'Adamantium Ore x2', image: 'static/common/items/Items/Ore/adamantium.png'},
-    2673: {name: 'Quartz Dust x2', image: 'static/common/items/Items/Ore/quartz.png'},
-    2675: {name: 'Jade Dust x2', image: 'static/common/items/Items/Ore/jade.png'},
-    2676: {name: 'Amethyst Dust x2', image: 'static/common/items/Items/Ore/amethyst.png'},
-    2688: {name: 'Christmas Spices', image: 'static/common/items/Items/Christmas/spices.png'},
-    2689: {name: 'Old Scarf &amp; Hat', image: 'static/common/items/Items/Christmas/hatscarf.png'},
-    2698: {name: 'Perfect Snowball', image: 'static/common/items/Items/Card/Christmas_Perfect_Snowball.png'},
-    2699: {name: 'Mistletoe', image: 'static/common/items/Items/Card/Christmas_Mistletoe.png'},
-    2700: {name: 'Santa Suit', image: 'static/common/items/Items/Card/Christmas_Santa_Suit.png'},
-    2701: {name: 'Abominable Santa', image: 'static/common/items/Items/Card/Christmas_Abominable_Santa.png'},
-    2702: {name: 'Icy Kisses', image: 'static/common/items/Items/Card/Christmas_Icy_Kisses.png'},
-    2703: {name: 'Sexy Santa', image: 'static/common/items/Items/Card/Christmas_Sexy_Santa.png'},
-    2704: {name: 'Christmas Cheer', image: 'static/common/items/Items/Card/Christmas_Christmas_Cheer.png'},
-    2717: {name: 'Emerald-Flecked Wheat', image: 'static/common/items/Items/Food/wheat_emerald.png'},
-    2718: {name: 'Emerald-Grained Baguette', image: 'static/common/items/Items/Food/bagette_emerald.png'},
-    2719: {name: 'Garlic Emerald-Baguette', image: 'static/common/items/Items/Food/garlic_emerald.png'},
-    2720: {name: 'Artisan Emerald-Baguette', image: 'static/common/items/Items/Food/artisan_emerald.png'},
-    2721: {name: 'Gazellian Emerald-Baguette', image: 'static/common/items/Items/Food/gazellian_emerald.png'},
-    2761: {name: 'Impure Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Segmentata.png'},
-    2762: {name: 'Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Bronze_Segmentata.png'},
-    2763: {name: 'Iron Segmentata', image: 'static/common/items/Cover/Body Armor/Iron_Segmentata.png'},
-    2764: {name: 'Steel Segmentata', image: 'static/common/items/Cover/Body Armor/Steel_Segmentata.png'},
-    2765: {name: 'Gold Segmentata', image: 'static/common/items/Cover/Body Armor/Gold_Segmentata.png'},
-    2766: {name: 'Mithril Segmentata', image: 'static/common/items/Cover/Body Armor/Mithril_Segmentata.png'},
-    2767: {name: 'Adamantium Segmentata', image: 'static/common/items/Cover/Body Armor/Adamantium_Segmentata.png'},
-    2772: {name: 'Regenerate', image: 'static/common/items/Items/AdventureClub/attack_meditation.png'},
-    2774: {name: 'Hypnosis', image: 'static/common/items/Items/AdventureClub/attack_hypnosis.png'},
-    2775: {name: 'Muddle', image: 'static/common/items/Items/AdventureClub/attack_muddle.png'},
-    2776: {name: 'Parasite', image: 'static/common/items/Items/AdventureClub/attack_parasite.png'},
-    2801: {name: '3 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_3.png'},
-    2802: {name: '4 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_4.png'},
-    2803: {name: '6 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_6.png'},
-    2813: {name: 'Scrap', image: 'static/common/items/Items/AdventureClub/craft_scrap.png'},
-    2814: {name: 'Cloth', image: 'static/common/items/Items/AdventureClub/craft_cloth.png'},
-    2816: {name: 'Hide', image: 'static/common/items/Items/AdventureClub/craft_hide.png'},
-    2822: {name: 'Can&#39;t Believe This Is Cherry', image: 'static/common/items/Items/Birthday/chakefhake.png'},
-    2825: {name: '9th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/9th_Birthday_Badge.png'},
-    2826: {name: 'Lick Badge Bits', image: 'static/common/items/Items/Birthday/licks_bits.png'},
-    2829: {name: 'Ripped Gazelle', image: 'static/common/items/Items/Card/Birthday_Ripped_Gazelle.png'},
-    2830: {name: 'Fancy Gazelle', image: 'static/common/items/Items/Card/Birthday_Fancy_Gazelle.png'},
-    2831: {name: 'Gamer Gazelle', image: 'static/common/items/Items/Card/Birthday_Gamer_Gazelle.png'},
-    2833: {name: 'Future Gazelle', image: 'static/common/items/Items/Card/Birthday_Future_Gazelle.png'},
-    2834: {name: 'Alien Gazelle', image: 'static/common/items/Items/Card/Birthday_Alien_Gazelle.png'},
-    2835: {name: 'Lucky Gazelle', image: 'static/common/items/Items/Card/Birthday_Lucky_Gazelle.png'},
-    2836: {name: 'Supreme Gazelle', image: 'static/common/items/Items/Card/Birthday_Supreme_Gazelle.png'},
-    2841: {name: 'Condensed Light', image: 'static/common/items/Items/AdventureClub/craft_light.png'},
-    2842: {name: 'Bottled Ghost', image: 'static/common/items/Items/AdventureClub/craft_bottle_ghost.png.png'},
-    2844: {name: 'Glowing Leaves', image: 'static/common/items/Items/AdventureClub/craft_glowing_leaves.png.png'},
-    2845: {name: 'Dark Orb', image: 'static/common/items/Items/AdventureClub/attack_darkorb.png'},
-    2846: {name: 'Burst of Light', image: 'static/common/items/Items/AdventureClub/attack_burstlight.png'},
-    2847: {name: 'Scrappy Gauntlets', image: 'static/common/items/Cover/AdventureClub/scrappy_gauntlets.png'},
-    2849: {name: 'Quartz Lamellar', image: 'static/common/items/Cover/Body Armor/Quartz_Lamellar.png'},
-    2850: {name: 'Jade Lamellar', image: 'static/common/items/Cover/Body Armor/Jade_Lamellar.png'},
-    2851: {name: 'Amethyst Lamellar', image: 'static/common/items/Cover/Body Armor/Amethyst_Lamellar.png'},
-    2852: {name: 'Impure Bronze Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Billhook.png'},
-    2853: {name: 'Bronze Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Billhook.png'},
-    2854: {name: 'Iron Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Billhook.png'},
-    2855: {name: 'Steel Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Billhook.png'},
-    2856: {name: 'Gold Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Billhook.png'},
-    2857: {name: 'Mithril Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Billhook.png'},
-    2858: {name: 'Adamantium Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Billhook.png'},
-    2859: {name: 'Quartz Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Guandao.png'},
-    2860: {name: 'Jade Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Guandao.png'},
-    2861: {name: 'Amethyst Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Guandao.png'},
-    2862: {name: 'Impure Bronze Armguards', image: 'static/common/items/Cover/Arm Armor/Impure_Bronze_Armguards.png'},
-    2892: {name: 'Glowing Ash', image: 'https://ptpimg.me/3i2xd1.png'},
-    2893: {name: 'Troll Tooth', image: 'https://ptpimg.me/mrr24x.png'},
-    2894: {name: 'Advanced Hide', image: 'https://ptpimg.me/1d6926.png'},
-    2900: {name: 'Burning Ash Cloud', image: 'https://ptpimg.me/n7900m.png'},
-    2901: {name: 'Troll Tooth Necklace', image: 'https://ptpimg.me/480516.png'},
-    2908: {name: 'Impure Bronze Power Gloves', image: 'https://ptpimg.me/9d1e15.png'},
-    2915: {name: 'Flame Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Flame_Badge.png'},
-    2930: {name: 'Nayru&#39;s Username', image: 'static/common/items/Items/Username/Nayru.png'},
-    2931: {name: 'Farore&#39;s Username', image: 'static/common/items/Items/Username/Farore.png'},
-    2932: {name: 'Din&#39;s Username', image: 'static/common/items/Items/Username/Din.png'},
-    2945: {name: 'Bloody Mario', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Bloody_Mario.png'},
-    2946: {name: 'Mommy&#39;s Recipe', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Mommys_Recipe.png'},
-    2947: {name: 'Memory Boost', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Memory_Boost.png'},
-    2948: {name: 'Link was here!', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Link_was_here.png'},
-    2949: {name: 'Gohma Sees You', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Gohma_sees_you.png'},
-    2950: {name: 'Skultilla the Cake Guard', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Skultilla_the_cake_guard.png'},
-    2951: {name: 'Who eats whom?', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Who_eats_whom.png'},
-    2952: {name: 'Cupcake Crumbles', image: 'https://ptpimg.me/ckw9ad.png'},
-    2953: {name: 'Halloween Cupcake Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Halloween_Cupcake_Badge.png'},
-    2969: {name: 'Gingerbread Kitana', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Kitana.png'},
-    2970: {name: 'Gingerbread Marston', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Marston.png'},
-    2972: {name: 'Gingerbread Doomslayer', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Doomslayer.png'},
-    2973: {name: 'Millenium Falcon Gingerbread', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Millenium_Falcon.png'},
-    2974: {name: 'Gingerbread AT Walker', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_AT_Walker.png'},
-    2975: {name: 'Mario Christmas', image: 'static/common/items/Items/Card/9th_Christmas_Mario_Christmas.png'},
-    2976: {name: 'Baby Yoda with Gingerbread', image: 'static/common/items/Items/Card/9th_Christmas_Baby_Yoda.png'},
-    2986: {name: 'Sonic and Amy', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Sonic_and_Amy.png'},
-    2987: {name: 'Yoshi and Birdo', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Yoshi_and_Birdo.png'},
-    2988: {name: 'Kirlia and Meloetta', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Kirlia_and_Meloetta.png'},
-    2989: {name: 'Aerith and Cloud', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Aerith_and_Cloud.png'},
-    2990: {name: 'Master Chief and Cortana', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Chief_and_Cortana.png'},
-    2991: {name: 'Dom and Maria', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Dom_and_Maria.png'},
-    2992: {name: 'Mr. and Mrs. Pac Man', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Mr_and_Mrs_Pac_Man.png'},
-    2993: {name: 'Chainsaw Chess', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Chainsaw_Chess.png'},
-    2994: {name: 'Chainsaw Wizard', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Chainsaw_Wizard.png'},
-    2995: {name: 'Angelise Reiter', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Angelise_Reiter.png'},
-    2996: {name: 'Ivy Valentine', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Ivy_Valentine.png'},
-    2997: {name: 'Jill Valentine', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Jill_Valentine.png'},
-    2998: {name: 'Sophitia', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Sophitia.png'},
-    2999: {name: 'Yennefer', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Yennefer.png'},
-    3000: {name: 'Valentine Sugar Heart', image: 'https://ptpimg.me/82osc2.png'},
-    3001: {name: 'Valentine Chocolate Heart', image: 'https://ptpimg.me/gg9293.png'},
-    3002: {name: 'Valentine Rose', image: 'https://ptpimg.me/o6mt84.png'},
-    3004: {name: 'Special Box', image: 'static/common/items/Items/Valentine2022/special_box.png'},
-    3023: {name: 'Exodus Truce', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Exodus_Truce.png'},
-    3024: {name: 'Gazelle Breaking Bad', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Gazelle_Breaking_Bad.png'},
-    3025: {name: 'A Fair Fight', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_A_Fair_Fight.png'},
-    3026: {name: 'Home Sweet Home', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Home_Sweet_Home.png'},
-    3027: {name: 'Birthday Battle Kart', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Birthday_Battle_Kart.png'},
-    3028: {name: 'What an Adventure', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_What_an_Adventure.png'},
-    3029: {name: 'After Party', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_After_Party.png'},
-    3031: {name: 'Birthday Leaves (10th)', image: 'https://ptpimg.me/744jj8.png'},
-    3032: {name: '10th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/10th_Birthday_Badge.png'},
-    3105: {name: 'Cyberpunk 2077', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Cyberpunk_2077.png'},
-    3106: {name: 'Watch Dogs Legion', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Watch_Dogs_Legion.png'},
-    3107: {name: 'Dirt 5', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Dirt_5.png'},
-    3108: {name: 'Genshin Impact', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Genshin_Impact.png'},
-    3109: {name: 'Animal Crossing', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Animal_Crossing.png'},
-    3110: {name: 'Gazelle', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Gazelle.png'},
-    3111: {name: 'Mafia', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Mafia.png'},
-    3112: {name: 'Christmas Bauble Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Bauble_Badge.png'},
-    3113: {name: 'Red Crewmate Bauble', image: 'https://ptpimg.me/43o3rh.png'},
-    3114: {name: 'Green Crewmate Bauble', image: 'https://ptpimg.me/sm003l.png'},
-    3115: {name: 'Cyan Crewmate Bauble', image: 'https://ptpimg.me/r85pwu.png'},
-    3117: {name: 'Christmas Impostor Bauble?', image: 'https://ptpimg.me/455r6g.png'},
-    3119: {name: 'Broken Bauble Fragment', image: 'https://ptpimg.me/w3544e.png'},
-    3120: {name: 'Wilted Four-Leaves Holly', image: 'https://ptpimg.me/nsth09.png'},
-    3121: {name: 'Lucky Four-Leaves Holly', image: 'https://ptpimg.me/136074.png'},
-    3136: {name: 'Cupid&#39;s Winged Boots', image: 'https://ptpimg.me/vlk630.png'},
-    3143: {name: 'Symbol of Love', image: 'https://ptpimg.me/cf9vfc.png'},
-    3144: {name: 'Old Worn Boots', image: 'https://ptpimg.me/66unrh.png'},
-    3145: {name: 'Cupid&#39;s Magical Feather', image: 'https://ptpimg.me/004ho6.png'},
-    3151: {name: 'Bill Rizer', image: 'static/common/items/Items/Card/11th_Birthday_Bill_Rizer.png'},
-    3152: {name: 'Donkey Kong', image: 'static/common/items/Items/Card/11th_Birthday_Donkey_Kong.png'},
-    3153: {name: 'Duck Hunt Dog', image: 'static/common/items/Items/Card/11th_Birthday_Duck_Hunt_Dog.png'},
-    3154: {name: 'Dr. Mario', image: 'static/common/items/Items/Card/11th_Birthday_Dr_Mario.png'},
-    3155: {name: 'Pit', image: 'static/common/items/Items/Card/11th_Birthday_Pit.png'},
-    3156: {name: 'Little Mac', image: 'static/common/items/Items/Card/11th_Birthday_Little_Mac.png'},
-    3157: {name: 'Mega Man', image: 'static/common/items/Items/Card/11th_Birthday_Mega_Man.png'},
-    3158: {name: 'Link', image: 'static/common/items/Items/Card/11th_Birthday_Link.png'},
-    3159: {name: 'Pac-Man', image: 'static/common/items/Items/Card/11th_Birthday_Pac_Man.png'},
-    3160: {name: 'Samus Aran', image: 'static/common/items/Items/Card/11th_Birthday_Samus_Aran.png'},
-    3161: {name: 'Simon Belmont', image: 'static/common/items/Items/Card/11th_Birthday_Simon_Belmont.png'},
-    3162: {name: 'Kirby', image: 'static/common/items/Items/Card/11th_Birthday_Kirby.png'},
-    3163: {name: 'Black Mage', image: 'static/common/items/Items/Card/11th_Birthday_Black_Mage.png'},
-    3165: {name: '11th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/11th_Birthday_Badge.png'},
-    3166: {name: 'Party Pipe Badge Bit', image: 'https://ptpimg.me/r6vdr3.png'},
-    3207: {name: 'Abandoned Dwarven Helmet', image: 'https://ptpimg.me/ux20da.png'},
-    3208: {name: 'Abandoned Dwarven Cuirass', image: 'https://ptpimg.me/b70787.png'},
-    3209: {name: 'Abandoned Dwarven Gloves', image: 'https://ptpimg.me/o9z2fd.png'},
-    3210: {name: 'Abandoned Dwarven Boots', image: 'https://ptpimg.me/mgztcw.png'},
-    3211: {name: 'Abandoned Dwarven Axe', image: 'https://ptpimg.me/v7vtxy.png'},
-    3218: {name: 'Milk', image: 'https://ptpimg.me/raa068.png'},
-    3219: {name: 'Cherries', image: 'https://ptpimg.me/x02af9.png'},
-    3220: {name: 'Grapes', image: 'https://ptpimg.me/351721.png'},
-    3221: {name: 'Coconuts', image: 'https://ptpimg.me/9c121y.png'},
-    3222: {name: 'Marshmallows', image: 'https://ptpimg.me/6tl43k.png'},
-    3223: {name: 'Cocoa beans', image: 'https://ptpimg.me/8h05tu.png'},
-    3224: {name: 'Vanilla Pods', image: 'https://ptpimg.me/7c4us8.png'},
-    3225: {name: 'Strawberries', image: 'https://ptpimg.me/gp622c.png'},
-    3226: {name: '&quot;Grape&quot; Milkshake', image: 'static/common/items/Items/Birthday/grapeshake.png'},
-    3227: {name: ' Coco-Cooler Milkshake', image: 'static/common/items/Items/Birthday/coconutshake.png'},
-    3228: {name: 'Cinnamon Milkshake', image: 'https://ptpimg.me/kl097r.png'},
-    3229: {name: 'Rocky Road Milkshake', image: 'https://ptpimg.me/q8634k.png'},
-    3230: {name: 'Neapolitan Milkshake', image: 'https://ptpimg.me/fr7433.png'},
-    3241: {name: 'Cinnamon', image: 'https://ptpimg.me/tol70u.png'},
-    3263: {name: 'Blinky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Blinky.png'},
-    3264: {name: 'Halloween Tombstone Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Halloween2021_Thombstone_Badge.png'},
-    3265: {name: 'Clyde', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Clyde.png'},
-    3266: {name: 'Pinky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Pinky.png'},
-    3267: {name: 'Inky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Inky.png'},
-    3268: {name: 'Ghostbusters', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Ghostbusters.png'},
-    3269: {name: 'Boo', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Boo.png'},
-    3270: {name: 'King Boo', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_King_Boo.png'},
-    3281: {name: 'Haunted Tombstone Shard', image: 'https://gazellegames.net/static/common/items/Items/Halloween2021/Haunted_Tombstone_Shard.png'},
-    3313: {name: 'Snowman Cookie', image: 'static/common/items/Items/Christmas2021/Christmas2021_Snowman_Cookie.png'},
-    3322: {name: 'Young Snowman', image: 'static/common/items/Items/Christmas2021/Christmas2021_Young_Snowman.png'},
-    3325: {name: 'Snowflake', image: 'static/common/items/Items/Christmas2021/Christmas2021_Snowflake.png'},
-    3326: {name: 'Penguin Snowglobe', image: 'static/common/items/Items/Christmas2021/Christmas2021_Penguin_Snowglobe.png'},
-    3327: {name: 'Owl Snowglobe', image: 'static/common/items/Items/Christmas2021/Christmas2021_Owl_Snowglobe.png'},
-    3328: {name: 'Santa Claus Is Out There', image: 'static/common/items/Items/Card/Christmas2021_Santa_Claus_Is_Out_There.png'},
-    3329: {name: 'Back to the Future', image: 'static/common/items/Items/Card/Christmas2021_Back_to_the_Future.png'},
-    3330: {name: 'Big Lebowski', image: 'static/common/items/Items/Card/Christmas2021_Big_Lebowski.png'},
-    3331: {name: 'Picard', image: 'static/common/items/Items/Card/Christmas2021_Picard.png'},
-    3332: {name: 'Braveheart', image: 'static/common/items/Items/Card/Christmas2021_Braveheart.png'},
-    3333: {name: 'Indy', image: 'static/common/items/Items/Card/Christmas2021_Indy.png'},
-    3334: {name: 'Gremlins', image: 'static/common/items/Items/Card/Christmas2021_Gremlins.png'},
-    3335: {name: 'Die Hard', image: 'static/common/items/Items/Card/Christmas2021_Die_Hard.png'},
-    3336: {name: 'Jurassic Park', image: 'static/common/items/Items/Card/Christmas2021_Jurassic_Park.png'},
-    3338: {name: 'Mando', image: 'static/common/items/Items/Card/Christmas2021_Mando.png'},
-    3339: {name: 'Doomguy ', image: 'static/common/items/Items/Card/Christmas2021_Doomguy.png'},
-    3340: {name: 'Grievous', image: 'static/common/items/Items/Card/Christmas2021_Grievous.png'},
-    3341: {name: 'Have a Breathtaking Christmas', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2021_Have_a_Breathtaking_Christmas.png'},
-    3358: {name: 'Valentine&#39;s Day 2022 Badge', image: 'static/common/items/Items/Valentine2022/valentines_badge_shop.png'},
-    3359: {name: 'Rose Petals', image: 'static/common/items/Items/Valentine2022/rose_petals.png'},
-    3368: {name: 'IRC Voice (1 Year)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png'},
-    3369: {name: 'Red Dragon', image: 'https://ptpimg.me/01y295.png'},
-    3370: {name: 'Blue Dragon', image: 'https://ptpimg.me/g1t9wq.png'},
-    3371: {name: 'Green Dragon', image: 'https://ptpimg.me/eb6p8q.png'},
-    3373: {name: 'Gold Dragon', image: 'https://ptpimg.me/39xam3.png'},
-    3378: {name: '12th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/12th_Birthday_Badge.png'},
-    3379: {name: 'Slice of Birthday Cake', image: 'https://ptpimg.me/880dpt.png'},
-    3384: {name: 'Golden Egg', image: 'https://ptpimg.me/vg48o6.png'},
+    66: {name: 'Upload Potion Sampler', image: 'static/common/items/Items/Potions/sample_green.png', category: 'Stat potions', gold: '2500', infStock: true},
+    72: {name: 'IRC Voice (2 Weeks)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '10000', infStock: true},
+    98: {name: 'Small Upload Potion', image: 'static/common/items/Items/Potions/small_green.png', category: 'Stat potions', gold: '5000', infStock: true},
+    99: {name: 'Upload Potion', image: 'static/common/items/Items/Potions/green.png', category: 'Stat potions', gold: '10000', infStock: true},
+    100: {name: 'Large Upload Potion', image: 'static/common/items/Items/Potions/large_green.png', category: 'Stat potions', gold: '25000', infStock: true},
+    104: {name: 'Download-Reduction Potion Sampler', image: 'static/common/items/Items/Potions/sample_red.png', category: 'Stat potions', gold: '3000', infStock: true},
+    105: {name: 'Small Download-Reduction Potion', image: 'static/common/items/Items/Potions/small_red.png', category: 'Stat potions', gold: '6000', infStock: true},
+    106: {name: 'Download-Reduction Potion', image: 'static/common/items/Items/Potions/red.png', category: 'Stat potions', gold: '12000', infStock: true},
+    107: {name: 'Large Download-Reduction Potion', image: 'static/common/items/Items/Potions/large_red.png', category: 'Stat potions', gold: '30000', infStock: true},
+    111: {name: 'Purple Angelica Flowers', image: 'static/common/items/Items/Plants/angelica_flowers.png', category: 'Crafting Materials', gold: '2000', infStock: true},
+    112: {name: 'Head of Garlic', image: 'static/common/items/Items/Plants/garlic.png', category: 'Crafting Materials', gold: '1000', infStock: false},
+    113: {name: 'Yellow Hellebore Flower', image: 'static/common/items/Items/Plants/hellebore_flower.png', category: 'Crafting Materials', gold: '2500', infStock: true},
+    114: {name: 'Black Elderberries', image: 'static/common/items/Items/Plants/black_elder_berries.png', category: 'Crafting Materials', gold: '2000', infStock: true},
+    115: {name: 'Black Elder Leaves', image: 'static/common/items/Items/Plants/black_elder_leaves.png', category: 'Crafting Materials', gold: '1600', infStock: true},
+    116: {name: 'Emerald', image: 'static/common/items/Items/Gems/emerald.png', category: 'Crafting Materials', gold: '10000', infStock: true},
+    120: {name: 'Green Onyx Gem', image: 'static/common/items/Items/Gems/green_onyx.png', category: 'Crafting Materials', gold: '20000', infStock: true},
+    121: {name: 'Flawless Amethyst', image: 'static/common/items/Items/Gems/flawless_amethyst.png', category: 'Crafting Materials', gold: '200000', infStock: true},
+    124: {name: 'Vial', image: 'static/common/items/Items/Vials/vial.png', category: 'Crafting Materials', gold: '1000', infStock: true},
+    125: {name: 'Test Tube', image: 'static/common/items/Items/Vials/test_tube.png', category: 'Crafting Materials', gold: '400', infStock: true},
+    126: {name: 'Bowl', image: 'static/common/items/Items/Vials/bowl.png', category: 'Crafting Materials', gold: '1500', infStock: true},
+    127: {name: 'Garlic Tincture', image: 'static/common/items/Items/Plants/garlic_tincture.png', category: 'Crafting Materials', gold: '2000', infStock: true},
+    175: {name: 'IRC Voice (2 Weeks) - Low Cost Option', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '5000', infStock: true},
+    1987: {name: 'Pile of Sand', image: 'static/common/items/Items/Vials/sand.png', category: 'Crafting Materials', gold: '250', infStock: true},
+    1988: {name: 'Glass Shards', image: 'static/common/items/Items/Vials/shards.png', category: 'Crafting Materials', gold: '275', infStock: true},
+    2153: {name: 'Farore&#39;s Flame', image: 'static/common/items/Items/Bling/flame_green.png', category: 'Crafting Materials', gold: '150000', infStock: false},
+    2154: {name: 'Nayru&#39;s Flame', image: 'static/common/items/Items/Bling/flame_blue.png', category: 'Crafting Materials', gold: '150000', infStock: false},
+    2155: {name: 'Din&#39;s Flame', image: 'static/common/items/Items/Bling/flame_red.png', category: 'Crafting Materials', gold: '150000', infStock: false},
+    2212: {name: 'IRC Voice (8 Weeks)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '20000', infStock: true},
+    2225: {name: 'Bronze Alloy Mix', image: 'static/common/items/Items/Ore/bronze.png', category: 'Crafting Materials', gold: '1000', infStock: false},
+    2226: {name: 'Iron Ore', image: 'static/common/items/Items/Ore/iron.png', category: 'Crafting Materials', gold: '2000', infStock: false},
+    2227: {name: 'Gold Ore', image: 'static/common/items/Items/Ore/gold.png', category: 'Crafting Materials', gold: '3500', infStock: false},
+    2228: {name: 'Mithril Ore', image: 'static/common/items/Items/Ore/mithril.png', category: 'Crafting Materials', gold: '5500', infStock: false},
+    2229: {name: 'Adamantium Ore', image: 'static/common/items/Items/Ore/adamantium.png', category: 'Crafting Materials', gold: '16000', infStock: false},
+    2230: {name: 'Quartz Dust', image: 'static/common/items/Items/Ore/quartz.png', category: 'Crafting Materials', gold: '1250', infStock: false},
+    2231: {name: 'Jade Dust', image: 'static/common/items/Items/Ore/jade.png', category: 'Crafting Materials', gold: '2500', infStock: false},
+    2232: {name: 'Amethyst Dust', image: 'static/common/items/Items/Ore/amethyst.png', category: 'Crafting Materials', gold: '8000', infStock: false},
+    2233: {name: 'Lump of Coal', image: 'static/common/items/Items/Ore/coal.png', category: 'Crafting Materials', gold: '1250', infStock: true},
+    2234: {name: 'Lump of Clay', image: 'static/common/items/Items/Ore/clay.png', category: 'Crafting Materials', gold: '150', infStock: true},
+    2235: {name: 'Bronze Bar', image: 'static/common/items/Items/Ore/bronze_bar.png', category: 'Crafting Materials', gold: '2000', infStock: false},
+    2236: {name: 'Impure Bronze Bar', image: 'static/common/items/Items/Ore/impure_bronze_bar.png', category: 'Crafting Materials', gold: '1150', infStock: false},
+    2237: {name: 'Iron Bar', image: 'static/common/items/Items/Ore/iron_bar.png', category: 'Crafting Materials', gold: '4000', infStock: false},
+    2238: {name: 'Steel Bar', image: 'static/common/items/Items/Ore/steel_bar.png', category: 'Crafting Materials', gold: '4500', infStock: false},
+    2239: {name: 'Gold Bar', image: 'static/common/items/Items/Ore/gold_bar.png', category: 'Crafting Materials', gold: '7000', infStock: false},
+    2240: {name: 'Mithril Bar', image: 'static/common/items/Items/Ore/mithril_bar.png', category: 'Crafting Materials', gold: '11000', infStock: false},
+    2241: {name: 'Adamantium Bar', image: 'static/common/items/Items/Ore/adamantium_bar.png', category: 'Crafting Materials', gold: '32000', infStock: false},
+    2242: {name: 'Quartz Bar', image: 'static/common/items/Items/Ore/quartz_bar.png', category: 'Crafting Materials', gold: '2500', infStock: false},
+    2243: {name: 'Jade Bar', image: 'static/common/items/Items/Ore/jade_bar.png', category: 'Crafting Materials', gold: '5000', infStock: false},
+    2244: {name: 'Amethyst Bar', image: 'static/common/items/Items/Ore/amethyst_bar.png', category: 'Crafting Materials', gold: '16000', infStock: false},
+    2261: {name: 'Impure Bronze Cuirass', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Cuirass.png', category: 'Equipment', gold: '2300', infStock: false},
+    2262: {name: 'Bronze Cuirass', image: 'https://ptpimg.me/3mf3lw.png', category: 'Equipment', gold: '4000', infStock: false},
+    2263: {name: 'Iron Cuirass', image: 'static/common/items/Cover/Body Armor/Iron_Cuirass.png', category: 'Equipment', gold: '16000', infStock: false},
+    2264: {name: 'Steel Cuirass', image: 'static/common/items/Cover/Body Armor/Steel_Cuirass.png', category: 'Equipment', gold: '18000', infStock: false},
+    2265: {name: 'Gold Cuirass', image: 'static/common/items/Cover/Body Armor/Gold_Cuirass.png', category: 'Equipment', gold: '28000', infStock: false},
+    2266: {name: 'Mithril Cuirass', image: 'static/common/items/Cover/Body Armor/Mithril_Cuirass.png', category: 'Equipment', gold: '55000', infStock: false},
+    2267: {name: 'Adamantium Cuirass', image: 'static/common/items/Cover/Body Armor/Adamantium_Cuirass.png', category: 'Equipment', gold: '160000', infStock: false},
+    2268: {name: 'Quartz Chainmail', image: 'static/common/items/Cover/Body Armor/Quartz_Chainmail.png', category: 'Equipment', gold: '5000', infStock: false},
+    2269: {name: 'Jade Chainmail', image: 'static/common/items/Cover/Body Armor/Jade_Chainmail.png', category: 'Equipment', gold: '20000', infStock: false},
+    2270: {name: 'Amethyst Chainmail', image: 'static/common/items/Cover/Body Armor/Amethyst_Chainmail.png', category: 'Equipment', gold: '80000', infStock: false},
+    2295: {name: 'Pile of Snow', image: 'static/common/items/Items/Christmas/snow.png', category: 'Crafting Materials', gold: '700', infStock: true},
+    2296: {name: 'Snowball', image: 'static/common/items/Items/Christmas/snowball_small.png', category: 'Crafting Materials', gold: '1400', infStock: false},
+    2297: {name: 'Candy Cane', image: 'static/common/items/Items/Christmas/candycane.png', category: 'Crafting Materials', gold: '1000', infStock: true},
+    2298: {name: 'Hot Chocolate', image: 'static/common/items/Items/Christmas/hotchoc.png', category: 'Stat potions', gold: '5500', infStock: false},
+    2299: {name: 'Peppermint Hot Chocolate', image: 'static/common/items/Items/Christmas/peremint_hotchoc.png', category: 'Stat potions', gold: '6500', infStock: false},
+    2300: {name: 'Pile of Charcoal', image: 'static/common/items/Items/Christmas/charcoal.png', category: 'Crafting Materials', gold: '5000', infStock: true},
+    2303: {name: 'Hyper Realistic Eggnog', image: 'static/common/items/Items/Christmas/eggnog.png', category: 'Stat potions', gold: '5500', infStock: false},
+    2305: {name: 'Large Snowball', image: 'static/common/items/Items/Christmas/snowball.png', category: 'Crafting Materials', gold: '4200', infStock: false},
+    2306: {name: 'Carrot', image: 'static/common/items/Items/Christmas/carrot.png', category: 'Crafting Materials', gold: '3500', infStock: true},
+    2307: {name: 'Snowman', image: 'static/common/items/Items/Christmas/snowman.png', category: 'Stat potions', gold: '27500', infStock: false},
+    2323: {name: 'Ruby', image: 'static/common/items/Items/Gems/ruby.png', category: 'Crafting Materials', gold: '25000', infStock: true},
+    2357: {name: 'The Golden Daedy', image: 'static/common/items/Items/Card/Staff_The_Golden_Daedy.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2358: {name: 'A Wild Artifaxx', image: 'static/common/items/Items/Card/Staff_A_Wild_Artifaxx.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2359: {name: 'A Red Hot Flamed', image: 'static/common/items/Items/Card/Staff_A_Red_Hot_Flamed.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2361: {name: 'Alpaca Out of Nowhere!', image: 'static/common/items/Items/Card/Staff_Alpaca_Out_of_Nowhere.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2364: {name: 'thewhale&#39;s Kiss', image: 'static/common/items/Items/Card/Staff_thewhales_Kiss.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2365: {name: 'Stump&#39;s Banhammer', image: 'static/common/items/Items/Card/Staff_Stumps_Banhammer.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2366: {name: 'Neo&#39;s Ratio Cheats', image: 'static/common/items/Items/Card/Staff_Neos_Ratio_Cheats.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2367: {name: 'Niko&#39;s Transformation', image: 'static/common/items/Items/Card/Staff_Nikos_Transformation.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2368: {name: 'lepik le prick', image: 'static/common/items/Items/Card/Staff_lepik_le_prick.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2369: {name: 'The Golden Throne', image: 'static/common/items/Items/Card/Staff_The_Golden_Throne.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2370: {name: 'The Biggest Banhammer', image: 'static/common/items/Items/Card/Staff_The_Biggest_Banhammer.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2371: {name: 'The Staff Beauty Parlor', image: 'static/common/items/Items/Card/Staff_The_Staff_Beauty_Parlor.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2372: {name: 'The Realm of Staff', image: 'static/common/items/Items/Card/Staff_The_Realm_of_Staff.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2373: {name: 'Cake', image: 'static/common/items/Items/Card/Portal_Cake.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2374: {name: 'GLaDOS', image: 'static/common/items/Items/Card/Portal_GLaDOS.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2375: {name: 'Companion Cube', image: 'static/common/items/Items/Card/Portal_Companion_Cube.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2376: {name: 'Portal Gun', image: 'static/common/items/Items/Card/Portal_Portal_Gun.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2377: {name: 'A Scared Morty', image: 'static/common/items/Items/Card/Portal_A_Scared_Morty.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2378: {name: 'Rick Sanchez', image: 'static/common/items/Items/Card/Portal_Rick_Sanchez.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2379: {name: 'Mr. Poopy Butthole', image: 'static/common/items/Items/Card/Portal_Mr_Poopy_Butthole.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2380: {name: 'Rick&#39;s Portal Gun', image: 'static/common/items/Items/Card/Portal_Ricks_Portal_Gun.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2381: {name: 'Nyx class Supercarrier', image: 'static/common/items/Items/Card/Portal_Nyx_class_Supercarrier.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2382: {name: 'Chimera Schematic', image: 'static/common/items/Items/Card/Portal_Chimera_Schematic.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2383: {name: 'Covetor Mining Ship', image: 'static/common/items/Items/Card/Portal_Covetor_Mining_Ship.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2384: {name: 'Space Wormhole', image: 'static/common/items/Items/Card/Portal_Space_Wormhole.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2385: {name: 'Interdimensional Portal', image: 'static/common/items/Items/Card/Portal_Interdimensional_Portal.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2388: {name: 'MuffledSilence&#39;s Headphones', image: 'static/common/items/Items/Card/Staff_MuffledSilences_Headphones.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2390: {name: 'Mario', image: 'static/common/items/Items/Card/Mario_Mario.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2391: {name: 'Luigi', image: 'static/common/items/Items/Card/Mario_Luigi.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2392: {name: 'Princess Peach', image: 'static/common/items/Items/Card/Mario_Princess_Peach.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2393: {name: 'Toad', image: 'static/common/items/Items/Card/Mario_Toad.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2394: {name: 'Yoshi', image: 'static/common/items/Items/Card/Mario_Yoshi.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2395: {name: 'Bowser', image: 'static/common/items/Items/Card/Mario_Bowser.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2396: {name: 'Goomba', image: 'static/common/items/Items/Card/Mario_Goomba.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2397: {name: 'Koopa Troopa', image: 'static/common/items/Items/Card/Mario_Koopa_Troopa.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2398: {name: 'Wario', image: 'static/common/items/Items/Card/Mario_Wario.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2400: {name: 'LinkinsRepeater Bone Hard Card', image: 'static/common/items/Items/Card/Staff_LinkinsRepeater_Bone_Hard_Card.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2401: {name: 'Super Mushroom', image: 'static/common/items/Items/Card/Mario_Super_Mushroom.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2402: {name: 'Fire Flower', image: 'static/common/items/Items/Card/Mario_Fire_Flower.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2403: {name: 'Penguin Suit', image: 'static/common/items/Items/Card/Mario_Penguin_Suit.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2404: {name: 'Goal Pole', image: 'static/common/items/Items/Card/Mario_Goal_Pole.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2410: {name: 'Z&eacute; do Caix&atilde;o Coffin Joe Card', image: 'static/common/items/Items/Card/Staff_Ze_do_Caixao_Coffin_Joe_Card.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2421: {name: 'Din&#39;s Lootbox', image: 'static/common/items/Items/Pack/Dins_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
+    2433: {name: 'Small Luck Potion', image: 'static/common/items/Items/Potions/small_purple.png', category: 'Buffs', gold: '5000', infStock: false},
+    2434: {name: 'Large Luck Potion', image: 'static/common/items/Items/Potions/large_purple.png', category: 'Buffs', gold: '14000', infStock: false},
+    2436: {name: 'Glass Shards x2', image: 'static/common/items/Items/Vials/shards.png', category: 'Crafting Materials', gold: '550', infStock: true},
+    2437: {name: 'Glass Shards x3', image: 'static/common/items/Items/Vials/shards.png', category: 'Crafting Materials', gold: '825', infStock: true},
+    2438: {name: 'Random Lvl2 Staff Card', image: 'static/common/items/Items/Pack/Random_Lvl2_Staff_Card.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2465: {name: 'Farore&#39;s Lootbox', image: 'static/common/items/Items/Pack/Farores_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
+    2466: {name: 'Nayru&#39;s Lootbox', image: 'static/common/items/Items/Pack/Nayrus_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
+    2468: {name: 'Random Lootbox (Din, Farore, or Nayru)', image: 'static/common/items/Items/Pack/Random_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
+    2508: {name: 'Dwarven Gem', image: 'static/common/items/Items/Gems/dwarven_gem.png', category: 'Crafting Materials', gold: '100000', infStock: false},
+    2537: {name: 'Carbon-Crystalline Quartz', image: 'static/common/items/Items/Gems/carbonquartz.png', category: 'Crafting Materials', gold: '3750', infStock: false},
+    2538: {name: 'Carbon-Crystalline Quartz Necklace', image: 'static/common/items/Cover/Jewelry/crystalline.png', category: 'Equipment', gold: '4000', infStock: false},
+    2539: {name: 'Silver Ring of Gazellia', image: 'static/common/items/Cover/Jewelry/silvering.png', category: 'Equipment', gold: '1000', infStock: true},
+    2549: {name: 'Sapphire', image: 'static/common/items/Items/Gems/sapphire.png', category: 'Crafting Materials', gold: '6000', infStock: true},
+    2550: {name: 'Ruby Chip', image: 'static/common/items/Items/Gems/chip_ruby.png', category: 'Crafting Materials', gold: '2500', infStock: true},
+    2551: {name: 'Emerald Chip', image: 'static/common/items/Items/Gems/chip_emerald.png', category: 'Crafting Materials', gold: '1000', infStock: true},
+    2554: {name: 'Unity Flame Necklet', image: 'static/common/items/Cover/Jewelry/unityneck.png', category: 'Equipment', gold: '1000000', infStock: false},
+    2563: {name: 'Exquisite Constellation of Rubies', image: 'static/common/items/Items/Jewelry/constellation_ruby.png', category: 'Crafting Materials', gold: '120000', infStock: false},
+    2564: {name: 'Exquisite Constellation of Sapphires', image: 'static/common/items/Items/Jewelry/constellation_sapphire.png', category: 'Crafting Materials', gold: '44000', infStock: false},
+    2565: {name: 'Exquisite Constellation of Emeralds', image: 'static/common/items/Items/Jewelry/constellation_emerald.png', category: 'Crafting Materials', gold: '60000', infStock: false},
+    2579: {name: 'Ruby-Flecked Wheat', image: 'static/common/items/Items/Food/wheat_ruby.png', category: 'Crafting Materials', gold: '1200', infStock: false},
+    2580: {name: 'Ruby-Grained Baguette', image: 'static/common/items/Items/Food/baguette_ruby.png', category: 'Buffs', gold: '2400', infStock: false},
+    2581: {name: 'Garlic Ruby-Baguette', image: 'static/common/items/Items/Food/garlic_ruby.png', category: 'Buffs', gold: '4500', infStock: false},
+    2582: {name: 'Artisan Ruby-Baguette', image: 'static/common/items/Items/Food/artisan_ruby.png', category: 'Buffs', gold: '9500', infStock: false},
+    2584: {name: 'Unity Flame Band', image: 'static/common/items/Cover/Jewelry/unityring.png', category: 'Equipment', gold: '850000', infStock: false},
+    2585: {name: 'Amethyst', image: 'static/common/items/Items/Gems/amethyst.png', category: 'Crafting Materials', gold: '30000', infStock: true},
+    2589: {name: 'Ripe Pumpkin', image: 'static/common/items/Items/Card/Halloween_Ripe_Pumpkin.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2590: {name: 'Rotting Pumpkin', image: 'static/common/items/Items/Card/Halloween_Rotting_Pumpkin.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2591: {name: 'Carved Pumpkin', image: 'static/common/items/Items/Card/Halloween_Carved_Pumpkin.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2592: {name: 'Stormrage Pumpkin', image: 'static/common/items/Items/Card/Halloween_Stormrage_Pumpkin.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2593: {name: 'Russian Pumpkin', image: 'static/common/items/Items/Card/Halloween_Russian_Pumpkin.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2594: {name: 'Green Mario Pumpkin', image: 'static/common/items/Items/Card/Halloween_Green_Mario_Pumpkin.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2595: {name: 'Lame Pumpkin Trio', image: 'static/common/items/Items/Card/Halloween_Lame_Pumpkin_Trio.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2600: {name: 'Pumpkin Badge Bits', image: 'static/common/items/Items/Halloween/pumpkin_bits.png', category: 'Stat potions', gold: '2250', infStock: false},
+    2601: {name: 'Halloween Pumpkin Badge', image: 'static/common/items/Items/Badges/Halloween_Pumpkin_Badge.png', category: 'User badges', gold: '13500', infStock: false},
+    2627: {name: 'Blacksmith Tongs', image: 'static/common/items/Items/Recast/blacksmith_tongs.png', category: 'Crafting Materials', gold: '50', infStock: true},
+    2639: {name: 'Dwarven Disco Ball', image: 'static/common/items/Cover/Clothing/disco_ball.png', category: 'Equipment', gold: '900000', infStock: false},
+    2641: {name: 'Impure Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Claymore.png', category: 'Equipment', gold: '2300', infStock: false},
+    2642: {name: 'Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Claymore.png', category: 'Equipment', gold: '4000', infStock: false},
+    2643: {name: 'Iron Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Claymore.png', category: 'Equipment', gold: '16000', infStock: false},
+    2644: {name: 'Steel Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Claymore.png', category: 'Equipment', gold: '18000', infStock: false},
+    2645: {name: 'Gold Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Claymore.png', category: 'Equipment', gold: '28000', infStock: false},
+    2646: {name: 'Mithril Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Claymore.png', category: 'Equipment', gold: '55000', infStock: false},
+    2647: {name: 'Adamantium Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Claymore.png', category: 'Equipment', gold: '160000', infStock: false},
+    2648: {name: 'Quartz Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Khopesh.png', category: 'Equipment', gold: '5000', infStock: false},
+    2649: {name: 'Jade Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Khopesh.png', category: 'Equipment', gold: '20000', infStock: false},
+    2650: {name: 'Amethyst Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Khopesh.png', category: 'Equipment', gold: '80000', infStock: false},
+    2653: {name: 'Flux', image: 'static/common/items/Items/Recast/flux.png', category: 'Crafting Materials', gold: '50', infStock: true},
+    2656: {name: 'Impure Bronze Bar x2', image: 'static/common/items/Items/Ore/impure_bronze_bar.png', category: 'Crafting Materials', gold: '2500', infStock: false},
+    2666: {name: 'Bronze Alloy Mix x2', image: 'static/common/items/Items/Ore/bronze.png', category: 'Crafting Materials', gold: '2000', infStock: false},
+    2668: {name: 'Iron Ore x2', image: 'static/common/items/Items/Ore/iron.png', category: 'Crafting Materials', gold: '4000', infStock: false},
+    2670: {name: 'Gold Ore x2', image: 'static/common/items/Items/Ore/gold.png', category: 'Crafting Materials', gold: '7000', infStock: false},
+    2671: {name: 'Mithril Ore x2', image: 'static/common/items/Items/Ore/mithril.png', category: 'Crafting Materials', gold: '11000', infStock: false},
+    2672: {name: 'Adamantium Ore x2', image: 'static/common/items/Items/Ore/adamantium.png', category: 'Crafting Materials', gold: '32000', infStock: false},
+    2673: {name: 'Quartz Dust x2', image: 'static/common/items/Items/Ore/quartz.png', category: 'Crafting Materials', gold: '2000', infStock: false},
+    2675: {name: 'Jade Dust x2', image: 'static/common/items/Items/Ore/jade.png', category: 'Crafting Materials', gold: '4000', infStock: false},
+    2676: {name: 'Amethyst Dust x2', image: 'static/common/items/Items/Ore/amethyst.png', category: 'Crafting Materials', gold: '16000', infStock: false},
+    2688: {name: 'Christmas Spices', image: 'static/common/items/Items/Christmas/spices.png', category: 'Crafting Materials', gold: '2600', infStock: true},
+    2689: {name: 'Old Scarf &amp; Hat', image: 'static/common/items/Items/Christmas/hatscarf.png', category: 'Crafting Materials', gold: '2500', infStock: true},
+    2698: {name: 'Perfect Snowball', image: 'static/common/items/Items/Card/Christmas_Perfect_Snowball.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2699: {name: 'Mistletoe', image: 'static/common/items/Items/Card/Christmas_Mistletoe.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2700: {name: 'Santa Suit', image: 'static/common/items/Items/Card/Christmas_Santa_Suit.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2701: {name: 'Abominable Santa', image: 'static/common/items/Items/Card/Christmas_Abominable_Santa.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2702: {name: 'Icy Kisses', image: 'static/common/items/Items/Card/Christmas_Icy_Kisses.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2703: {name: 'Sexy Santa', image: 'static/common/items/Items/Card/Christmas_Sexy_Santa.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2704: {name: 'Christmas Cheer', image: 'static/common/items/Items/Card/Christmas_Christmas_Cheer.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2717: {name: 'Emerald-Flecked Wheat', image: 'static/common/items/Items/Food/wheat_emerald.png', category: 'Crafting Materials', gold: '600', infStock: false},
+    2718: {name: 'Emerald-Grained Baguette', image: 'static/common/items/Items/Food/bagette_emerald.png', category: 'Buffs', gold: '1200', infStock: false},
+    2719: {name: 'Garlic Emerald-Baguette', image: 'static/common/items/Items/Food/garlic_emerald.png', category: 'Buffs', gold: '2500', infStock: false},
+    2720: {name: 'Artisan Emerald-Baguette', image: 'static/common/items/Items/Food/artisan_emerald.png', category: 'Buffs', gold: '6000', infStock: false},
+    2721: {name: 'Gazellian Emerald-Baguette', image: 'static/common/items/Items/Food/gazellian_emerald.png', category: 'Buffs', gold: '8000', infStock: false},
+    2761: {name: 'Impure Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Segmentata.png', category: 'Equipment', gold: '1150', infStock: false},
+    2762: {name: 'Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Bronze_Segmentata.png', category: 'Equipment', gold: '2000', infStock: false},
+    2763: {name: 'Iron Segmentata', image: 'static/common/items/Cover/Body Armor/Iron_Segmentata.png', category: 'Equipment', gold: '8000', infStock: false},
+    2764: {name: 'Steel Segmentata', image: 'static/common/items/Cover/Body Armor/Steel_Segmentata.png', category: 'Equipment', gold: '9000', infStock: false},
+    2765: {name: 'Gold Segmentata', image: 'static/common/items/Cover/Body Armor/Gold_Segmentata.png', category: 'Equipment', gold: '14000', infStock: false},
+    2766: {name: 'Mithril Segmentata', image: 'static/common/items/Cover/Body Armor/Mithril_Segmentata.png', category: 'Equipment', gold: '22000', infStock: false},
+    2767: {name: 'Adamantium Segmentata', image: 'static/common/items/Cover/Body Armor/Adamantium_Segmentata.png', category: 'Equipment', gold: '64000', infStock: false},
+    2772: {name: 'Regenerate', image: 'static/common/items/Items/AdventureClub/attack_meditation.png', category: 'Attacks', gold: '200', infStock: false},
+    2774: {name: 'Hypnosis', image: 'static/common/items/Items/AdventureClub/attack_hypnosis.png', category: 'Attacks', gold: '250', infStock: false},
+    2775: {name: 'Muddle', image: 'static/common/items/Items/AdventureClub/attack_muddle.png', category: 'Attacks', gold: '250', infStock: false},
+    2776: {name: 'Parasite', image: 'static/common/items/Items/AdventureClub/attack_parasite.png', category: 'Attacks', gold: '800', infStock: false},
+    2801: {name: '3 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_3.png', category: 'Backpack (IRC)', gold: '300', infStock: false},
+    2802: {name: '4 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_4.png', category: 'Backpack (IRC)', gold: '400', infStock: false},
+    2803: {name: '6 Backpack Slots', image: 'static/common/items/Items/AdventureClub/backpack_6.png', category: 'Backpack (IRC)', gold: '600', infStock: false},
+    2813: {name: 'Scrap', image: 'static/common/items/Items/AdventureClub/craft_scrap.png', category: 'Items', gold: '500', infStock: false},
+    2814: {name: 'Cloth', image: 'static/common/items/Items/AdventureClub/craft_cloth.png', category: 'Items', gold: '500', infStock: false},
+    2816: {name: 'Hide', image: 'static/common/items/Items/AdventureClub/craft_hide.png', category: 'Items', gold: '500', infStock: false},
+    2822: {name: 'Can&#39;t Believe This Is Cherry', image: 'static/common/items/Items/Birthday/chakefhake.png', category: 'Buffs', gold: '8000', infStock: false},
+    2825: {name: '9th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/9th_Birthday_Badge.png', category: 'User badges', gold: '13500', infStock: false},
+    2826: {name: 'Lick Badge Bits', image: 'static/common/items/Items/Birthday/licks_bits.png', category: 'Stat potions', gold: '2250', infStock: false},
+    2829: {name: 'Ripped Gazelle', image: 'static/common/items/Items/Card/Birthday_Ripped_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2830: {name: 'Fancy Gazelle', image: 'static/common/items/Items/Card/Birthday_Fancy_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2831: {name: 'Gamer Gazelle', image: 'static/common/items/Items/Card/Birthday_Gamer_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2833: {name: 'Future Gazelle', image: 'static/common/items/Items/Card/Birthday_Future_Gazelle.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2834: {name: 'Alien Gazelle', image: 'static/common/items/Items/Card/Birthday_Alien_Gazelle.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2835: {name: 'Lucky Gazelle', image: 'static/common/items/Items/Card/Birthday_Lucky_Gazelle.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2836: {name: 'Supreme Gazelle', image: 'static/common/items/Items/Card/Birthday_Supreme_Gazelle.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2841: {name: 'Condensed Light', image: 'static/common/items/Items/AdventureClub/craft_light.png', category: 'Items', gold: '500', infStock: false},
+    2842: {name: 'Bottled Ghost', image: 'static/common/items/Items/AdventureClub/craft_bottle_ghost.png.png', category: 'Items', gold: '500', infStock: false},
+    2844: {name: 'Glowing Leaves', image: 'static/common/items/Items/AdventureClub/craft_glowing_leaves.png.png', category: 'Items', gold: '50', infStock: false},
+    2845: {name: 'Dark Orb', image: 'static/common/items/Items/AdventureClub/attack_darkorb.png', category: 'Attacks', gold: '5000', infStock: false},
+    2846: {name: 'Burst of Light', image: 'static/common/items/Items/AdventureClub/attack_burstlight.png', category: 'Attacks', gold: '5000', infStock: false},
+    2847: {name: 'Scrappy Gauntlets', image: 'static/common/items/Cover/AdventureClub/scrappy_gauntlets.png', category: 'Items', gold: '2500', infStock: false},
+    2849: {name: 'Quartz Lamellar', image: 'static/common/items/Cover/Body Armor/Quartz_Lamellar.png', category: 'Equipment', gold: '2500', infStock: false},
+    2850: {name: 'Jade Lamellar', image: 'static/common/items/Cover/Body Armor/Jade_Lamellar.png', category: 'Equipment', gold: '10000', infStock: false},
+    2851: {name: 'Amethyst Lamellar', image: 'static/common/items/Cover/Body Armor/Amethyst_Lamellar.png', category: 'Equipment', gold: '32000', infStock: false},
+    2852: {name: 'Impure Bronze Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Billhook.png', category: 'Equipment', gold: '1150', infStock: false},
+    2853: {name: 'Bronze Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Billhook.png', category: 'Equipment', gold: '2000', infStock: false},
+    2854: {name: 'Iron Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Billhook.png', category: 'Equipment', gold: '8000', infStock: false},
+    2855: {name: 'Steel Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Billhook.png', category: 'Equipment', gold: '9000', infStock: false},
+    2856: {name: 'Gold Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Billhook.png', category: 'Equipment', gold: '14000', infStock: false},
+    2857: {name: 'Mithril Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Billhook.png', category: 'Equipment', gold: '22000', infStock: false},
+    2858: {name: 'Adamantium Billhook', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Billhook.png', category: 'Equipment', gold: '64000', infStock: false},
+    2859: {name: 'Quartz Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Guandao.png', category: 'Equipment', gold: '2500', infStock: false},
+    2860: {name: 'Jade Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Guandao.png', category: 'Equipment', gold: '10000', infStock: false},
+    2861: {name: 'Amethyst Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Guandao.png', category: 'Equipment', gold: '32000', infStock: false},
+    2862: {name: 'Impure Bronze Armguards', image: 'static/common/items/Cover/Arm Armor/Impure_Bronze_Armguards.png', category: 'Equipment', gold: '1250', infStock: false},
+    2892: {name: 'Glowing Ash', image: 'https://ptpimg.me/3i2xd1.png', category: 'Items', gold: '50', infStock: false},
+    2893: {name: 'Troll Tooth', image: 'https://ptpimg.me/mrr24x.png', category: 'Items', gold: '50', infStock: false},
+    2894: {name: 'Advanced Hide', image: 'https://ptpimg.me/1d6926.png', category: 'Items', gold: '50', infStock: false},
+    2900: {name: 'Burning Ash Cloud', image: 'https://ptpimg.me/n7900m.png', category: 'Attacks', gold: '7500', infStock: false},
+    2901: {name: 'Troll Tooth Necklace', image: 'https://ptpimg.me/480516.png', category: 'Items', gold: '3500', infStock: false},
+    2908: {name: 'Impure Bronze Power Gloves', image: 'https://ptpimg.me/9d1e15.png', category: 'Equipment', gold: '4000', infStock: false},
+    2915: {name: 'Flame Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Flame_Badge.png', category: 'User badges', gold: '1000000', infStock: false},
+    2930: {name: 'Nayru&#39;s Username', image: 'static/common/items/Items/Username/Nayru.png', category: 'Username customizations', gold: '270000', infStock: false},
+    2931: {name: 'Farore&#39;s Username', image: 'static/common/items/Items/Username/Farore.png', category: 'Username customizations', gold: '270000', infStock: false},
+    2932: {name: 'Din&#39;s Username', image: 'static/common/items/Items/Username/Din.png', category: 'Username customizations', gold: '270000', infStock: false},
+    2945: {name: 'Bloody Mario', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Bloody_Mario.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2946: {name: 'Mommy&#39;s Recipe', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Mommys_Recipe.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2947: {name: 'Memory Boost', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Memory_Boost.png', category: 'Trading Cards', gold: '6660', infStock: false},
+    2948: {name: 'Link was here!', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Link_was_here.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2949: {name: 'Gohma Sees You', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Gohma_sees_you.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2950: {name: 'Skultilla the Cake Guard', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Skultilla_the_cake_guard.png', category: 'Trading Cards', gold: '6660', infStock: false},
+    2951: {name: 'Who eats whom?', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Halloween_Who_eats_whom.png', category: 'Trading Cards', gold: '15000', infStock: false},
+    2952: {name: 'Cupcake Crumbles', image: 'https://ptpimg.me/ckw9ad.png', category: 'Crafting Materials', gold: '2250', infStock: false},
+    2953: {name: 'Halloween Cupcake Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Halloween_Cupcake_Badge.png', category: 'User badges', gold: '13500', infStock: false},
+    2969: {name: 'Gingerbread Kitana', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Kitana.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2970: {name: 'Gingerbread Marston', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Marston.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2972: {name: 'Gingerbread Doomslayer', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Doomslayer.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    2973: {name: 'Millenium Falcon Gingerbread', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_Millenium_Falcon.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2974: {name: 'Gingerbread AT Walker', image: 'static/common/items/Items/Card/9th_Christmas_Gingerbread_AT_Walker.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    2975: {name: 'Mario Christmas', image: 'static/common/items/Items/Card/9th_Christmas_Mario_Christmas.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    2976: {name: 'Baby Yoda with Gingerbread', image: 'static/common/items/Items/Card/9th_Christmas_Baby_Yoda.png', category: 'Trading Cards', gold: '14000', infStock: false},
+    2986: {name: 'Sonic and Amy', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Sonic_and_Amy.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2987: {name: 'Yoshi and Birdo', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Yoshi_and_Birdo.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2988: {name: 'Kirlia and Meloetta', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Kirlia_and_Meloetta.png', category: 'Trading Cards', gold: '4500', infStock: false},
+    2989: {name: 'Aerith and Cloud', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Aerith_and_Cloud.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2990: {name: 'Master Chief and Cortana', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Chief_and_Cortana.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2991: {name: 'Dom and Maria', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Dom_and_Maria.png', category: 'Trading Cards', gold: '4500', infStock: false},
+    2992: {name: 'Mr. and Mrs. Pac Man', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Master_Mr_and_Mrs_Pac_Man.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    2993: {name: 'Chainsaw Chess', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Chainsaw_Chess.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2994: {name: 'Chainsaw Wizard', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Chainsaw_Wizard.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2995: {name: 'Angelise Reiter', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Angelise_Reiter.png', category: 'Trading Cards', gold: '4500', infStock: false},
+    2996: {name: 'Ivy Valentine', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Ivy_Valentine.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2997: {name: 'Jill Valentine', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Jill_Valentine.png', category: 'Trading Cards', gold: '2000', infStock: false},
+    2998: {name: 'Sophitia', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Sophitia.png', category: 'Trading Cards', gold: '4500', infStock: false},
+    2999: {name: 'Yennefer', image: 'https://gazellegames.net/static/common/items/Items/Card/9th_Valentine_Yennefer.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3000: {name: 'Valentine Sugar Heart', image: 'https://ptpimg.me/82osc2.png', category: 'Stat potions', gold: '500', infStock: false},
+    3001: {name: 'Valentine Chocolate Heart', image: 'https://ptpimg.me/gg9293.png', category: 'Stat potions', gold: '500', infStock: false},
+    3002: {name: 'Valentine Rose', image: 'https://ptpimg.me/o6mt84.png', category: 'Buffs', gold: '5000', infStock: false},
+    3004: {name: 'Special Box', image: 'static/common/items/Items/Valentine2022/special_box.png', category: 'Special Items', gold: '300000', infStock: false},
+    3023: {name: 'Exodus Truce', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Exodus_Truce.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3024: {name: 'Gazelle Breaking Bad', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Gazelle_Breaking_Bad.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3025: {name: 'A Fair Fight', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_A_Fair_Fight.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    3026: {name: 'Home Sweet Home', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Home_Sweet_Home.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3027: {name: 'Birthday Battle Kart', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_Birthday_Battle_Kart.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3028: {name: 'What an Adventure', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_What_an_Adventure.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    3029: {name: 'After Party', image: 'https://gazellegames.net/static/common/items/Items/Card/10th_Birthday_After_Party.png', category: 'Trading Cards', gold: '15000', infStock: false},
+    3031: {name: 'Birthday Leaves (10th)', image: 'https://ptpimg.me/744jj8.png', category: 'Stat potions', gold: '2250', infStock: false},
+    3032: {name: '10th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/10th_Birthday_Badge.png', category: 'User badges', gold: '13500', infStock: false},
+    3105: {name: 'Cyberpunk 2077', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Cyberpunk_2077.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3106: {name: 'Watch Dogs Legion', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Watch_Dogs_Legion.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3107: {name: 'Dirt 5', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Dirt_5.png', category: 'Trading Cards', gold: '6000', infStock: false},
+    3108: {name: 'Genshin Impact', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Genshin_Impact.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3109: {name: 'Animal Crossing', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Animal_Crossing.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3110: {name: 'Gazelle', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Gazelle.png', category: 'Trading Cards', gold: '6000', infStock: false},
+    3111: {name: 'Mafia', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2020_Mafia.png', category: 'Trading Cards', gold: '15000', infStock: false},
+    3112: {name: 'Christmas Bauble Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Bauble_Badge.png', category: 'User badges', gold: '8000', infStock: false},
+    3113: {name: 'Red Crewmate Bauble', image: 'https://ptpimg.me/43o3rh.png', category: 'Crafting Materials', gold: '5000', infStock: false},
+    3114: {name: 'Green Crewmate Bauble', image: 'https://ptpimg.me/sm003l.png', category: 'Crafting Materials', gold: '5001', infStock: false},
+    3115: {name: 'Cyan Crewmate Bauble', image: 'https://ptpimg.me/r85pwu.png', category: 'Crafting Materials', gold: '5000', infStock: false},
+    3117: {name: 'Christmas Impostor Bauble?', image: 'https://ptpimg.me/455r6g.png', category: 'Special Items', gold: '10000', infStock: false},
+    3119: {name: 'Broken Bauble Fragment', image: 'https://ptpimg.me/w3544e.png', category: 'Crafting Materials', gold: '2250', infStock: false},
+    3120: {name: 'Wilted Four-Leaves Holly', image: 'https://ptpimg.me/nsth09.png', category: 'Crafting Materials', gold: '2250', infStock: false},
+    3121: {name: 'Lucky Four-Leaves Holly', image: 'https://ptpimg.me/136074.png', category: 'Buffs', gold: '8000', infStock: false},
+    3136: {name: 'Cupid&#39;s Winged Boots', image: 'https://ptpimg.me/vlk630.png', category: 'Equipment', gold: '160000', infStock: false},
+    3143: {name: 'Symbol of Love', image: 'https://ptpimg.me/cf9vfc.png', category: 'Crafting Materials', gold: '100000', infStock: false},
+    3144: {name: 'Old Worn Boots', image: 'https://ptpimg.me/66unrh.png', category: 'Crafting Materials', gold: '10000', infStock: true},
+    3145: {name: 'Cupid&#39;s Magical Feather', image: 'https://ptpimg.me/004ho6.png', category: 'Crafting Materials', gold: '21500', infStock: false},
+    3151: {name: 'Bill Rizer', image: 'static/common/items/Items/Card/11th_Birthday_Bill_Rizer.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3152: {name: 'Donkey Kong', image: 'static/common/items/Items/Card/11th_Birthday_Donkey_Kong.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3153: {name: 'Duck Hunt Dog', image: 'static/common/items/Items/Card/11th_Birthday_Duck_Hunt_Dog.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3154: {name: 'Dr. Mario', image: 'static/common/items/Items/Card/11th_Birthday_Dr_Mario.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3155: {name: 'Pit', image: 'static/common/items/Items/Card/11th_Birthday_Pit.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3156: {name: 'Little Mac', image: 'static/common/items/Items/Card/11th_Birthday_Little_Mac.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3157: {name: 'Mega Man', image: 'static/common/items/Items/Card/11th_Birthday_Mega_Man.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3158: {name: 'Link', image: 'static/common/items/Items/Card/11th_Birthday_Link.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3159: {name: 'Pac-Man', image: 'static/common/items/Items/Card/11th_Birthday_Pac_Man.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3160: {name: 'Samus Aran', image: 'static/common/items/Items/Card/11th_Birthday_Samus_Aran.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3161: {name: 'Simon Belmont', image: 'static/common/items/Items/Card/11th_Birthday_Simon_Belmont.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3162: {name: 'Kirby', image: 'static/common/items/Items/Card/11th_Birthday_Kirby.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3163: {name: 'Black Mage', image: 'static/common/items/Items/Card/11th_Birthday_Black_Mage.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    3165: {name: '11th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/11th_Birthday_Badge.png', category: 'User badges', gold: '13500', infStock: false},
+    3166: {name: 'Party Pipe Badge Bit', image: 'https://ptpimg.me/r6vdr3.png', category: 'Crafting Materials', gold: '2250', infStock: false},
+    3218: {name: 'Milk', image: 'https://ptpimg.me/raa068.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3219: {name: 'Cherries', image: 'https://ptpimg.me/x02af9.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3220: {name: 'Grapes', image: 'https://ptpimg.me/351721.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3221: {name: 'Coconuts', image: 'https://ptpimg.me/9c121y.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3222: {name: 'Marshmallows', image: 'https://ptpimg.me/6tl43k.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3223: {name: 'Cocoa beans', image: 'https://ptpimg.me/8h05tu.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3224: {name: 'Vanilla Pods', image: 'https://ptpimg.me/7c4us8.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3225: {name: 'Strawberries', image: 'https://ptpimg.me/gp622c.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3226: {name: '&quot;Grape&quot; Milkshake', image: 'static/common/items/Items/Birthday/grapeshake.png', category: 'Buffs', gold: 0, infStock: false},
+    3227: {name: ' Coco-Cooler Milkshake', image: 'static/common/items/Items/Birthday/coconutshake.png', category: 'Buffs', gold: '8000', infStock: false},
+    3228: {name: 'Cinnamon Milkshake', image: 'https://ptpimg.me/kl097r.png', category: 'Buffs', gold: '8000', infStock: false},
+    3229: {name: 'Rocky Road Milkshake', image: 'https://ptpimg.me/q8634k.png', category: 'Buffs', gold: '11000', infStock: false},
+    3230: {name: 'Neapolitan Milkshake', image: 'https://ptpimg.me/fr7433.png', category: 'Buffs', gold: '14000', infStock: false},
+    3241: {name: 'Cinnamon', image: 'https://ptpimg.me/tol70u.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3263: {name: 'Blinky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Blinky.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3264: {name: 'Halloween Tombstone Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Halloween2021_Thombstone_Badge.png', category: 'User badges', gold: '15000', infStock: false},
+    3265: {name: 'Clyde', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Clyde.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3266: {name: 'Pinky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Pinky.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3267: {name: 'Inky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Inky.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3268: {name: 'Ghostbusters', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Ghostbusters.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    3269: {name: 'Boo', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Boo.png', category: 'Trading Cards', gold: '6500', infStock: false},
+    3270: {name: 'King Boo', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_King_Boo.png', category: 'Trading Cards', gold: '15000', infStock: false},
+    3281: {name: 'Haunted Tombstone Shard', image: 'https://gazellegames.net/static/common/items/Items/Halloween2021/Haunted_Tombstone_Shard.png', category: 'Special Items', gold: '2500', infStock: false},
+    3313: {name: 'Snowman Cookie', image: 'static/common/items/Items/Christmas2021/Christmas2021_Snowman_Cookie.png', category: 'Stat potions', gold: '650', infStock: false},
+    3322: {name: 'Young Snowman', image: 'static/common/items/Items/Christmas2021/Christmas2021_Young_Snowman.png', category: 'Equipment', gold: '35000', infStock: false},
+    3328: {name: 'Santa Claus Is Out There', image: 'static/common/items/Items/Card/Christmas2021_Santa_Claus_Is_Out_There.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3329: {name: 'Back to the Future', image: 'static/common/items/Items/Card/Christmas2021_Back_to_the_Future.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3330: {name: 'Big Lebowski', image: 'static/common/items/Items/Card/Christmas2021_Big_Lebowski.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3331: {name: 'Picard', image: 'static/common/items/Items/Card/Christmas2021_Picard.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3332: {name: 'Braveheart', image: 'static/common/items/Items/Card/Christmas2021_Braveheart.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3333: {name: 'Indy', image: 'static/common/items/Items/Card/Christmas2021_Indy.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3334: {name: 'Gremlins', image: 'static/common/items/Items/Card/Christmas2021_Gremlins.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3335: {name: 'Die Hard', image: 'static/common/items/Items/Card/Christmas2021_Die_Hard.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3336: {name: 'Jurassic Park', image: 'static/common/items/Items/Card/Christmas2021_Jurassic_Park.png', category: 'Trading Cards', gold: '3000', infStock: false},
+    3338: {name: 'Mando', image: 'static/common/items/Items/Card/Christmas2021_Mando.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3339: {name: 'Doomguy ', image: 'static/common/items/Items/Card/Christmas2021_Doomguy.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3340: {name: 'Grievous', image: 'static/common/items/Items/Card/Christmas2021_Grievous.png', category: 'Trading Cards', gold: '10000', infStock: false},
+    3341: {name: 'Have a Breathtaking Christmas', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2021_Have_a_Breathtaking_Christmas.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    3358: {name: 'Valentine&#39;s Day 2022 Badge', image: 'static/common/items/Items/Valentine2022/valentines_badge_shop.png', category: 'User badges', gold: '15000', infStock: false},
+    3359: {name: 'Rose Petals', image: 'static/common/items/Items/Valentine2022/rose_petals.png', category: 'Crafting Materials', gold: '3750', infStock: false},
+    3368: {name: 'IRC Voice (1 Year)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '130000', infStock: true},
+    3369: {name: 'Red Dragon', image: 'https://ptpimg.me/01y295.png', category: 'Equipment', gold: '500000', infStock: false},
+    3370: {name: 'Blue Dragon', image: 'https://ptpimg.me/g1t9wq.png', category: 'Equipment', gold: '500000', infStock: false},
+    3371: {name: 'Green Dragon', image: 'https://ptpimg.me/eb6p8q.png', category: 'Equipment', gold: '500000', infStock: false},
+    3373: {name: 'Gold Dragon', image: 'https://ptpimg.me/39xam3.png', category: 'Equipment', gold: '1000000', infStock: false},
+    3378: {name: '12th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/12th_Birthday_Badge.png', category: 'User badges', gold: '15000', infStock: false},
+    3379: {name: 'Slice of Birthday Cake', image: 'https://ptpimg.me/880dpt.png', category: 'Crafting Materials', gold: '3000', infStock: false},
+    3384: {name: 'Golden Egg', image: 'https://ptpimg.me/vg48o6.png', category: 'Crafting Materials', gold: '1000000', infStock: true},
   };
   //
   // #endregion
@@ -565,33 +577,26 @@
   //  recipes: an array of associated recipe buttons (jQuery objs)
   //  section: the jQuery object for the element wrapping associated recipe buttons
   //
-  const books = GM_getValue('selected_books', {
-    Glass: {bgcolor: 'white', color: 'black', disabled: true},
-    Potions: {bgcolor: 'green', color: 'white', disabled: false},
-    // Luck: {bgcolor: 'blue', color: 'white', disabled: false},
-    Food: {bgcolor: 'wheat', color: 'black', disabled: false},
-    Dwarven: {bgcolor: 'brown', color: 'beige', disabled: true},
-    Material_Bars: {bgcolor: 'purple', color: 'white', disabled: false},
-    Armor: {bgcolor: 'darkblue', color: 'white', disabled: true},
-    Weapons: {bgcolor: 'darkred', color: 'white', disabled: true},
-    Recasting: {bgcolor: 'gray', color: 'white', disabled: true},
-    Jewelry: {bgcolor: 'deeppink', color: 'white', disabled: true},
-    Bling: {bgcolor: 'gold', color: 'darkgray', disabled: true},
-    Trading_Decks: {bgcolor: '#15273F', color: 'white', disabled: true},
-    Xmas_Crafting: {bgcolor: 'red', color: 'lightgreen', disabled: true},
-    Birthday: {bgcolor: 'dark', color: 'gold', disabled: true},
-    Valentines: {bgcolor: 'pink', color: 'deeppink', disabled: true},
-    Adventure_Club: {bgcolor: 'yellow', color: 'black', disabled: true},
-    Halloween: {bgcolor: 'gray', color: 'black', disabled: true},
-  });
-  // Migrate old saves
-  const oldBooks = GM_getValue('BOOKS_SAVE');
-  if (oldBooks && typeof (oldBooks[0] !== 'object')) {
-    for (let i = 0; i < oldBooks.length / 2; i++) {
-      books[Object.keys(books)[i]].disabled = oldBooks[2 * i + 1] === 0;
-    }
-    GM_deleteValue('BOOKS_SAVE');
-  }
+  GM_deleteValue('selected_books');
+  const books = {
+    Glass: {bgcolor: 'white', color: 'black'},
+    Potions: {bgcolor: 'green', color: 'white'},
+    // Luck: {bgcolor: 'blue', color: 'white'},
+    Food: {bgcolor: 'wheat', color: 'black'},
+    Dwarven: {bgcolor: 'brown', color: 'beige'},
+    'Material Bars': {bgcolor: 'purple', color: 'white'},
+    Armor: {bgcolor: 'darkblue', color: 'white'},
+    Weapons: {bgcolor: 'darkred', color: 'white'},
+    Recasting: {bgcolor: 'gray', color: 'white'},
+    Jewelry: {bgcolor: 'deeppink', color: 'white'},
+    Bling: {bgcolor: 'gold', color: 'darkgray'},
+    'Trading Decks': {bgcolor: '#15273F', color: 'white'},
+    'Xmas Crafting': {bgcolor: 'red', color: 'lightgreen'},
+    Birthday: {bgcolor: 'darkgray', color: 'gold'},
+    Valentines: {bgcolor: 'pink', color: 'deeppink'},
+    'Adventure Club': {bgcolor: 'yellow', color: 'black'},
+    Halloween: {bgcolor: 'gray', color: 'black'},
+  };
   //
   // #endregion Recipe Book definitions
   //
@@ -651,7 +656,7 @@
       {itemId: 3229, recipe: '0321802295EEEEE0322303222EEEEE019880198801988', requirement: ''},
       {itemId: 3230, recipe: '0321802295EEEEE032230322403225019880198801988', requirement: ''},
     ],
-    Material_Bars: [
+    'Material Bars': [
       {itemId: 2236, recipe: '0222502234EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2235, recipe: '0222502225EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
       {itemId: 2237, recipe: '0222602226EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', requirement: 1},
@@ -732,7 +737,7 @@
       {itemId: 2564, recipe: 'EEEEEEEEEEEEEEE025490224402549025490224402549', requirement: 2},
       {itemId: 2563, recipe: 'EEEEEEEEEEEEEEE023230224402323023230224402323', requirement: 2},
     ],
-    Trading_Decks: [
+    'Trading Decks': [
       {itemId: 2369, recipe: 'EEEEEEEEEEEEEEE023580235902357EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2370, recipe: 'EEEEEEEEEEEEEEE023650236402366EEEEEEEEEEEEEEE', requirement: '', name: 'Biggest Banhammer'},
       {itemId: 2371, recipe: 'EEEEEEEEEEEEEEE023610236702368EEEEEEEEEEEEEEE', requirement: '', name: 'Staff Beauty Parlor'},
@@ -751,7 +756,7 @@
       {itemId: 2465, recipe: '02404EEEEEEEEEEEEEEE02372EEEEE02404EEEEEEEEEE', requirement: 2, name: 'Farores Lootbox'},
       {itemId: 2466, recipe: '02385EEEEEEEEEEEEEEE02372EEEEE02385EEEEEEEEEE', requirement: 2, name: 'Nayrus Lootbox'},
     ],
-    Xmas_Crafting: [
+    'Xmas Crafting': [
       {itemId: 3107, recipe: 'EEEEEEEEEEEEEEEEEEEE0310503106EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3111, recipe: 'EEEEEEEEEEEEEEEEEEEE0310703110EEEEEEEEEEEEEEE', requirement: ''},
@@ -828,7 +833,7 @@
       {itemId: 3270, recipe: 'EEEEEEEEEEEEEEE0326803269EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 3264, recipe: '032810328103281EEEEEEEEEEEEEEE032810328103281', requirement: '', name: 'Tombstone Badge'},
     ],
-    Adventure_Club: [
+    'Adventure Club': [
       {itemId: 2772, recipe: 'EEEEEEEEEEEEEEEEEEEE02844EEEEEEEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2774, recipe: 'EEEEEEEEEEEEEEE028440284402844EEEEEEEEEEEEEEE', requirement: ''},
       {itemId: 2775, recipe: 'EEEEE02844EEEEEEEEEE02844EEEEEEEEEE02844EEEEE', requirement: ''},
@@ -869,30 +874,276 @@
   //
   // #region Stylesheets
   //
-  const styleExtraBookSpace = $(`<style>
-.recipe_buttons {
-  row-gap: 1rem;
-}
-</style>`);
-  const styleIngredientQuantity = $(`<style>
-.crafting-info__ingredient-quantity {
-  flex-direction: row;
-}
-</style>`);
-  const styleIngredientQuantitySwap = $(`<style>
-.crafting-info__ingredient-quantity {
-  flex-direction: row-reverse;
-}
-</style>`);
   const head = $('head');
   head.append(`<style>
-.crafting-info__ingredient-quantity {
-  display: flex;
-}
 .crafting-clear {
   clear: both;
   margin-bottom: 1rem
 }
+.crafting-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.crafting-panel__main {
+  display: flex;
+  flex-direction: row;
+  gap: .125rem;
+}
+.crafting-panel__title {
+  margin-bottom: .5rem;
+  margin-top: 0;
+}
+.crafting-panel__column {
+  display: flex;
+  flex-direction: column;
+}
+.crafting-panel__row {
+  display: flex;
+  flex-direction: row;
+  gap: .25rem;
+}
+/* Scale factor times size of grid, grid size from #slots_panel */
+.crafting-panel-grid__wrapper {
+  height: 277.5px;
+  width: 412.5px;
+  min-width: 412.5px;
+  flex: 0;
+}
+/* TODO use scale factor against height width of this and parent */
+.crafting-panel-grid__main {
+  background: url('/static/styles/game_room/images/shop/crafting_panel.jpg');
+  height: 370px;
+  width: 550px;
+  position: relative;
+  transform: scale(0.75);
+  transform-origin: top left;
+}
+.crafting-panel-grid__slot,
+.crafting-panel-grid__result,
+.crafting-panel-grid__requirement {
+  position: absolute;
+  background: transparent;
+}
+.crafting-panel-info-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 275px;
+}
+.crafting-panel-info__ingredients-header {
+  margin-bottom: .5rem;
+}
+.crafting-panel-info__ingredient-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  align-items: center;
+  align-self: left;
+}
+.crafting-panel-info__ingredient-shop-link {
+  border-radius: 50%;
+  background-color: orange;
+  color: black;
+  padding: 0 0.25rem;
+}
+.crafting-panel-info__ingredient-shop-link--purchasable {
+  background-color: green;
+}
+.crafting-panel-info__ingredient {
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.25rem;
+  align-items: center;
+  align-self: left;
+}
+.crafting-panel-info__ingredient-quantity {
+  display: flex;
+}
+.crafting-panel-info__ingredient-quantity:not(.crafting-panel-info__ingredient-quantity--swapped) {
+  flex-direction: row;
+}
+.crafting-panel-info__ingredient-quantity--swapped {
+  flex-direction: row-reverse;
+}
+.crafting-panel-info__availability {
+  margin-bottom: 1rem;
+}
+.crafting-panel-info__ingredient--purchasable,
+.crafting-panel-info__available-with-purchase--purchasable {
+  color: lightGreen;
+}
+.crafting-panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.crafting-panel-actions__craft-row {
+  display: flex;
+  flex-direction: row;
+  gap: .25rem;
+  align-items: center;
+  align-self: center;
+}
+.crafting-panel-actions__max-craft-button {
+  width: 100%;
+  margin-left: 0;
+  background-color: orange;
+}
+.crafting-panel-actions__max-craft-button--confirm {
+  background-color: red;
+}
+.crafting-panel-actions__clear-craft-button {
+  width: 100%;
+  margin-top: 1rem;
+  background-color: red;
+}
+.crafting-panel-options,
+.crafting-panel-filters {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: .5rem;
+}
+.crafting-panel-settings-sorts {
+  display: flex;
+  flex-direction: row;
+  gap: .5rem;
+}
+.crafting-panel-sorts__wrapper {
+  order: -1;
+  gap: .25rem;
+}
+.crafting-panel-sorts__wrapper,
+.crafting-panel-settings {
+  display: flex;
+  flex-direction: column;
+  flex: 50%;
+}
+.crafting-panel-settings {
+  align-items: end;
+}
+.crafting-panel-settings input {
+  margin: 0;
+  margin-left: .5rem;
+}
+.crafting-panel-sorts {
+  display: flex;
+  flex-direction: row;
+}
+.crafting-panel-sorts__title {
+  display: inline-block;
+}
+.crafting-panel-sorts__title,
+.crafting-panel-filters__title,
+.crafting-panel-filters__books-title,
+.crafting-panel-filters__categories-title,
+.crafting-panel-filters__types-title {
+  margin: 0;
+  flex: 1;
+}
+.crafting-panel-filters__books,
+.crafting-panel-filters__categories,
+.crafting-panel-filters__types {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.crafting-panel-filters__craftable,
+.crafting-panel-filters__books-row,
+.crafting-panel-filters__categories-row,
+.crafting-panel-filters__types-row {
+  display: flex;
+  flex-direction: row;
+  gap: .25rem;
+  flex: 1;
+}
+.crafting-panel-filters__craftable-option,
+.crafting-panel-filters__books-button,
+.crafting-panel-filters__categories-category,
+.crafting-panel-filters__types-type {
+  flex: 1;
+  opacity: 0.4;
+}
+.crafting-panel-filters__craftable-option--selected,
+.crafting-panel-filters__books-show,
+.crafting-panel-filters__books-hide,
+.crafting-panel-filters__books-button--selected,
+.crafting-panel-filters__categories-all,
+.crafting-panel-filters__categories-none,
+.crafting-panel-filters__categories-category--selected,
+.crafting-panel-filters__types-all,
+.crafting-panel-filters__types-none,
+.crafting-panel-filters__types-type--selected {
+  flex: 1;
+  opacity: 1;
+}
+.crafting-panel-filters__craftable input,
+.crafting-panel-filters__books-button input,
+.crafting-panel-filters__books-show input,
+.crafting-panel-filters__books-hide input,
+.crafting-panel-filters__categories-all input,
+.crafting-panel-filters__categories-none input,
+.crafting-panel-filters__categories-category input,
+.crafting-panel-filters__types-all input,
+.crafting-panel-filters__types-none input,
+.crafting-panel-filters__types-type input {
+  display: none;
+}
+.crafting-panel-filters__craftable-option,
+.crafting-panel-filters__books-button,
+.crafting-panel-filters__books-show,
+.crafting-panel-filters__books-hide,
+.crafting-panel-filters__categories-all,
+.crafting-panel-filters__categories-none,
+.crafting-panel-filters__categories-category,
+.crafting-panel-filters__types-all,
+.crafting-panel-filters__types-none,
+.crafting-panel-filters__types-type {
+  border-radius: 3px;
+  border: none;
+  padding: 2px 5px;
+  background: gray;
+}
+.crafting-panel-filters__books-show,
+.crafting-panel-filters__categories-all,
+.crafting-panel-filters__types-all {
+  background-color: green;
+}
+.crafting-panel-filters__books-hide,
+.crafting-panel-filters__categories-none,
+.crafting-panel-filters__types-none {
+  background-color: red;
+}
+.recipes__recipe {
+  border: 2px solid transparent;
+  margin-top: 3px;
+  margin-right: 5px;
+}
+.recipes__recipe:focus {
+  border: 2px solid red;
+}
+.recipe-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.recipe-buttons--book-sort {
+  flex-direction: column;
+}
+.recipe-buttons--book-sort.recipe-buttons--extra-space {
+  gap: 1rem;
+}
+.recipe-buttons__book-section {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+
 .disabled {
   background-color: #333 !important;
   color: #666 !important;
@@ -901,31 +1152,7 @@
 a.disabled {
   pointer-events: none;
 }
-.quick_craft_button {
-  margin-left: 2rem;
-  background-color: orange;
-}
-.quick_craft_button_confirm {
-  background-color: red;
-}
-.recipe_buttons {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-.crafting-info__ingredient--purchasable,
-.crafting-info__available-with-purchase--purchasable {
-  color: lightGreen;
-}
 </style>`);
-  if (GM_getValue('SEG', false)) {
-    head.append(styleExtraBookSpace);
-  }
-  if (GM_getValue('NHswitch', false)) {
-    head.append(styleIngredientQuantitySwap);
-  } else {
-    head.append(styleIngredientQuantity);
-  }
   //
   // #endregion Stylesheets
   //
@@ -935,9 +1162,31 @@ a.disabled {
   //
   const gmKeyCurrentCraft = 'current_craft';
   const dataChangeEvent = 'changeData';
+  const filterChangeEvent = 'changeFilter';
+  const sortChangeEvent = 'changeSort';
+  const gmKeyRecipeFilters = 'recipe-filters';
+  const gmKeyRecipeSort = 'recipe-sort';
+
+  const initialFilters = GM_getValue(gmKeyRecipeFilters, {
+    books: ['Potions', 'Food', 'Material Bars'],
+    categories: Array.from(
+      new Set(
+        Object.values(recipes).flatMap((recipes) => recipes.map((recipe) => ingredients[recipe.itemId].category)),
+      ),
+    ),
+    types: [],
+    craftable: 0,
+  });
+  const initialSort = GM_getValue(gmKeyRecipeSort, 'books');
+  const sorts = {
+    alpha: 'Alphabetical',
+    gold: 'Gold Value',
+    book: 'Book Order',
+    'book-alpha': 'Books / Alphabetical',
+    'book-gold': 'Books / Gold',
+  };
 
   let isCrafting;
-  let saveDebounce;
   let craftingPanelTitle;
   let craftingPanelSlots;
   let craftingPanelResult;
@@ -947,6 +1196,7 @@ a.disabled {
   let craftingAvailability;
   let craftingActionsMenu;
   let craftNumberSelect;
+  let recipeButtons;
 
   function resetQuickCraftingMenu() {
     // set all the IDs to 0/reset
@@ -959,18 +1209,18 @@ a.disabled {
   }
 
   const blankSlot = 'EEEEE';
-  async function setRecipe(info) {
+  async function setRecipe() {
     if (isCrafting) return;
 
+    const {recipe: info} = $(this).data();
     const inventory = await getInventoryAmounts();
     const {itemId, name, recipe, requirement} = info;
     const counts = {};
+    const resolvedName = resolveNames(name || ingredients[itemId].name);
 
-    GM_setValue(gmKeyCurrentCraft, name || ingredients[itemId].name);
+    GM_setValue(gmKeyCurrentCraft, resolvedName);
 
-    craftingPanelTitle
-      .data({name: name || ingredients[itemId].name, available: inventory[itemId] || 0})
-      .trigger(dataChangeEvent);
+    craftingPanelTitle.data({name: resolvedName, available: inventory[itemId] || 0}).trigger(dataChangeEvent);
     craftingPanelResult.data({id: itemId}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: requirement}).trigger(dataChangeEvent);
 
@@ -998,7 +1248,7 @@ a.disabled {
         purchasable: -1,
       });
     });
-    craftingIngredients.removeClass('crafting-info__ingredient--purchasable').trigger(dataChangeEvent);
+    craftingIngredients.removeClass('crafting-panel-info__ingredient--purchasable').trigger(dataChangeEvent);
 
     const available = Math.floor(
       Math.min(
@@ -1026,7 +1276,6 @@ a.disabled {
         ? -1
         : Math.floor(Math.min(...nonPurchasableIngredientData.map(({available, count}) => (available || 0) / count)));
     craftingInfoActions.data({purchasable: maxWithPurchase}).trigger(dataChangeEvent);
-    console.log('upd', nonPurchasableIngredientData, maxWithPurchase);
 
     craftingIngredients
       .each(function () {
@@ -1057,7 +1306,7 @@ a.disabled {
 
     // Set now for max calculations
     elem.data({purchasable: afterClickPurchasable ? 0 : -1});
-    elem.toggleClass('crafting-info__ingredient--purchasable', afterClickPurchasable);
+    elem.toggleClass('crafting-panel-info__ingredient--purchasable', afterClickPurchasable);
 
     updatePurchasable();
   }
@@ -1102,13 +1351,14 @@ a.disabled {
     })();
   }
 
-  function tryDoMaximumCraft() {
-    if (!$(this).hasClass('quick_craft_button_confirm')) {
+  async function tryDoMaximumCraft() {
+    if (!$(this).hasClass('crafting-panel-actions__max-craft-button--confirm')) {
       craftNumberSelect.val(craftingInfoActions.data().available);
-      $(this).text('** CONFIRM **').addClass('quick_craft_button_confirm');
+      $(this).text('** CONFIRM **').addClass('crafting-panel-actions__max-craft-button--confirm');
     } else {
       $(this).text('-- Crafting --');
-      doCraft(); // TODO make sure to set back the text after
+      await doCraft();
+      $(this).removeClass('crafting-panel-actions__max-craft-button--confirm').text('Craft maximum');
     }
   }
   //
@@ -1123,291 +1373,439 @@ a.disabled {
     $('<div class="crafting-clear">'),
     // main quick craft box
     $('<div class="quick-crafter">')
-      .css({
-        display: 'block',
-        margin: '0 auto 1rem',
-        backgroundColor: 'rgba(19,9,0,.7)',
-        padding: '5px',
-        width: '100%',
-        maxWidth: '1100px',
-        minWidth: '200px',
-      })
+      .css(
+        $('#crafting_recipes').css([
+          'display',
+          'margin',
+          'backgroundColor',
+          'padding',
+          'width',
+          'maxWidth',
+          'minWidth',
+        ]),
+      )
       .append(
         //
         // #region Selected craft display
         //
-        (currentCraftBox = $('<div id="current_craft_box">')
-          .css({
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-          })
-          .append(
-            (craftingPanelTitle = $('<h3 class="crafting-panel-title">').css({
-              marginBottom: '.5rem',
-              marginTop: 0,
-              ...$('.item:first').css(['text-shadow', 'font-weight', 'color']),
-            })),
-            $('<div id="crafting-panel-row">')
-              .css({display: 'flex', flexDirection: 'row', gap: '1rem'})
-              .append(
+        (currentCraftBox = $('<div class="crafting-panel">').append(
+          $('<div class="crafting-panel__main">').append(
+            $('<div class="crafting-panel__column">').append(
+              (craftingPanelTitle = $('<h3 class="crafting-panel__title">').css(
+                $('.item:first').css(['text-shadow', 'font-weight', 'color']),
+              )),
+              $('<div class="crafting-panel__row">').append(
                 //
                 // #region Crafting grid display
                 //
-                $('<div>')
-                  .css({height: '277.5px', width: '412.5px'})
-                  .append(
-                    $('<div id="crafting-panel">')
-                      .css({
-                        background: `url('/static/styles/game_room/images/shop/crafting_panel.jpg')`,
-                        height: '370px',
-                        width: '550px',
-                        position: 'relative',
-                        transform: 'scale(0.75)', // TODO use scale factor against height width of this and parent
-                        transformOrigin: 'top left',
-                      })
-                      .append(
-                        ...(craftingPanelSlots = $(
-                          Array.from(new Array(9)).map(
-                            (_, i) =>
-                              $('<div>').css({
-                                position: 'absolute',
-                                width: '106px', // TODO pull widths and margins from existing UI/style
-                                height: '106px',
-                                left: `${13 + (i % 3) * 119}px`,
-                                top: `${13 + Math.floor(i / 3) * 119}px`,
-                                background: 'transparent',
-                              })[0],
-                          ),
-                        )).toArray(),
-                        (craftingPanelResult = $('<div id="craft-slot-result">').css({
-                          position: 'absolute',
-                          width: '106px', // TODO pull widths and margins from existing UI/style
-                          height: '106px',
-                          left: `${13 + 2 * 119 + 180}px`,
-                          top: `${13 + 119}px`,
-                          background: 'transparent',
-                        })),
-                        (craftingPanelRequirement = $('<div id="craft-slot-requirement">').css({
-                          position: 'absolute',
-                          width: '106px', // TODO pull widths and margins from existing UI/style
-                          height: '106px',
-                          left: `${13 + 2 * 119 + 180}px`,
-                          top: `${13 + 2 * 119}px`,
-                          background: 'transparent',
-                        })),
+                $('<div class="crafting-panel-grid__wrapper">').append(
+                  $('<div class="crafting-panel-grid__main">').append(
+                    ...(craftingPanelSlots = $(
+                      Array.from(new Array(9)).map(
+                        (_, i) =>
+                          $('<div class="crafting-panel-grid__slot">').css({
+                            width: '106px', // TODO pull widths and positions from existing UI/style (widths/margins)
+                            height: '106px',
+                            left: `${13 + (i % 3) * 119}px`,
+                            top: `${13 + Math.floor(i / 3) * 119}px`,
+                          })[0],
                       ),
+                    )).toArray(),
+                    (craftingPanelResult = $('<div class="crafting-panel-grid__result">').css({
+                      width: '106px', // TODO pull widths and margins from existing UI/style
+                      height: '106px',
+                      left: `${13 + 2 * 119 + 180}px`,
+                      top: `${13 + 119}px`,
+                    })),
+                    (craftingPanelRequirement = $('<div class="crafting-panel-grid__requirement">').css({
+                      width: '106px', // TODO pull widths and margins from existing UI/style
+                      height: '106px',
+                      left: `${13 + 2 * 119 + 180}px`,
+                      top: `${13 + 2 * 119}px`,
+                    })),
                   ),
+                ),
                 //
                 // #endregion Crafting grid display
                 //
                 //
                 // #region Crafting text/actions display
                 //
-                (craftingInfoActions = $('<div id="crafting-info-actions">')
-                  .css({display: 'flex', flexDirection: 'column', gap: '0.25rem'})
-                  .append(
-                    '<div style="margin-bottom: .5rem;" class="crafting-info__ingredients-header">Ingredients:</div>',
-                    ...(craftingIngredients = $(
-                      Array.from(new Array(9)).map(() => $(`<div class="crafting-info__ingredient">`)[0]),
-                    )
-                      .css({
-                        display: 'flex',
-                        flexDirection: 'row',
-                        columnGap: '0.25rem',
-                        alignItems: 'center',
-                        alignSelf: 'left',
-                      })
-                      .append(
-                        $('<a class="crafting-info__ingredient-shop-link">')
-                          .text('$')
-                          .attr('target', '_blank')
-                          .css({
-                            borderRadius: '50%',
-                            backgroundColor: 'yellow',
-                            color: 'black',
-                            padding: '0 0.25rem',
-                          })
-                          .click((event) => event.stopPropagation()),
-                        $('<span class="crafting-info__ingredient-name"></span>'),
-                        $('<div class="crafting-info__ingredient-quantity">').append(
-                          '<span class="crafting-info__ingredient-quantity-on-hand"></span>',
+                (craftingInfoActions = $('<div class="crafting-panel-info-actions">').append(
+                  '<div class="crafting-panel-info__ingredients-header">Ingredients:</div>',
+                  ...(craftingIngredients = $(
+                    Array.from(new Array(9)).map(() => $(`<div class="crafting-panel-info__ingredient-row">`)[0]),
+                  )
+                    .append(
+                      $('<a class="crafting-panel-info__ingredient-shop-link">')
+                        .text('$')
+                        .attr('target', '_blank')
+                        .click((event) => event.stopPropagation()),
+                      $('<span class="crafting-panel-info__ingredient-name"></span>'),
+                      $('<div class="crafting-panel-info__ingredient-quantity">')
+                        .toggleClass(
+                          'crafting-panel-info__ingredient-quantity--swapped',
+                          GM_getValue('NHswitch', false),
+                        )
+                        .append(
+                          '<span class="crafting-panel-info__ingredient-quantity-per-craft"></span>',
                           '/',
-                          '<span class="crafting-info__ingredient-quantity-per-craft"></span>',
+                          '<span class="crafting-panel-info__ingredient-quantity-on-hand"></span>',
                         ),
-                        $(
-                          '<span title="Needed for max possible crafts" class="crafting-info__ingredient-quantity-purchasable">',
-                        ).append(
-                          ' (+',
-                          '<span class="crafting-info__ingredient-quantity-purchasable-value"></span>',
-                          ')',
+                      $(
+                        '<span title="Needed for max possible crafts" class="crafting-panel-info__ingredient-quantity-purchasable">',
+                      ).append(
+                        ' (+',
+                        '<span class="crafting-panel-info__ingredient-quantity-purchasable-value"></span>',
+                        ')',
+                      ),
+                    )
+                    .click(togglePurchasable)).toArray(),
+                  (craftingAvailability = $(`<span id="crafting-panel-info__availability">`).append(
+                    `Max available craft(s): <span class="crafting-panel-info__available"></span>`,
+                    $(
+                      `<span class="crafting-panel-info__available-with-purchase crafting-panel-info__available-with-purchase--purchasable">`,
+                    ).prop('title', 'Max possible if additional ingredients are purchased'),
+                    $('<sup><a>?</a></sup>').attr(
+                      'title',
+                      'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.',
+                    ),
+                  )),
+                  (craftingActionsMenu = $('<div class="crafting-panel-actions">').append(
+                    $('<div id="crafting-panel-actions__craft-row">').append(
+                      (craftNumberSelect = $('<select class="crafting-panel-actions__number-select">')),
+                      $('<button class="crafting-panel-actions__craft-button">Craft</button>').click(doCraft),
+                    ),
+                    $('<button class="crafting-panel-actions__max-craft-button">Craft maximum</button>').click(
+                      tryDoMaximumCraft,
+                    ),
+                    $('<button class="crafting-panel-actions__clear-craft-button">Clear</button>').click(() =>
+                      resetQuickCraftingMenu(),
+                    ),
+                  )),
+                )),
+              ),
+            ),
+            //
+            // #endregion Crafting text/actions display
+            //
+            //
+            // #region Settings and recipe filters
+            //
+            $('<div class="crafting-panel-options">').append(
+              $('<div class="crafting-panel-settings-sorts">').append(
+                $('<div class="crafting-panel-settings">').append(
+                  $('<label>').append(
+                    'Blank line between books',
+                    $('<input type="checkbox" />')
+                      .prop('checked', GM_getValue('SEG', false))
+                      .change(function () {
+                        const checked = $(this).prop('checked');
+                        recipeButtons.toggleClass('recipe-buttons--extra-space', checked);
+                        GM_setValue('SEG', checked);
+                      }),
+                  ),
+                  $('<label title="Switches item counts between needed/have and have/needed">').append(
+                    'N/H switch',
+                    $('<input type="checkbox" />')
+                      .prop('checked', GM_getValue('NHswitch', false))
+                      .change(function () {
+                        const checked = $(this).prop('checked');
+                        $('.crafting-panel-info__ingredient-quantity').toggleClass(
+                          'crafting-panel-info__ingredient-quantity--swapped',
+                          checked,
+                        );
+                        GM_setValue('NHswitch', checked);
+                      }),
+                  ),
+                ),
+                $('<div class="crafting-panel-sorts__wrapper">').append(
+                  $(`<div class="crafting-panel-sorts">`).append(
+                    $('<h3 class="crafting-panel-sorts__title">Sort:</h3>'),
+                    $('<select>')
+                      .append(
+                        Object.entries(sorts).map(
+                          ([value, text]) =>
+                            $(`<option value="${value}">${text}</option>`).attr('selected', initialSort === value)[0],
                         ),
                       )
-                      .click(togglePurchasable)).toArray(),
-                    (craftingAvailability = $(`<span id="crafting-info-availability">`)
-                      .css({marginBottom: '1rem'})
-                      .append(
-                        `Max available craft(s): <span class="crafting-info__available"></span>`,
-                        $(
-                          `<span class="crafting-info__available-with-purchase crafting-info__available-with-purchase--purchasable">`,
-                        ).prop('title', 'Max possible if additional ingredients are purchased'),
-                        $('<sup><a>?</a></sup>').attr(
-                          'title',
-                          'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.',
-                        ),
-                      )),
-                    (craftingActionsMenu = $('<div id="crafting-info-actions">')
-                      .css({
-                        textAlign: 'center',
-                        marginBottom: '1rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.25rem',
-                      })
-                      .append(
-                        $('<div id="crafting-info-actions__craft-row">')
-                          .css({
-                            display: 'flex',
-                            flexDirection: 'row',
-                            columnGap: '.25rem',
-                            alignItems: 'center',
-                            alignSelf: 'center',
-                          })
-                          .append((craftNumberSelect = $('<select>')), $('<button>Craft</button>').click(doCraft)),
-                        $('<button class="quick_craft_button">Craft maximum</button>')
-                          .css({width: '100%', marginLeft: 0})
-                          .click(tryDoMaximumCraft),
-                      )),
-                  )),
-                //
-                // #endregion Crafting text/actions display
-                //
-                // TODO also settings here
+                      .change(function () {
+                        recipeButtons.data('sort', $(this).find('option:selected').val()).trigger(sortChangeEvent);
+                      }),
+                  ),
+                  $('<h3 class="crafting-panel-filters__title">Filters:</h3>'),
+                ),
               ),
-          )),
+              $(`<div class="crafting-panel-filters">`).append(
+                //
+                // #region Add craftable/purchasable filter buttons to DOM
+                //
+                $('<div class="crafting-panel-filters__craftable">').append(
+                  ...$([
+                    $(
+                      '<label class="crafting-panel-filters__craftable-option"><input type="radio" name="craftable" value="0">All</label>',
+                    )[0],
+                    $(
+                      '<label class="crafting-panel-filters__craftable-option"><input type="radio" name="craftable" value="1">Craftable</label>',
+                    )[0],
+                    $(
+                      '<label class="crafting-panel-filters__craftable-option"><input type="radio" name="craftable" value="2">With Purchase</label>',
+                    )[0],
+                  ])
+                    .find('input')
+                    .attr('checked', function () {
+                      const checked = parseInt($(this).val()) === initialFilters.craftable;
+                      $(this).parent().toggleClass('crafting-panel-filters__craftable-option--selected', checked);
+                      return checked;
+                    })
+                    .change(function () {
+                      const elem = $(this);
+                      elem
+                        .parent()
+                        .toggleClass('crafting-panel-filters__craftable-option--selected', elem.prop('checked'))
+                        .siblings()
+                        .toggleClass('crafting-panel-filters__craftable-option--selected', !elem.prop('checked'));
+                      const {filters} = recipeButtons.data();
+                      filters.craftable = parseInt(elem.val());
+                      recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                    })
+                    .end()
+                    .toArray(),
+                ),
+                //
+                // #endregion Add craftable/purchasable filter buttons to DOM
+                //
+                //
+                // #region Add "Recipe Book" on/off buttons to DOM
+                //
+                $('<div class="crafting-panel-filters__books">').append(
+                  $('<div class="crafting-panel-filters__books-row">').append(
+                    '<h3 class="crafting-panel-filters__books-title">Books</h3>',
+                    $(
+                      '<label class="crafting-panel-filters__books-show"><input type="button" />Show all</label>',
+                    ).click(() => $('.crafting-panel-filters__books-button input').prop('checked', true).change()),
+                    $(
+                      '<label class="crafting-panel-filters__books-hide"><input type="button" />Hide all</label>',
+                    ).click(() => $('.crafting-panel-filters__books-button input').prop('checked', false).change()),
+                  ),
+                  ...Object.keys(books)
+                    .map(
+                      (name) =>
+                        $(`<label class="crafting-panel-filters__books-button">`)
+                          .toggleClass(
+                            'crafting-panel-filters__books-button--selected',
+                            initialFilters.books.includes(name),
+                          )
+                          .append(
+                            $('<input type="checkbox" />')
+                              .attr('checked', initialFilters.books.includes(name))
+                              .change(function () {
+                                const {filters} = recipeButtons.data();
+                                const isChecked = $(this).prop('checked');
+                                if (
+                                  $(this).parent().hasClass('crafting-panel-filters__books-button--selected') ===
+                                  isChecked
+                                )
+                                  return;
+
+                                $(this)
+                                  .parent()
+                                  .toggleClass('crafting-panel-filters__books-button--selected', isChecked);
+                                if (isChecked) filters.books.push(name);
+                                else filters.books.splice(filters.books.indexOf(name), 1);
+                                recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                              }),
+                            name,
+                          )
+                          .css({
+                            backgroundColor: books[name].bgcolor,
+                            color: books[name].color,
+                          })[0],
+                    )
+                    .reduce(chunkArray(4), [])
+                    .map((bookSet) => $('<div class="crafting-panel-filters__books-row">').append(bookSet)),
+                ),
+                //
+                // #endregion Add "Recipe Book" on/off buttons to DOM
+                //
+                //
+                // #region Add category on/off buttons to DOM
+                //
+                $('<div class="crafting-panel-filters__categories">').append(
+                  $('<div class="crafting-panel-filters__categories-row">').append(
+                    '<h3 class="crafting-panel-filters__categories-title">Categories</h3>',
+                    $('<label class="crafting-panel-filters__categories-all"><input type="button">All</label>').click(
+                      () => $('.crafting-panel-filters__categories-category input').prop('checked', true).change(),
+                    ),
+                    $('<label class="crafting-panel-filters__categories-none"><input type="button">None</label>').click(
+                      () => $('.crafting-panel-filters__categories-category input').prop('checked', false).change(),
+                    ),
+                  ),
+                  ...Array.from(
+                    new Set(
+                      Object.values(recipes).flatMap((recipes) =>
+                        recipes.map((recipe) => ingredients[recipe.itemId].category),
+                      ),
+                    ),
+                  )
+                    .sort()
+                    .map((category) =>
+                      $('<label class="crafting-panel-filters__categories-category">')
+                        .toggleClass(
+                          'crafting-panel-filters__categories-category--selected',
+                          initialFilters.categories.includes(category),
+                        )
+                        .append(
+                          $('<input type="checkbox" />')
+                            .attr('checked', initialFilters.categories.includes(category))
+                            .change(function () {
+                              const {filters} = recipeButtons.data();
+                              const isChecked = $(this).prop('checked');
+                              if (
+                                $(this).parent().hasClass('crafting-panel-filters__categories-category--selected') ===
+                                isChecked
+                              )
+                                return;
+
+                              $(this)
+                                .parent()
+                                .toggleClass('crafting-panel-filters__categories-category--selected', isChecked);
+                              if (isChecked) filters.categories.push(category);
+                              else filters.categories.splice(filters.categories.indexOf(category), 1);
+                              recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                            }),
+                          // Shorten longer category names
+                          category
+                            .replace('Materials', 'Mats')
+                            .replace('Username customizations', 'Usernames')
+                            .replace('customizations', 'cust.'),
+                        ),
+                    )
+                    .reduce(chunkArray(4), [])
+                    .map((categorySet) =>
+                      $('<div class="crafting-panel-filters__categories-row">').append(categorySet),
+                    ),
+                ),
+                //
+                // #endregion Add category on/off buttons to DOM
+                //
+                //
+                // #region Add type on/off buttons to DOM
+                //
+                // TODO implement types actually
+                $('<div class="crafting-panel-filters__types">').append(
+                  $('<div class="crafting-panel-filters__types-row">').append(
+                    '<h3 class="crafting-panel-filters__types-title">Types</h3>',
+                    $('<label class="crafting-panel-filters__types-all"><input type="button">All</label>').click(() =>
+                      $('.crafting-panel-filters__types-type input').prop('checked', true).change(),
+                    ),
+                    $('<label class="crafting-panel-filters__types-none"><input type="button">None</label>').click(() =>
+                      $('.crafting-panel-filters__types-type input').prop('checked', false).change(),
+                    ),
+                  ),
+                  $('<div class="crafting-panel-filters__types-row">').append(
+                    ['Standard', 'Repair', 'Upgrade', 'Downgrade'].map((type) =>
+                      $('<label class="crafting-panel-filters__types-type">')
+                        .toggleClass(
+                          'crafting-panel-filters__types-type--selected',
+                          initialFilters.types.includes(type),
+                        )
+                        .append(
+                          $('<input type="checkbox" />')
+                            .attr('checked', initialFilters.types.includes(type))
+                            .change(function () {
+                              const {filters} = recipeButtons.data();
+                              const isChecked = $(this).prop('checked');
+                              if (
+                                $(this).parent().hasClass('crafting-panel-filters__types-type--selected') === isChecked
+                              )
+                                return;
+
+                              $(this).parent().toggleClass('crafting-panel-filters__types-type--selected', isChecked);
+                              if (isChecked) filters.types.push(type);
+                              else filters.types.splice(filters.types.indexOf(type), 1);
+                              recipeButtons.data('filters', filters).trigger(filterChangeEvent);
+                            }),
+                          type,
+                        ),
+                    ),
+                  ),
+                ),
+              ),
+              //
+              // #endregion Add type on/off buttons to DOM
+              //
+            ),
+            //
+            // #endregion Settings and recipe filters
+            //
+          ),
+        )),
         //
         // #endregion Selected craft display
-        //
-        '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>',
-        $('<button class="quick_craft_button">Clear</button>')
-          .css({marginBottom: '1rem', backgroundColor: 'red'})
-          .click(() => resetQuickCraftingMenu()),
-        $('<div>')
-          .css({display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
-          .append(
-            '<span>Click on the buttons below to show or hide crafting categories - </span>',
-            $('<button class="quick_craft_button">Hide all</button>')
-              .css({backgroundColor: 'red'})
-              .click(function () {
-                Object.values(books).forEach(({disabled, button}) => {
-                  if (!disabled) button.click();
-                });
-              }),
-            $('<button class="quick_craft_button">Show all</button>')
-              .css({backgroundColor: 'green'})
-              .click(function () {
-                Object.values(books).forEach(({disabled, button}) => {
-                  if (disabled) button.click();
-                });
-              }),
-            $('<input type="checkbox" class="quick_craft_button">Blank line between books</input>')
-              .prop('checked', GM_getValue('SEG', false))
-              .change(function () {
-                const checked = $(this).prop('checked');
-                if (checked) {
-                  $('head').append(styleExtraBookSpace);
-                } else {
-                  styleExtraBookSpace.remove();
-                }
-                GM_setValue('SEG', checked);
-              }),
-            $(
-              '<input type="checkbox" class="quick_craft_button" title="Switches between needed/have and have/needed">NH switch</input>',
-            )
-              .prop('checked', GM_getValue('NHswitch', false))
-              .change(function () {
-                const checked = $(this).prop('checked');
-                if (checked) {
-                  styleIngredientQuantity.remove();
-                  $('head').append(styleIngredientQuantitySwap);
-                } else {
-                  styleIngredientQuantitySwap.remove();
-                  $('head').append(styleIngredientQuantity);
-                }
-                GM_setValue('NHswitch', checked);
-              }),
-          ),
-
-        //
-        // #region Add "Recipe Book" on/off buttons to DOM
-        //
-        $('<div>')
-          .css({marginBottom: '2rem', display: 'flex', flexDirection: 'row', columnGap: '.25rem', alignItems: 'center'})
-          .append(
-            Object.keys(books).map((name) => {
-              const book = books[name];
-              const {bgcolor, color, disabled} = book;
-
-              book.button = $(`<button id="${name}" class="qcbutton_book">${name.replace(/_/g, ' ')}</button>`)
-                .css({backgroundColor: bgcolor, color: color, opacity: 1})
-                .click(function () {
-                  if (saveDebounce) window.clearTimeout(saveDebounce);
-                  const button = $(this);
-                  const disabled = (book.disabled = !book.disabled);
-                  button.css('opacity', disabled ? 0.2 : 1);
-                  $(book.section).css('display', disabled ? 'none' : '');
-                  if (book.hasOwnProperty('recipes'))
-                    book.recipes.forEach((elem) => $(elem).prop('disabled', disabled));
-                  saveDebounce = window.setTimeout(() => GM_setValue('selected_books', books), 100);
-                });
-              if (disabled) {
-                book.disabled = false;
-                book.button.click();
-              }
-              return book.button;
-            }),
-          ),
-        //
-        // #endregion Add "Recipe Book" on/off buttons to DOM
         //
 
         //
         // #region Add Recipe buttons to DOM
         //
-        $('<div class="recipe_buttons">').append(
-          Object.keys(recipes).map((bookKey) => {
-            const book = books[bookKey];
-            book.recipes = [];
-            book.section = $('<div class="recipe_book_section">')
-              .append(
-                recipes[bookKey].map((recipe) => {
-                  const recipeButton = $(`<button>${recipe.name || ingredients[recipe.itemId].name}</button>`)
-                    .css({
-                      backgroundColor: book.bgcolor,
-                      color: book.color,
-                      border: '2px solid transparent',
-                      marginTop: '3px',
-                      marginRight: '5px',
-                    })
-                    .focus(function () {
-                      $(this).css({border: '2px solid red'});
-                    })
-                    .blur(function () {
-                      $(this).css({border: '2px solid transparent'});
-                    })
-                    .click(() => setRecipe(recipe));
-                  book.recipes.push(recipeButton); // TODO redo this into general sorting/filtering
-                  return recipeButton;
-                }),
+        (recipeButtons = $('<div class="recipe-buttons recipe-buttons--book-sort">')
+          .toggleClass('recipe-buttons--extra-space', GM_getValue('SEG', false))
+          .append(
+            Object.keys(recipes).map((bookKey) => {
+              const book = books[bookKey];
+              book.recipes = [];
+              book.section = $(
+                `<div class="recipe-buttons__book-section recipe-buttons__book-section--${bookKey
+                  .toLocaleLowerCase()
+                  .replace(/ /g, '-')}">`,
               )
-              .css({display: book.disabled ? 'none' : ''}); // TODO redo this into general sorting/filtering
-            return book.section;
-          }),
-        ),
+                .append(
+                  recipes[bookKey].map((recipe, i) => {
+                    const item = ingredients[recipe.itemId];
+                    const data = {
+                      book: bookKey,
+                      category: item.category,
+                      gold: item.gold,
+                      ingredients: recipe.recipe
+                        .match(/.{5}/g)
+                        .filter((item) => item !== blankSlot)
+                        .map((item) => parseInt(item))
+                        .reduce((counts, id) => {
+                          if (!(id in counts)) counts[id] = 0;
+                          counts[id]++;
+                          return counts;
+                        }, {}),
+                      purchasable: recipe.recipe
+                        .match(/.{5}/g)
+                        .filter((item) => item !== blankSlot)
+                        .map((item) => parseInt(item))
+                        .every((itemId) => ingredients[itemId].infStock),
+                      order: i,
+                      recipe: recipe,
+                      type: 'unknown',
+                    };
+                    const recipeButton = $(
+                      `<button class="recipes__recipe" />${resolveNames(recipe.name || item.name)}</button>`,
+                    )
+                      .data(data)
+                      .css({
+                        backgroundColor: book.bgcolor,
+                        color: book.color,
+                      })
+                      .click(setRecipe);
+                    book.recipes.push(recipeButton);
+                    return recipeButton;
+                  }),
+                )
+                .css({display: book.disabled ? 'none' : ''});
+              return book.section;
+            }),
+          )),
         //
         // #endregion Add Recipe buttons to DOM
         //
 
+        '<p>Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.</p>', // TODO remove this after implementing "normal" crafting hook
         `<p style="float:right;margin-top:-20px;margin-right:5px;">Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${VERSION}</a></p>`,
       ),
   );
@@ -1478,36 +1876,29 @@ a.disabled {
     .data({id: 0, count: 0, available: 0, purchasable: -1})
     .on(dataChangeEvent, function () {
       const elem = $(this);
-      const link = elem.find('.crafting-info__ingredient-shop-link');
-      const nameNode = elem.find('.crafting-info__ingredient-name');
-      const onHand = elem.find('.crafting-info__ingredient-quantity-on-hand');
-      const perCraft = elem.find('.crafting-info__ingredient-quantity-per-craft');
-      const purchaseWrapper = elem.find('.crafting-info__ingredient-quantity-purchasable');
-      const purchaseNeeded = elem.find('.crafting-info__ingredient-quantity-purchasable-value');
+      const link = elem.find('.crafting-panel-info__ingredient-shop-link');
+      const nameNode = elem.find('.crafting-panel-info__ingredient-name');
+      const onHand = elem.find('.crafting-panel-info__ingredient-quantity-on-hand');
+      const perCraft = elem.find('.crafting-panel-info__ingredient-quantity-per-craft');
+      const purchaseWrapper = elem.find('.crafting-panel-info__ingredient-quantity-purchasable');
+      const purchaseNeeded = elem.find('.crafting-panel-info__ingredient-quantity-purchasable-value');
       const {id, count, available, purchasable} = elem.data();
       if (id && count) {
-        link.attr('href', `https://gazellegames.net/shop.php?ItemID=${id}`);
-        nameNode.text(`${ingredients[id].name}:`);
+        link
+          .attr('href', `https://gazellegames.net/shop.php?ItemID=${id}`)
+          .toggleClass('crafting-panel-info__ingredient-shop-link--purchasable', ingredients[id].infStock);
+        nameNode.text(`${resolveNames(ingredients[id].name)}:`);
         onHand.text(available);
         perCraft.text(count);
         purchaseNeeded.text(~purchasable ? purchasable : undefined);
         if (!~purchasable) purchaseWrapper.hide();
         else purchaseWrapper.show();
         elem.show();
-        currentCraftBox.show();
+        $('.crafting-panel-grid__wrapper').add(craftingInfoActions).css('visibility', '');
       } else {
         elem.hide();
-        if (
-          craftingIngredients
-            .map(function () {
-              return $(this).data();
-            })
-            .toArray()
-            .filter(({id}) => id).length
-        ) {
-          currentCraftBox.show();
-        } else {
-          currentCraftBox.hide();
+        if (!craftingPanelResult.data().id) {
+          $('.crafting-panel-grid__wrapper').add(craftingInfoActions).css('visibility', 'hidden');
         }
       }
     })
@@ -1517,8 +1908,8 @@ a.disabled {
     .data({available: 0, purchasable: 0})
     .on(dataChangeEvent, function () {
       const elem = $(this);
-      const availableNode = craftingAvailability.find('.crafting-info__available');
-      const purchasableNode = craftingAvailability.find('.crafting-info__available-with-purchase');
+      const availableNode = craftingAvailability.find('.crafting-panel-info__available');
+      const purchasableNode = craftingAvailability.find('.crafting-panel-info__available-with-purchase');
       const {available, purchasable} = elem.data();
       availableNode.text(available);
       if (available) {
@@ -1534,6 +1925,68 @@ a.disabled {
       else purchasableNode.hide();
     })
     .trigger(dataChangeEvent);
+
+  recipeButtons
+    .data({sort: initialSort, filters: initialFilters})
+    .on(sortChangeEvent, function () {
+      const {sort} = $(this).data();
+      const recipes = $(this).find('.recipes__recipe');
+      recipes.sort((a, b) => {
+        const aElem = $(a);
+        const bElem = $(b);
+        const {book: aBook, gold: aGold, order: aOrder} = aElem.data();
+        const {book: bBook, gold: bGold, order: bOrder} = bElem.data();
+        const bookKeys = Object.keys(books);
+        const aBookIndex = bookKeys.indexOf(aBook);
+        const bBookIndex = bookKeys.indexOf(bBook);
+
+        recipeButtons.toggleClass('recipe-buttons--book-sort', sort.includes('book'));
+
+        // Sort by book order, then secondary (in-book if no other) order
+        if (sort.includes('book') && aBook !== bBook) return aBookIndex - bBookIndex;
+        // Also put in book row separators
+        if (sort.includes('alpha')) return aElem.text().localeCompare(bElem.text());
+        else if (sort.includes('gold')) return aGold - bGold;
+        else return aOrder - bOrder;
+      });
+      if (sort.includes('book')) {
+        recipes.each(function () {
+          const elem = $(this);
+          elem.appendTo(`.recipe-buttons__book-section--${elem.data().book.toLocaleLowerCase().replace(/ /g, '-')}`);
+        });
+      } else $(this).append(recipes);
+      GM_setValue(gmKeyRecipeSort, sort);
+    })
+    .on(filterChangeEvent, async function () {
+      const {filters} = $(this).data();
+      const {books, categories, types, craftable} = filters;
+      const inventory = await getInventoryAmounts();
+      $(this)
+        .find('.recipes__recipe')
+        .each(function () {
+          const recipeLabel = $(this);
+          const {book, category, ingredients, purchasable, type} = recipeLabel.data();
+          if (
+            books.includes(book) &&
+            categories.includes(category) &&
+            (!craftable ||
+              Object.entries(ingredients).every(([id, count]) => inventory[id] >= count) ||
+              (craftable === 2 && purchasable)) //&&
+            //types.includes(type)
+          )
+            $(`.recipe-buttons__book-section--${book.toLocaleLowerCase().replace(/ /g, '-')}`)
+              .add(recipeLabel)
+              .show();
+          else recipeLabel.hide();
+        });
+      $('.recipe-buttons__book-section').each(function () {
+        const elem = $(this);
+        if (!elem.find('.recipes__recipe:visible').length) elem.hide();
+      });
+      GM_setValue(gmKeyRecipeFilters, filters);
+    })
+    .trigger(sortChangeEvent)
+    .trigger(filterChangeEvent);
   //
   // #endregion DOM Data and Mutation observers
   //
@@ -1543,7 +1996,7 @@ a.disabled {
   //
 
   // Persist selected recipe
-  $('button')
+  $('.recipes__recipe')
     .filter(function () {
       return $(this).text() === GM_getValue(gmKeyCurrentCraft);
     })
