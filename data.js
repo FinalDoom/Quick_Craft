@@ -66,8 +66,6 @@ const recipeDefinitions = {
       {name: 'artisan emerald-baguette', recipe: ['garlic emerald-baguette', [3], 'emerald chip', [4], 'yellow hellebore flower', [5]]},
       {name: 'gazellian emerald-baguette', recipe: ['artisan emerald-baguette', [3], 'emerald chip', [4, 5]]},
     ],
-  ],
-  Dwarven: [
     [
       {name: 'cant believe this is cherry', recipe: ['milk', [0], 'pile of snow', [1], 'cherries', [2], 'glass shards', [6, 7, 8]]},
       {name: 'grape milkshake', recipe: ['milk', [0], 'pile of snow', [1], 'grapes', [2], 'glass shards', [6, 7, 8]]},
@@ -76,6 +74,35 @@ const recipeDefinitions = {
       {name: 'rocky road milkshake', recipe: ['milk', [0], 'pile of snow', [1], 'cocoa beans', [3], 'marshmallows', [4], 'glass shards', [6, 7, 8]]},
       {name: 'neapolitan milkshake', recipe: ['milk', [0], 'pile of snow', [1], 'cocoa beans', [3], 'vanilla pods', [4], 'strawberries', [5], 'glass shards', [6, 7, 8]]},
     ],
+  ],
+  Pets: [
+    [
+      {name: 'bronze dwarf', recipe: ['sand dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'quartz dwarf', recipe: ['sand dwarf', [4], 'dwarven gem', [6]]},
+      {name: 'bronze to iron dwarf', recipe: ['bronze dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'quartz to iron dwarf', recipe: ['quartz dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'gold dwarf', recipe: ['iron dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'jade dwarf', recipe: ['iron dwarf', [4], 'dwarven gem', [6]]},
+      {name: 'gold to mithril dwarf', recipe: ['gold dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'jade to mithril dwarf', recipe: ['jade dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'adamantium dwarf', recipe: ['mithril dwarf', [4], 'dwarven gem', [5]]},
+      {name: 'amethyst dwarf', recipe: ['mithril dwarf', [4], 'dwarven gem', [6]]},
+      {name: 'green slime', recipe: ['blue slime', [4, 5]]},
+      {name: 'rainbow slime', recipe: ['blue slime', [0], 'green slime', [1], 'pile of sand', [7], 'ruby', [8]]},
+      {name: 'young snowman', recipe: ['snowman cookie', [1, 3, 5, 7], 'snowman', [4]]},
+      {name: 'frosty snowman', recipe: ['snowflake', [1, 3, 5, 7], 'young snowman', [4]]},
+      {name: 'happy snowman', recipe: ['penguin snowglobe', [1, 3, 5, 7], 'owl snowglobe', [0, 2, 6, 8], 'frosty snowman', [4]]},
+      {name: 'ghost billie', recipe: ['Lame Pumpkin Trio', [4], 'Interdimensional Portal', [6], 'Goal Pole', [8]]},
+      {name: 'ghost billie (gold)', recipe: ['amethyst', [0], 'Lame Pumpkin Trio', [3], 'Christmas Cheer', [4], 'Supreme Gazelle', [5]]},
+      {name: 'umaro', recipe: ['Christmas Cheer', [4], 'Interdimensional Portal', [6], 'Goal Pole', [8]]},
+      {name: 'golden umaro', recipe: ['amethyst', [1], 'Lame Pumpkin Trio', [3], 'Christmas Cheer', [4], 'Supreme Gazelle', [5]]},
+      {name: 'gazelle', recipe: ['Supreme Gazelle', [4], 'Interdimensional Portal', [6], 'Goal Pole', [8]]},
+      {name: '[Au]zelle', recipe: ['amethyst', [2], 'Lame Pumpkin Trio', [3], 'Christmas Cheer', [4], 'Supreme Gazelle', [5]]},
+      {name: 'Red Dragon', recipe: ['Dins flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Green Dragon', recipe: ['Farores flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Blue Dragon', recipe: ['Nayrus flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Gold Dragon', recipe: ['golden egg', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+    ]
   ],
   'Material Bars': [
     [
@@ -121,11 +148,58 @@ const recipeDefinitions = {
       {name: 'jade lamellar', recipe: ['jade bar', [1, 4], 'tongs', [7]]},
       {name: 'amethyst lamellar', recipe: ['amethyst bar', [1, 4], 'tongs', [7]]},
     ],
-    [{name: 'impure bronze segmentata to cuirass',recipe:['impure bronze cuirass',[4],'impure bronze bar',[3]],result:'bronze cuirass'}],
-    // TODO got to here
+    [
+      {name: 'impure bronze segmentata to cuirass', recipe: ['impure bronze segmentata', [4], 'impure bronze bar', [3]], result: 'impure bronze cuirass'},
+      {name: 'bronze segmentata to cuirass', recipe: ['bronze segmentata', [4], 'bronze bar', [3]], result: 'bronze cuirass'},
+      {name: 'iron segmentata to cuirass', recipe: ['iron segmentata', [4], 'iron bar', [0, 3]], result: 'iron cuirass'},
+      {name: 'steel segmentata to cuirass', recipe: ['steel segmentata', [4], 'steel bar', [0, 3]], result: 'steel cuirass'},
+      {name: 'gold segmentata to cuirass', recipe: ['gold segmentata', [4], 'gold bar', [0, 3]], result: 'gold cuirass'},
+      {name: 'mithril segmentata to cuirass', recipe: ['mithril segmentata', [4], 'mithril bar', [0, 3, 6]], result: 'mithril cuirass'},
+      {name: 'adamantium segmentata to cuirass', recipe: ['adamantium segmentata', [4], 'adamantium bar', [0, 3, 6]], result: 'adamantium cuirass'},
+    ],
+    [
+      {name: 'quartz lamellar to chainmail', recipe: ['quartz lamellar', [4], 'quartz bar', [3]], result: 'quartz chainmail'},
+      {name: 'jade lamellar to chainmail', recipe: ['jade lamellar', [4], 'jade bar', [0, 3]], result: 'jade chainmail'},
+      {name: 'amethyst lamellar to chainmail', recipe: ['amethyst lamellar', [4], 'amethyst bar', [0, 3, 6]], result: 'amethyst chainmail'},
+    ],
     [
       {name: 'impure bronze armguards', recipe: ['impure bronze bar', [1], 'tongs', [6, 8]]},
+      {name: 'bronze armguards', recipe: ['bronze bar', [1], 'impure bronze armguards', [4], 'tongs', [6, 8]]},
+      {name: 'iron armguards', recipe: ['iron bar', [1], 'bronze armguards', [4], 'tongs', [6, 8]]},
+      {name: 'steel armguards', recipe: ['steel bar', [1], 'iron armguards', [4], 'tongs', [6, 8]]},
+      {name: 'gold armguards', recipe: ['gold bar', [1], 'steel armguards', [4], 'tongs', [6, 8]]},
+      {name: 'mithril armguards', recipe: ['mithril bar', [1], 'gold armguards', [4], 'tongs', [6, 8]]},
+      {name: 'adamantium armguards', recipe: ['adamantium bar', [1], 'mithril armguards', [4], 'tongs', [6, 8]]},
+    ],
+    [
       {name: 'impure bronze power gloves', recipe: ['impure bronze bar', [1], 'tongs', [5], 'ruby chip', [6]]},
+      {name: 'bronze power gloves', recipe: ['bronze bar', [1], 'impure bronze power gloves', [4], 'tongs', [5], 'ruby chip', [0, 6]]},
+      {name: 'iron power gloves', recipe: ['iron bar', [1], 'bronze power gloves', [4], 'tongs', [5], 'ruby chip', [0, 3, 6]]},
+      {name: 'steel power gloves', recipe: ['steel bar', [1], 'iron power gloves', [4], 'tongs', [5], 'ruby chip', [0, 3, 6, 7]]},
+      {name: 'gold power gloves', recipe: ['gold bar', [1, 7], 'steel power gloves', [4], 'tongs', [5], 'ruby', [0, 3, 6]]},
+      {name: 'mithril power gloves', recipe: ['mithril bar', [1, 7], 'gold power gloves', [4], 'tongs', [5], 'ruby', [0, 6]]},
+      {name: 'adamantium power gloves', recipe: ['adamantium bar', [1, 7], 'mithril power gloves', [4], 'tongs', [5], 'ruby', [0, 6]]},
+    ],
+    [
+      {name: 'repair impure bronze cuirass', recipe: ['impure bronze cuirass', [4], 'impure bronze bar', [3]], result: 'impure bronze cuirass'},
+      {name: 'repair bronze cuirass', recipe: ['bronze cuirass', [4], 'bronze bar', [3]], result: 'bronze cuirass'},
+      {name: 'repair iron cuirass', recipe: ['iron cuirass', [4], 'iron bar', [0, 3]], result: 'iron cuirass'},
+      {name: 'repair steel cuirass', recipe: ['steel cuirass', [4], 'steel bar', [0, 3]], result: 'steel cuirass'},
+      {name: 'repair gold cuirass', recipe: ['gold cuirass', [4], 'gold bar', [0, 3]], result: 'gold cuirass'},
+      {name: 'repair mithril cuirass', recipe: ['mithril cuirass', [4], 'mithril bar', [0, 3, 6]], result: 'mithril cuirass'},
+      {name: 'repair adamantium cuirass', recipe: ['adamantium cuirass', [4], 'adamantium bar', [0, 3, 6]], result: 'adamantium cuirass'},
+    ],
+    [
+      {name: 'repair quartz chainmail', recipe: ['quartz chainmail', [4], 'quartz bar', [3]], result: 'quartz chainmail'},
+      {name: 'repair jade chainmail', recipe: ['jade chainmail', [4], 'jade bar', [0, 3]], result: 'jade chainmail'},
+      {name: 'repair amethyst chainmail', recipe: ['amethyst chainmail', [4], 'amethyst bar', [0, 3, 6]], result: 'amethyst chainmail'},
+    ],
+    [
+      {name: 'repair mithril armguards', recipe: ['mithril bar', [1], 'mithril armguards', [4]], result: 'mithril armguards'},
+      {name: 'repair adamantium armguards', recipe: ['adamantium bar', [1], 'adamantium armguards', [4]], result: 'adamantium armguards'},
+      {name: 'repair gold power gloves', recipe: ['ruby', [1], 'gold bar', [7], 'gold power gloves', [4]], result: 'gold power gloves'},
+      {name: 'repair mithril power gloves', recipe: ['ruby', [1], 'mithril bar', [7], 'mithril power gloves', [4]], result: 'mithril power gloves'},
+      {name: 'repair adamantium power gloves', recipe: ['ruby', [1], 'adamantium bar', [7], 'adamantium power gloves', [4]], result: 'adamantium power gloves'},
     ],
   ],
   Weapons: [
@@ -156,6 +230,34 @@ const recipeDefinitions = {
       {name: 'quartz guandao', recipe: ['tongs', [1], 'quartz bar', [7]]},
       {name: 'jade guandao', recipe: ['tongs', [1], 'jade bar', [4, 7]]},
       {name: 'amethyst guandao', recipe: ['tongs', [1], 'amethyst bar', [4, 7]]},
+    ],
+    [
+      {name: 'impure bronze billhook to claymore', recipe: ['impure bronze billhook', [4], 'impure bronze bar', [3]], result: 'impure bronze claymore'},
+      {name: 'bronze billhook to claymore', recipe: ['bronze billhook', [4], 'bronze bar', [3]], result: 'bronze claymore'},
+      {name: 'iron billhook to claymore', recipe: ['iron billhook', [4], 'iron bar', [0, 3]], result: 'iron claymore'},
+      {name: 'steel billhook to claymore', recipe: ['steel billhook', [4], 'steel bar', [0, 3]], result: 'steel claymore'},
+      {name: 'gold billhook to claymore', recipe: ['gold billhook', [4], 'gold bar', [0, 3]], result: 'gold claymore'},
+      {name: 'mithril billhook to claymore', recipe: ['mithril billhook', [4], 'mithril bar', [0, 3, 6]], result: 'mithril claymore'},
+      {name: 'adamantium billhook to claymore', recipe: ['adamantium billhook', [4], 'adamantium bar', [0, 3, 6]], result: 'adamantium claymore'},
+    ],
+    [
+      {name: 'quartz guandao to khopesh', recipe: ['quartz guandao', [4], 'quartz bar', [3]], result: 'quartz khopesh'},
+      {name: 'jade guandao to khopesh', recipe: ['jade guandao', [4], 'jade bar', [0, 3]], result: 'jade khopesh'},
+      {name: 'amethyst guandao to khopesh', recipe: ['amethyst guandao', [4], 'amethyst bar', [0, 3, 6]], result: 'amethyst khopesh'},
+    ],
+    [
+      {name: 'repair impure bronze claymore', recipe: ['impure bronze claymore', [4], 'impure bronze bar', [3]], result: 'impure bronze claymore'},
+      {name: 'repair bronze claymore', recipe: ['bronze claymore', [4], 'bronze bar', [3]], result: 'bronze claymore'},
+      {name: 'repair iron claymore', recipe: ['iron claymore', [4], 'iron bar', [0, 3]], result: 'iron claymore'},
+      {name: 'repair steel claymore', recipe: ['steel claymore', [4], 'steel bar', [0, 3]], result: 'steel claymore'},
+      {name: 'repair gold claymore', recipe: ['gold claymore', [4], 'gold bar', [0, 3]], result: 'gold claymore'},
+      {name: 'repair mithril claymore', recipe: ['mithril claymore', [4], 'mithril bar', [0, 3, 6]], result: 'mithril claymore'},
+      {name: 'repair adamantium claymore', recipe: ['adamantium claymore', [4], 'adamantium bar', [0, 3, 6]], result: 'adamantium claymore'},
+    ],
+    [
+      {name: 'repair quartz khopesh', recipe: ['quartz khopesh', [4], 'quartz bar', [3]], result: 'quartz khopesh'},
+      {name: 'repair jade khopesh', recipe: ['jade khopesh', [4], 'jade bar', [0, 3]], result: 'jade khopesh'},
+      {name: 'repair amethyst khopesh', recipe: ['amethyst khopesh', [4], 'amethyst bar', [0, 3, 6]], result: 'amethyst khopesh'},
     ],
   ],
   Recasting: [
@@ -375,27 +477,21 @@ const recipeDefinitions = {
       {name: 'Alien Gazelle', recipe: ['Ripped Gazelle', [3], 'Fancy Gazelle', [4]]},
       {name: 'Lucky Gazelle', recipe: ['Fancy Gazelle', [4], 'Gamer Gazelle', [5]]},
       {name: 'Supreme Gazelle', recipe: ['Future Gazelle', [3], 'Alien Gazelle', [4], 'Lucky Gazelle', [5]]},
-      {name: 'birthday licks badge -_9th', recipe: ['lick badge bits', [3, 4, 5, 6, 7, 8]]},
+      {name: 'birthday licks badge - 9th', recipe: ['lick badge bits', [3, 4, 5, 6, 7, 8]]},
     ],
     [
       {name: 'A Fair Fight', recipe: ['Exodus Truce', [4], 'Gazelle Breaking Bad', [5]]},
       {name: 'What an Adventure', recipe: ['Home Sweet Home', [4], 'Birthday Battle Kart', [5]]},
       {name: 'After Party', recipe: ['A Fair Fight', [4], 'What an Adventure', [5]]},
-      {name: 'birthday gazelle badge -_10th', recipe: ['birthday leaves 10th', [0, 2, 3, 5, 6, 8]]},
+      {name: 'birthday gazelle badge - 10th', recipe: ['birthday leaves 10th', [0, 2, 3, 5, 6, 8]]},
     ],
     [
       {name: 'Dr Mario', recipe: ['Bill Rizer', [3], 'Donkey Kong', [4], 'Duck Hunt Dog', [5]]},
       {name: 'Link', recipe: ['Pit', [3], 'Little Mac', [4], 'Mega Man', [5]]},
       {name: 'Kirby', recipe: ['Pac-Man', [3], 'Samus Aran', [4], 'Simon Belmont', [5]]},
       {name: 'Black Mage', recipe: ['Dr Mario', [0], 'Link', [4], 'Kirby', [8]]},
-      {name: 'birthday gazelle badge -_11th', recipe: ['party pipe badge bit', [0, 4, 5, 8]]},
-    ],
-    [
+      {name: 'birthday gazelle badge - 11th', recipe: ['party pipe badge bit', [0, 4, 5, 8]]},
       {name: '12th birthday badge', recipe: ['slice of birthday cake', [0, 2, 4, 6, 8]]},
-      {name: 'Red Dragon', recipe: ['Dins flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
-      {name: 'Green Dragon', recipe: ['Farores flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
-      {name: 'Blue Dragon', recipe: ['Nayrus flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
-      {name: 'Gold Dragon', recipe: ['golden egg', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
     ],
   ],
   Valentines: [
@@ -437,9 +533,9 @@ const recipeDefinitions = {
       {name: "repair cupid's adamantium wings", recipe: ['sapphire', [0, 1, 2], 'adamantium bar', [7], "cupid's adamantium wings", [4]], result: "cupid's adamantium wings"},
     ],
     [
-      {name: "disassembled cupid's gold wings", recipe: ['flux', [1], 'tongs', [7], "cupid's gold wings", [4]]},
-      {name: "disassembled cupid's mithril wings", recipe: ['flux', [0, 2], 'tongs', [6, 8], "cupid's mithril wings", [4]]},
-      {name: "disassembled cupid's adamantium wings", recipe: ['flux', [0, 1, 2], 'tongs', [6, 7, 8], "cupid's adamantium wings", [4]]},
+      {name: 'disassembled gold wings', recipe: ['flux', [1], 'tongs', [7], "cupid's gold wings", [4]]},
+      {name: 'disassembled mithril wings', recipe: ['flux', [0, 2], 'tongs', [6, 8], "cupid's mithril wings", [4]]},
+      {name: 'disassembled adamantium wings', recipe: ['flux', [0, 1, 2], 'tongs', [6, 7, 8], "cupid's adamantium wings", [4]]},
       {name: 'cupids cradle', recipe: ['gods cradle', [4], 'cupids tiara', [5]]},
       {name: "disassembled cupid's cradle", recipe: ['flux', [0, 1, 2, 3], 'tongs', [5, 6, 7, 8], 'cupids cradle', [4]]},
     ],
@@ -492,8 +588,9 @@ const recipeDefinitions = {
       {name: 'Farores Username', recipe: ['Farores flame', [3], 'green onyx gem', [4]]},
       {name: 'Dins Username', recipe: ['Dins flame', [3], 'green onyx gem', [4]]},
       {name: 'Dwarven Disco Ball', recipe: ['dwarven gem', [0, 1, 2, 3, 4, 5, 6, 7, 8]]},
+      {name: 'Dwarven Disco Plate', recipe: ['dwarven gem', [0, 1, 2, 3, 5, 6, 7, 8], 'obsidian plate armor', [4]]},
       {name: 'irc voice 8w', recipe: ['irc voice 2 weeks', [3, 4, 5]]},
-      {name: 'irc voice 8w -_low cost', recipe: ['irc voice 2 weeks - low cost option', [1, 3, 4, 5]], result: 'irc voice 8 weeks'},
+      {name: 'irc voice 8w - low cost', recipe: ['irc voice 2 weeks - low cost option', [1, 3, 4, 5]], result: 'irc voice 8 weeks'},
       {name: 'irc voice 1y', recipe: ['irc voice 8 weeks', [0, 1, 2, 3, 4, 5], 'sapphire', [7]]},
     ],
   ],
@@ -507,7 +604,7 @@ const recipeDefinitions = {
 //
 
 async function recipeStringToFullInfo(recipe) {
-  return await apiCall({data: {request: 'items', type: 'crafting result', recipe: recipe}}).then((data) => {
+  return await apiCall({data: {request: 'items', type: 'crafting_result', recipe: recipe}}).then((data) => {
     if (data.status !== 'success') return false;
     return {
       ...data.response,
@@ -603,50 +700,42 @@ async function getNewFullRecipeInfo() {
 
 const types = ['Standard', 'Repair', 'Upgrade', 'Downgrade'];
 const upgrades = {Segmentata: 'Cuirass', Lamellar: 'Chainmail', Billhook: 'Claymore', Guandao: 'Khopesh'};
-const metalTiers = ['Impure Bronze', 'Bronze', 'Iron', 'Steel', 'Gold', 'Mithryl', 'Adamantium'];
+const metalTiers = ['Impure Bronze', 'Bronze', 'Iron', 'Steel', 'Gold', 'Mithril', 'Adamantium'];
 const magicTiers = ['Quartz', 'Jade', 'Amethyst'];
 const pantsTiers = ['Jazz', 'Jazzier', 'Disco', "Devil's"];
 function isUpgrade(ingredient, result) {
   let match;
   // Pet upgrades to higher tiers
   return (
-    ((match = ingredient.match(/(Dwarf Companion|IRC Slime Pet|Snowman)$/)) && result.endsWith(match[1])) ||
+    ((match = ingredient.match(/(Dwarf Companion|Slime|Snowman)$/)) && result.endsWith(match[1])) ||
     // Jewelry Upgrades
     result === 'Empowered ' + ingredient ||
     // Armor, Weapon type upgrades
     result ===
-      [ingredient].map((ingredient) =>
-        Object.entries(upgrades).reduce(
-          (ingredient, [base, upgraded]) => ingredient.replace(base, upgraded),
-          ingredient,
-        ),
-      )[0] ||
+      Object.entries(upgrades).reduce(
+        (ingredient, [base, upgraded]) => ingredient.replace(base, upgraded),
+        ingredient,
+      ) ||
     // Armor, Weapon material upgrades
     result ===
-      [ingredient].map((ingredient) =>
-        metalTiers.reduce(
-          (ingredient, tier, i) =>
-            i <= metalTiers.length - 2 ? ingredient.replace(tier, metalTiers[i + 1]) : ingredient,
-          ingredient,
-        ),
-      )[0] ||
+      metalTiers.reduce(
+        (upgraded, tier, i) =>
+          upgraded === ingredient && i <= metalTiers.length - 2 ? upgraded.replace(tier, metalTiers[i + 1]) : upgraded,
+        ingredient,
+      ) ||
     result ===
-      [ingredient].map((ingredient) =>
-        magicTiers.reduce(
-          (ingredient, tier, i) =>
-            i <= magicTiers.length - 2 ? ingredient.replace(tier, magicTiers[i + 1]) : ingredient,
-          ingredient,
-        ),
-      )[0] ||
+      magicTiers.reduce(
+        (upgraded, tier, i) =>
+          upgraded === ingredient && i <= magicTiers.length - 2 ? upgraded.replace(tier, magicTiers[i + 1]) : upgraded,
+        ingredient,
+      ) ||
     // Discount pants
     result.replace('Pantaloons', 'Pants') ===
-      [ingredient].map((ingredient) =>
-        pantsTiers.reduce(
-          (ingredient, tier, i) =>
-            i <= pantsTiers.length - 2 ? ingredient.replace(tier, pantsTiers[i + 1]) : ingredient,
-          ingredient,
-        ),
-      )[0] ||
+      pantsTiers.reduce(
+        (upgraded, tier, i) =>
+          upgraded === ingredient && i <= pantsTiers.length - 2 ? upgraded.replace(tier, pantsTiers[i + 1]) : upgraded,
+        ingredient,
+      ) ||
     // Cupid's Wings (metal tier handled above) and Cupids Winged Boots
     (result === "Cupid's Gold Wings" && ingredient === "Cupid's Wings") ||
     ((match = result.match(/(Cupid's Winged Boots) of (?:Aggression|Fortune|Luck)/)) && match[1] === ingredient) ||
@@ -658,14 +747,14 @@ function isUpgrade(ingredient, result) {
 function getRecipeType(recipe) {
   const ingredients = recipe.recipe.match(/.{5}/g).map((item) => (item === 'EEEEE' ? 0 : parseInt(item)));
   const result = parseInt(recipe.ID);
-  if (ingredients.includes(2653)) return types[3]; // Flux === Downgrade
-  else if (ingredients[4] === result) return types[1]; // Repair slot 4 matches result
+  if (ingredients[4] === result) return types[1]; // Repair slot 4 matches result
   else if (
     ingredients[4] in window.items &&
     result in window.items &&
     isUpgrade(window.items[ingredients[4]].name, window.items[result].name)
   )
     return types[2];
+  else if (ingredients.includes(2653)) return types[3]; // Flux === Downgrade
   else return types[0];
 }
 function titleCase(str) {

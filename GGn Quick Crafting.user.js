@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.8.0
+// @version      2.8.1
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -197,6 +197,7 @@
   //
   // prettier-ignore
   const ingredients = {
+    46: {name: 'Obsidian Plate Armor', image: 'static/common/items/Cover/Armor/2_black.png', category: 'Equipment', gold: '600', infStock: true},
     66: {name: 'Upload Potion Sampler', image: 'static/common/items/Items/Potions/sample_green.png', category: 'Stat potions', gold: '2500', infStock: true},
     72: {name: 'IRC Voice (2 Weeks)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '10000', infStock: true},
     98: {name: 'Small Upload Potion', image: 'static/common/items/Items/Potions/small_green.png', category: 'Stat potions', gold: '5000', infStock: true},
@@ -265,7 +266,9 @@
     2305: {name: 'Large Snowball', image: 'static/common/items/Items/Christmas/snowball.png', category: 'Crafting Materials', gold: '4200', infStock: false},
     2306: {name: 'Carrot', image: 'static/common/items/Items/Christmas/carrot.png', category: 'Crafting Materials', gold: '3500', infStock: true},
     2307: {name: 'Snowman', image: 'static/common/items/Items/Christmas/snowman.png', category: 'Stat potions', gold: '27500', infStock: false},
+    2321: {name: 'Gold Power Gloves', image: 'static/common/items/Cover/Gloves/Power_Gloves.png', category: 'Equipment', gold: '105000', infStock: true},
     2323: {name: 'Ruby', image: 'static/common/items/Items/Gems/ruby.png', category: 'Crafting Materials', gold: '25000', infStock: true},
+    2333: {name: 'Gazelle Pet', image: 'static/common/items/Cover/Pets/gazelle.png', category: 'Equipment', gold: '12000', infStock: false},
     2357: {name: 'The Golden Daedy', image: 'static/common/items/Items/Card/Staff_The_Golden_Daedy.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2358: {name: 'A Wild Artifaxx', image: 'static/common/items/Items/Card/Staff_A_Wild_Artifaxx.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2359: {name: 'A Red Hot Flamed', image: 'static/common/items/Items/Card/Staff_A_Red_Hot_Flamed.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -318,16 +321,44 @@
     2466: {name: 'Nayru&#39;s Lootbox', image: 'static/common/items/Items/Pack/Nayrus_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
     2468: {name: 'Random Lootbox (Din, Farore, or Nayru)', image: 'static/common/items/Items/Pack/Random_Lootbox.png', category: 'Special Items', gold: '150000', infStock: false},
     2508: {name: 'Dwarven Gem', image: 'static/common/items/Items/Gems/dwarven_gem.png', category: 'Crafting Materials', gold: '100000', infStock: false},
+    2509: {name: 'Bronze Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_bronze.png', category: 'Equipment', gold: '35000', infStock: true},
+    2510: {name: 'Iron Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_iron.png', category: 'Equipment', gold: '70000', infStock: false},
+    2511: {name: 'Gold Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_gold.png', category: 'Equipment', gold: '122500', infStock: false},
+    2512: {name: 'Sand Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_sand.png', category: 'Equipment', gold: '10000', infStock: true},
+    2513: {name: 'Mithril Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_mithril.png', category: 'Equipment', gold: '192500', infStock: false},
+    2515: {name: 'Adamantium Dwarf Companion', image: 'static/common/items/Cover/Pets/dwarf_adamantium.png', category: 'Equipment', gold: '560000', infStock: false},
+    2524: {name: 'Green IRC Slime Pet', image: 'static/common/items/Cover/Pets/slime_green.png', category: 'Equipment', gold: '50000', infStock: true},
+    2525: {name: 'Blue IRC Slime Pet', image: 'static/common/items/Cover/Pets/slime_blue.png', category: 'Equipment', gold: '25000', infStock: true},
     2537: {name: 'Carbon-Crystalline Quartz', image: 'static/common/items/Items/Gems/carbonquartz.png', category: 'Crafting Materials', gold: '3750', infStock: false},
     2538: {name: 'Carbon-Crystalline Quartz Necklace', image: 'static/common/items/Cover/Jewelry/crystalline.png', category: 'Equipment', gold: '4000', infStock: false},
     2539: {name: 'Silver Ring of Gazellia', image: 'static/common/items/Cover/Jewelry/silvering.png', category: 'Equipment', gold: '1000', infStock: true},
+    2540: {name: 'Quartz Loop of Luck', image: 'static/common/items/Cover/Jewelry/quartzringluck.png', category: 'Equipment', gold: '4100', infStock: false},
+    2541: {name: 'Jade Loop of Luck', image: 'static/common/items/Cover/Jewelry/jaderingluck.png', category: 'Equipment', gold: '17000', infStock: false},
+    2542: {name: 'Amethyst Loop of Luck', image: 'static/common/items/Cover/Jewelry/amethystringluck.png', category: 'Equipment', gold: '67000', infStock: false},
+    2543: {name: 'Quartz Loop of Aggression', image: 'static/common/items/Cover/Jewelry/quartzringaggression.png', category: 'Equipment', gold: '4500', infStock: false},
+    2544: {name: 'Jade Loop of Aggression', image: 'static/common/items/Cover/Jewelry/jaderingaggression.png', category: 'Equipment', gold: '21000', infStock: false},
+    2545: {name: 'Amethyst Loop of Aggression', image: 'static/common/items/Cover/Jewelry/amethystringaggression.png', category: 'Equipment', gold: '79000', infStock: false},
+    2546: {name: 'Quartz Loop of Fortune', image: 'static/common/items/Cover/Jewelry/quartzringfortune.png', category: 'Equipment', gold: '6000', infStock: false},
+    2547: {name: 'Jade Loop of Fortune', image: 'static/common/items/Cover/Jewelry/jaderingfortune.png', category: 'Equipment', gold: '36000', infStock: false},
+    2548: {name: 'Amethyst Loop of Fortune', image: 'static/common/items/Cover/Jewelry/amethystringfortune.png', category: 'Equipment', gold: '124000', infStock: false},
     2549: {name: 'Sapphire', image: 'static/common/items/Items/Gems/sapphire.png', category: 'Crafting Materials', gold: '6000', infStock: true},
     2550: {name: 'Ruby Chip', image: 'static/common/items/Items/Gems/chip_ruby.png', category: 'Crafting Materials', gold: '2500', infStock: true},
     2551: {name: 'Emerald Chip', image: 'static/common/items/Items/Gems/chip_emerald.png', category: 'Crafting Materials', gold: '1000', infStock: true},
+    2552: {name: 'Sapphire Chip', image: 'static/common/items/Items/Gems/chip_sapphire.png', category: 'Crafting Materials', gold: '600', infStock: true},
     2554: {name: 'Unity Flame Necklet', image: 'static/common/items/Cover/Jewelry/unityneck.png', category: 'Equipment', gold: '1000000', infStock: false},
+    2556: {name: 'Gods Cradle', image: 'static/common/items/Cover/Helmet/gods_cradle.png', category: 'Equipment', gold: '1000000', infStock: false},
     2563: {name: 'Exquisite Constellation of Rubies', image: 'static/common/items/Items/Jewelry/constellation_ruby.png', category: 'Crafting Materials', gold: '120000', infStock: false},
     2564: {name: 'Exquisite Constellation of Sapphires', image: 'static/common/items/Items/Jewelry/constellation_sapphire.png', category: 'Crafting Materials', gold: '44000', infStock: false},
     2565: {name: 'Exquisite Constellation of Emeralds', image: 'static/common/items/Items/Jewelry/constellation_emerald.png', category: 'Crafting Materials', gold: '60000', infStock: false},
+    2566: {name: 'Quartz Prism of Aggression', image: 'static/common/items/Cover/Jewelry/quartzneckaggression.png', category: 'Equipment', gold: '13400', infStock: false},
+    2567: {name: 'Quartz Prism of Luck', image: 'static/common/items/Cover/Jewelry/quartzneckluck.png', category: 'Equipment', gold: '11000', infStock: false},
+    2568: {name: 'Quartz Prism of Fortune', image: 'static/common/items/Cover/Jewelry/quartzneckfortune.png', category: 'Equipment', gold: '22400', infStock: false},
+    2569: {name: 'Jade Trifocal of Aggression', image: 'static/common/items/Cover/Jewelry/jadeneckaggression.png', category: 'Equipment', gold: '40750', infStock: false},
+    2570: {name: 'Jade Trifocal of Luck', image: 'static/common/items/Cover/Jewelry/jadeneckluck.png', category: 'Equipment', gold: '32750', infStock: false},
+    2571: {name: 'Jade Trifocal of Fortune', image: 'static/common/items/Cover/Jewelry/jadeneckfortune.png', category: 'Equipment', gold: '70750', infStock: false},
+    2572: {name: 'Amethyst Totality of Aggression', image: 'static/common/items/Cover/Jewelry/amethystneckaggression.png', category: 'Equipment', gold: '150750', infStock: false},
+    2573: {name: 'Amethyst Totality of Luck', image: 'static/common/items/Cover/Jewelry/amethystneckluck.png', category: 'Equipment', gold: '126750', infStock: false},
+    2574: {name: 'Amethyst Totality of Fortune', image: 'static/common/items/Cover/Jewelry/amethystneckfortune.png', category: 'Equipment', gold: '240750', infStock: false},
     2579: {name: 'Ruby-Flecked Wheat', image: 'static/common/items/Items/Food/wheat_ruby.png', category: 'Crafting Materials', gold: '1200', infStock: false},
     2580: {name: 'Ruby-Grained Baguette', image: 'static/common/items/Items/Food/baguette_ruby.png', category: 'Buffs', gold: '2400', infStock: false},
     2581: {name: 'Garlic Ruby-Baguette', image: 'static/common/items/Items/Food/garlic_ruby.png', category: 'Buffs', gold: '4500', infStock: false},
@@ -341,6 +372,8 @@
     2593: {name: 'Russian Pumpkin', image: 'static/common/items/Items/Card/Halloween_Russian_Pumpkin.png', category: 'Trading Cards', gold: '10000', infStock: false},
     2594: {name: 'Green Mario Pumpkin', image: 'static/common/items/Items/Card/Halloween_Green_Mario_Pumpkin.png', category: 'Trading Cards', gold: '10000', infStock: false},
     2595: {name: 'Lame Pumpkin Trio', image: 'static/common/items/Items/Card/Halloween_Lame_Pumpkin_Trio.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    2598: {name: 'Ghost Billie', image: 'static/common/items/Cover/Pets/ghost_white.png', category: 'Equipment', gold: '12000', infStock: false},
+    2599: {name: 'Ghost Billy', image: 'static/common/items/Cover/Pets/ghost_yellow.png', category: 'Equipment', gold: '120000', infStock: false},
     2600: {name: 'Pumpkin Badge Bits', image: 'static/common/items/Items/Halloween/pumpkin_bits.png', category: 'Stat potions', gold: '2250', infStock: false},
     2601: {name: 'Halloween Pumpkin Badge', image: 'static/common/items/Items/Badges/Halloween_Pumpkin_Badge.png', category: 'User badges', gold: '13500', infStock: false},
     2627: {name: 'Blacksmith Tongs', image: 'static/common/items/Items/Recast/blacksmith_tongs.png', category: 'Crafting Materials', gold: '50', infStock: true},
@@ -367,6 +400,8 @@
     2676: {name: 'Amethyst Dust x2', image: 'static/common/items/Items/Ore/amethyst.png', category: 'Crafting Materials', gold: '16000', infStock: false},
     2688: {name: 'Christmas Spices', image: 'static/common/items/Items/Christmas/spices.png', category: 'Crafting Materials', gold: '2600', infStock: true},
     2689: {name: 'Old Scarf &amp; Hat', image: 'static/common/items/Items/Christmas/hatscarf.png', category: 'Crafting Materials', gold: '2500', infStock: true},
+    2690: {name: 'Umaro', image: 'static/common/items/Cover/Pets/umaro_white.png', category: 'Equipment', gold: '12000', infStock: false},
+    2691: {name: 'Golden Umaro', image: 'static/common/items/Cover/Pets/umaro_yellow.png', category: 'Equipment', gold: '120000', infStock: false},
     2698: {name: 'Perfect Snowball', image: 'static/common/items/Items/Card/Christmas_Perfect_Snowball.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2699: {name: 'Mistletoe', image: 'static/common/items/Items/Card/Christmas_Mistletoe.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2700: {name: 'Santa Suit', image: 'static/common/items/Items/Card/Christmas_Santa_Suit.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -379,6 +414,25 @@
     2719: {name: 'Garlic Emerald-Baguette', image: 'static/common/items/Items/Food/garlic_emerald.png', category: 'Buffs', gold: '2500', infStock: false},
     2720: {name: 'Artisan Emerald-Baguette', image: 'static/common/items/Items/Food/artisan_emerald.png', category: 'Buffs', gold: '6000', infStock: false},
     2721: {name: 'Gazellian Emerald-Baguette', image: 'static/common/items/Items/Food/gazellian_emerald.png', category: 'Buffs', gold: '8000', infStock: false},
+    2729: {name: 'Empowered Quartz Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzringluck.png', category: 'Equipment', gold: '6600', infStock: false},
+    2730: {name: 'Empowered Jade Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjaderingluck.png', category: 'Equipment', gold: '27000', infStock: false},
+    2731: {name: 'Empowered Amethyst Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystringluck.png', category: 'Equipment', gold: '115000', infStock: false},
+    2732: {name: 'Empowered Quartz Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzringaggression.png', category: 'Equipment', gold: '7000', infStock: false},
+    2733: {name: 'Empowered Jade Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjaderingaggression.png', category: 'Equipment', gold: '31000', infStock: false},
+    2734: {name: 'Empowered Amethyst Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystringaggression.png', category: 'Equipment', gold: '127000', infStock: false},
+    2735: {name: 'Empowered Quartz Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzringfortune.png', category: 'Equipment', gold: '8500', infStock: false},
+    2736: {name: 'Empowered Jade Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjaderingfortune.png', category: 'Equipment', gold: '46000', infStock: false},
+    2737: {name: 'Empowered Amethyst Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystringfortune.png', category: 'Equipment', gold: '172000', infStock: false},
+    2738: {name: 'Empowered Quartz Prism of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckaggression.png', category: 'Equipment', gold: '18400', infStock: false},
+    2739: {name: 'Empowered Quartz Prism of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckluck.png', category: 'Equipment', gold: '16000', infStock: false},
+    2740: {name: 'Empowered Quartz Prism of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckfortune.png', category: 'Equipment', gold: '27400', infStock: false},
+    2741: {name: 'Empowered Jade Trifocal of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckaggression.png', category: 'Equipment', gold: '55750', infStock: false},
+    2742: {name: 'Empowered Jade Trifocal of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckluck.png', category: 'Equipment', gold: '47750', infStock: false},
+    2743: {name: 'Empowered Jade Trifocal of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckfortune.png', category: 'Equipment', gold: '85750', infStock: false},
+    2744: {name: 'Empowered Amethyst Totality of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckaggression.png', category: 'Equipment', gold: '230750', infStock: false},
+    2745: {name: 'Empowered Amethyst Totality of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckluck.png', category: 'Equipment', gold: '206750', infStock: false},
+    2746: {name: 'Empowered Amethyst Totality of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckfortune.png', category: 'Equipment', gold: '320750', infStock: false},
+    2760: {name: 'Dwarven Disco Plate', image: 'static/common/items/Cover/Body Armor/Disco_Plate.png', category: 'Equipment', gold: '800000', infStock: false},
     2761: {name: 'Impure Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Segmentata.png', category: 'Equipment', gold: '1150', infStock: false},
     2762: {name: 'Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Bronze_Segmentata.png', category: 'Equipment', gold: '2000', infStock: false},
     2763: {name: 'Iron Segmentata', image: 'static/common/items/Cover/Body Armor/Iron_Segmentata.png', category: 'Equipment', gold: '8000', infStock: false},
@@ -399,6 +453,7 @@
     2822: {name: 'Can&#39;t Believe This Is Cherry', image: 'static/common/items/Items/Birthday/chakefhake.png', category: 'Buffs', gold: '8000', infStock: false},
     2825: {name: '9th Birthday Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/9th_Birthday_Badge.png', category: 'User badges', gold: '13500', infStock: false},
     2826: {name: 'Lick Badge Bits', image: 'static/common/items/Items/Birthday/licks_bits.png', category: 'Stat potions', gold: '2250', infStock: false},
+    2827: {name: '[Au]zelle Pet', image: 'static/common/items/Cover/Pets/gazelle_yellow.png', category: 'Equipment', gold: '120000', infStock: false},
     2829: {name: 'Ripped Gazelle', image: 'static/common/items/Items/Card/Birthday_Ripped_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2830: {name: 'Fancy Gazelle', image: 'static/common/items/Items/Card/Birthday_Fancy_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
     2831: {name: 'Gamer Gazelle', image: 'static/common/items/Items/Card/Birthday_Gamer_Gazelle.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -426,13 +481,27 @@
     2860: {name: 'Jade Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Guandao.png', category: 'Equipment', gold: '10000', infStock: false},
     2861: {name: 'Amethyst Guandao', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Guandao.png', category: 'Equipment', gold: '32000', infStock: false},
     2862: {name: 'Impure Bronze Armguards', image: 'static/common/items/Cover/Arm Armor/Impure_Bronze_Armguards.png', category: 'Equipment', gold: '1250', infStock: false},
+    2863: {name: 'Bronze Armguards', image: 'static/common/items/Cover/Arm Armor/Bronze_Armguards.png', category: 'Equipment', gold: '3250', infStock: false},
+    2864: {name: 'Iron Armguards', image: 'static/common/items/Cover/Arm Armor/Iron_Armguards.png', category: 'Equipment', gold: '7250', infStock: false},
+    2865: {name: 'Steel Armguards', image: 'static/common/items/Cover/Arm Armor/Steel_Armguards.png', category: 'Equipment', gold: '11750', infStock: false},
+    2866: {name: 'Gold Armguards', image: 'static/common/items/Cover/Arm Armor/Gold_Armguards.png', category: 'Equipment', gold: '18750', infStock: false},
+    2867: {name: 'Mithril Armguards', image: 'static/common/items/Cover/Arm Armor/Mithril_Armguards.png', category: 'Equipment', gold: '29750', infStock: false},
+    2868: {name: 'Adamantium Armguards', image: 'static/common/items/Cover/Arm Armor/Adamantium_Armguards.png', category: 'Equipment', gold: '61750', infStock: false},
     2892: {name: 'Glowing Ash', image: 'https://ptpimg.me/3i2xd1.png', category: 'Items', gold: '50', infStock: false},
     2893: {name: 'Troll Tooth', image: 'https://ptpimg.me/mrr24x.png', category: 'Items', gold: '50', infStock: false},
     2894: {name: 'Advanced Hide', image: 'https://ptpimg.me/1d6926.png', category: 'Items', gold: '50', infStock: false},
     2900: {name: 'Burning Ash Cloud', image: 'https://ptpimg.me/n7900m.png', category: 'Attacks', gold: '7500', infStock: false},
     2901: {name: 'Troll Tooth Necklace', image: 'https://ptpimg.me/480516.png', category: 'Items', gold: '3500', infStock: false},
+    2902: {name: 'Mithril Power Gloves', image: 'https://ptpimg.me/xiq9n9.png', category: 'Equipment', gold: '190000', infStock: false},
+    2903: {name: 'Adamantium Power Gloves', image: 'https://ptpimg.me/850f5v.png', category: 'Equipment', gold: '305000', infStock: false},
+    2905: {name: 'Steel Power Gloves', image: 'https://ptpimg.me/oqwww2.png', category: 'Equipment', gold: '37000', infStock: false},
+    2906: {name: 'Iron Power Gloves', image: 'https://ptpimg.me/999ex6.png', category: 'Equipment', gold: '22500', infStock: false},
+    2907: {name: 'Bronze Power Gloves', image: 'https://ptpimg.me/v98n53.png', category: 'Equipment', gold: '11000', infStock: false},
     2908: {name: 'Impure Bronze Power Gloves', image: 'https://ptpimg.me/9d1e15.png', category: 'Equipment', gold: '4000', infStock: false},
     2915: {name: 'Flame Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Flame_Badge.png', category: 'User badges', gold: '1000000', infStock: false},
+    2927: {name: 'Amethyst Dust Dwarf Companion', image: 'https://ptpimg.me/8n1o75.png', category: 'Equipment', gold: '280000', infStock: false},
+    2928: {name: 'Jade Dust Dwarf Companion', image: 'https://ptpimg.me/803l8j.png', category: 'Equipment', gold: '87500', infStock: false},
+    2929: {name: 'Quartz Dust Dwarf Companion', image: 'https://ptpimg.me/6zl54e.png', category: 'Equipment', gold: '43750', infStock: true},
     2930: {name: 'Nayru&#39;s Username', image: 'static/common/items/Items/Username/Nayru.png', category: 'Username customizations', gold: '270000', infStock: false},
     2931: {name: 'Farore&#39;s Username', image: 'static/common/items/Items/Username/Farore.png', category: 'Username customizations', gold: '270000', infStock: false},
     2932: {name: 'Din&#39;s Username', image: 'static/common/items/Items/Username/Din.png', category: 'Username customizations', gold: '270000', infStock: false},
@@ -498,6 +567,9 @@
     3143: {name: 'Symbol of Love', image: 'https://ptpimg.me/cf9vfc.png', category: 'Crafting Materials', gold: '100000', infStock: false},
     3144: {name: 'Old Worn Boots', image: 'https://ptpimg.me/66unrh.png', category: 'Crafting Materials', gold: '10000', infStock: true},
     3145: {name: 'Cupid&#39;s Magical Feather', image: 'https://ptpimg.me/004ho6.png', category: 'Crafting Materials', gold: '21500', infStock: false},
+    3146: {name: 'Cupid&#39;s Winged Boots of Luck', image: 'https://ptpimg.me/1bx3k2.png', category: 'Equipment', gold: '200000', infStock: false},
+    3147: {name: 'Cupid&#39;s Winged Boots of Aggression', image: 'https://ptpimg.me/3983q6.png', category: 'Equipment', gold: '200000', infStock: false},
+    3148: {name: 'Cupid&#39;s Winged Boots of Fortune', image: 'https://ptpimg.me/mopf18.png', category: 'Equipment', gold: '200000', infStock: false},
     3151: {name: 'Bill Rizer', image: 'static/common/items/Items/Card/11th_Birthday_Bill_Rizer.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3152: {name: 'Donkey Kong', image: 'static/common/items/Items/Card/11th_Birthday_Donkey_Kong.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3153: {name: 'Duck Hunt Dog', image: 'static/common/items/Items/Card/11th_Birthday_Duck_Hunt_Dog.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -526,6 +598,7 @@
     3228: {name: 'Cinnamon Milkshake', image: 'https://ptpimg.me/kl097r.png', category: 'Buffs', gold: '8000', infStock: false},
     3229: {name: 'Rocky Road Milkshake', image: 'https://ptpimg.me/q8634k.png', category: 'Buffs', gold: '11000', infStock: false},
     3230: {name: 'Neapolitan Milkshake', image: 'https://ptpimg.me/fr7433.png', category: 'Buffs', gold: '14000', infStock: false},
+    3237: {name: 'Rainbow IRC Slime Pet', image: 'https://ptpimg.me/kh1c5k.png', category: 'Equipment', gold: '100000', infStock: true},
     3241: {name: 'Cinnamon', image: 'https://ptpimg.me/tol70u.png', category: 'Crafting Materials', gold: '3000', infStock: false},
     3263: {name: 'Blinky', image: 'https://gazellegames.net/static/common/items/Items/Card/Halloween2021_Blinky.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3264: {name: 'Halloween Tombstone Badge', image: 'https://gazellegames.net/static/common/items/Items/Badges/Halloween2021_Thombstone_Badge.png', category: 'User badges', gold: '15000', infStock: false},
@@ -538,6 +611,11 @@
     3281: {name: 'Haunted Tombstone Shard', image: 'https://gazellegames.net/static/common/items/Items/Halloween2021/Haunted_Tombstone_Shard.png', category: 'Special Items', gold: '2500', infStock: false},
     3313: {name: 'Snowman Cookie', image: 'static/common/items/Items/Christmas2021/Christmas2021_Snowman_Cookie.png', category: 'Stat potions', gold: '650', infStock: false},
     3322: {name: 'Young Snowman', image: 'static/common/items/Items/Christmas2021/Christmas2021_Young_Snowman.png', category: 'Equipment', gold: '35000', infStock: false},
+    3323: {name: 'Frosty Snowman', image: 'static/common/items/Items/Christmas2021/Christmas2021_Frosty_Snowman.png', category: 'Equipment', gold: '70000', infStock: false},
+    3324: {name: 'Happy Snowman', image: 'static/common/items/Items/Christmas2021/Christmas2021_Happy_Snowman.png', category: 'Equipment', gold: '170000', infStock: false},
+    3325: {name: 'Snowflake', image: 'static/common/items/Items/Christmas2021/Christmas2021_Snowflake.png', category: 'Stat potions', gold: '825', infStock: false},
+    3326: {name: 'Penguin Snowglobe', image: 'static/common/items/Items/Christmas2021/Christmas2021_Penguin_Snowglobe.png', category: 'Stat potions', gold: '1375', infStock: false},
+    3327: {name: 'Owl Snowglobe', image: 'static/common/items/Items/Christmas2021/Christmas2021_Owl_Snowglobe.png', category: 'Stat potions', gold: '1625', infStock: false},
     3328: {name: 'Santa Claus Is Out There', image: 'static/common/items/Items/Card/Christmas2021_Santa_Claus_Is_Out_There.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3329: {name: 'Back to the Future', image: 'static/common/items/Items/Card/Christmas2021_Back_to_the_Future.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3330: {name: 'Big Lebowski', image: 'static/common/items/Items/Card/Christmas2021_Big_Lebowski.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -551,8 +629,18 @@
     3339: {name: 'Doomguy ', image: 'static/common/items/Items/Card/Christmas2021_Doomguy.png', category: 'Trading Cards', gold: '10000', infStock: false},
     3340: {name: 'Grievous', image: 'static/common/items/Items/Card/Christmas2021_Grievous.png', category: 'Trading Cards', gold: '10000', infStock: false},
     3341: {name: 'Have a Breathtaking Christmas', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2021_Have_a_Breathtaking_Christmas.png', category: 'Trading Cards', gold: '35000', infStock: false},
+    3348: {name: 'Cupid&#39;s Wings', image: 'static/common/items/Items/Valentine2022/cupids_wings_avatar.png', category: 'Equipment', gold: '10000', infStock: true},
+    3349: {name: 'Cupid&#39;s Gold Wings', image: 'static/common/items/Items/Valentine2022/cupids_gold_wings_avatar.png', category: 'Equipment', gold: '36000', infStock: false},
+    3352: {name: 'Cupid&#39;s Mithril Wings', image: 'static/common/items/Items/Valentine2022/cupids_mithril_wings_avatar.png', category: 'Equipment', gold: '87000', infStock: false},
+    3353: {name: 'Cupid&#39;s Adamantium Wings', image: 'static/common/items/Items/Valentine2022/cupids_adamantium_wings_avatar.png', category: 'Equipment', gold: '239000', infStock: false},
     3358: {name: 'Valentine&#39;s Day 2022 Badge', image: 'static/common/items/Items/Valentine2022/valentines_badge_shop.png', category: 'User badges', gold: '15000', infStock: false},
     3359: {name: 'Rose Petals', image: 'static/common/items/Items/Valentine2022/rose_petals.png', category: 'Crafting Materials', gold: '3750', infStock: false},
+    3360: {name: 'Cupid&#39;s Tiara', image: 'static/common/items/Items/Valentine2022/cupids_tiara.png', category: 'Equipment', gold: '30000', infStock: false},
+    3361: {name: 'Cupid&#39;s Cradle', image: 'static/common/items/Items/Valentine2022/cupids_cradle_avatar.png', category: 'Equipment', gold: '1030000', infStock: false},
+    3362: {name: 'Disassembled Adamantium Wings', image: 'static/common/items/Items/Valentine2022/cupids_mithril_wings_avatar.png', category: 'Crafting Materials', gold: '189000', infStock: false},
+    3363: {name: 'Disassembled Mithril Wings', image: 'static/common/items/Items/Valentine2022/cupids_gold_wings_avatar.png', category: 'Crafting Materials', gold: '64000', infStock: false},
+    3364: {name: 'Disassembled Gold Wings', image: 'static/common/items/Items/Valentine2022/cupids_wings_avatar.png', category: 'Crafting Materials', gold: '23000', infStock: false},
+    3365: {name: 'Disassembled Cupid&#39;s Cradle', image: 'https://ptpimg.me/7itno5.png', category: 'Crafting Materials', gold: '1030000', infStock: false},
     3368: {name: 'IRC Voice (1 Year)', image: 'static/common/items/Items/Buff/irc_voice_cheap.png', category: 'IRC customizations', gold: '130000', infStock: true},
     3369: {name: 'Red Dragon', image: 'https://ptpimg.me/01y295.png', category: 'Equipment', gold: '500000', infStock: false},
     3370: {name: 'Blue Dragon', image: 'https://ptpimg.me/g1t9wq.png', category: 'Equipment', gold: '500000', infStock: false},
@@ -574,23 +662,24 @@
   //
   GM_deleteValue('selected_books');
   const books = {
-    Glass: {bgcolor: 'white', color: 'black'},
     Potions: {bgcolor: 'green', color: 'white'},
-    // Luck: {bgcolor: 'blue', color: 'white'},
-    Food: {bgcolor: 'wheat', color: 'black'},
-    Dwarven: {bgcolor: 'brown', color: 'beige'},
+    Glass: {bgcolor: 'white', color: 'black'},
     'Material Bars': {bgcolor: 'purple', color: 'white'},
     Armor: {bgcolor: 'darkblue', color: 'white'},
+    'Xmas Crafting': {bgcolor: 'red', color: 'lightgreen'},
+    // Luck: {bgcolor: 'blue', color: 'white'}, // Combined with Potions
+    Jewelry: {bgcolor: 'deeppink', color: 'white'},
+    Food: {bgcolor: 'wheat', color: 'black'},
+    Halloween: {bgcolor: 'gray', color: 'black'},
+    'Trading Decks': {bgcolor: '#15273F', color: 'white'},
+    Bling: {bgcolor: 'gold', color: 'darkgray'},
     Weapons: {bgcolor: 'darkred', color: 'white'},
     Recasting: {bgcolor: 'gray', color: 'white'},
-    Jewelry: {bgcolor: 'deeppink', color: 'white'},
-    Bling: {bgcolor: 'gold', color: 'darkgray'},
-    'Trading Decks': {bgcolor: '#15273F', color: 'white'},
-    'Xmas Crafting': {bgcolor: 'red', color: 'lightgreen'},
-    Birthday: {bgcolor: 'darkgray', color: 'gold'},
-    Valentines: {bgcolor: 'pink', color: 'deeppink'},
     'Adventure Club': {bgcolor: 'yellow', color: 'black'},
-    Halloween: {bgcolor: 'gray', color: 'black'},
+    Birthday: {bgcolor: 'darkgray', color: 'gold'},
+    Pets: {bgcolor: 'brown', color: 'beige'},
+    Valentines: {bgcolor: 'pink', color: 'deeppink'},
+    //Dwarven: {bgcolor: 'brown', color: 'beige'}, // Combined with Food
   };
   //
   // #endregion Recipe Book definitions
@@ -599,10 +688,7 @@
   //
   // #region Recipe definitions
   //
-  // Defines all the recipes with ingredients and results
-  //
-  // key is the key in the book object above that these recipes belong to
-  // value is an array of recipes associated with the key book
+  // Defines all the recipes with ingredients and results, from data.js
   //
   // recipe object:
   //    See https://gazellegames.net/wiki.php?action=article&id=401#_2452401087 for details
@@ -610,266 +696,406 @@
   //
   // prettier-ignore
   const recipes = [
-    // Glass
-    ...[
-      {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1, name: 'Glass Shards From Sand'},
-      {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE00125EEEEEEEEEEEEEEEEEEEE', type: 'Standard', name: 'Glass Shards From Test Tube'},
-      {itemId: 2436, recipe: 'EEEEEEEEEEEEEEEEEEEE00124EEEEEEEEEEEEEEEEEEEE', type: 'Standard', name: 'Glass Shards From Vial'},
-      {itemId: 2437, recipe: 'EEEEEEEEEEEEEEEEEEEE00126EEEEEEEEEEEEEEEEEEEE', type: 'Standard', name: 'Glass Shards From Bowl'},
-      {itemId: 125, recipe: 'EEEEE01988EEEEEEEEEE01988EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 124, recipe: 'EEEEE01988EEEEE0198801988EEEEE0198801988EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 126, recipe: '01988019880198801988EEEEE01988019880198801988', type: 'Standard', requirement: 1},
-      {itemId: 124, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02230EEEEE', type: 'Standard', requirement: 1, name: 'Dust Ore Vial'},
-      {itemId: 126, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02231EEEEE', type: 'Standard', requirement: 1, name: 'Dust Ore Bowl'},
-    ].map((recipe) => (recipe.book = 'Glass') && recipe),
-    // Potions
-    ...[
-      {itemId: 66, recipe: 'EEEEEEEEEE00115EEEEE0012500114EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 98, recipe: 'EEEEEEEEEE00115EEEEE0012400114EEEEEEEEEE00115', type: 'Standard'},
-      {itemId: 99, recipe: '00115EEEEE0011500115001240011400115EEEEE00115', type: 'Standard'},
-      {itemId: 100, recipe: 'EEEEE00113EEEEE000990012600099EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 104, recipe: 'EEEEEEEEEE00111EEEEE0012500127EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 105, recipe: 'EEEEEEEEEE00111EEEEE0012400127EEEEEEEEEE00111', type: 'Standard'},
-      {itemId: 106, recipe: '00111EEEEE0011100111001240012700111EEEEE00111', type: 'Standard'},
-      {itemId: 107, recipe: 'EEEEE00113EEEEE001060012600106EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 127, recipe: 'EEEEEEEEEEEEEEEEEEEE0012500112EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2433, recipe: 'EEEEEEEEEEEEEEE001240011400114EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2434, recipe: '001140011400114001140012600114EEEEE00113EEEEE', type: 'Standard'},
-    ].map((recipe) => (recipe.book = 'Potions') && recipe),
-    // Food
-    ...[
-      {itemId: 2580, recipe: 'EEEEEEEEEEEEEEEEEEEE0257902579EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2581, recipe: 'EEEEEEEEEEEEEEE001120258000112EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2582, recipe: 'EEEEEEEEEEEEEEE025810011300113EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2718, recipe: 'EEEEEEEEEEEEEEEEEEEE0271702717EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2719, recipe: 'EEEEEEEEEEEEEEEEEEEE0271800112EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2720, recipe: 'EEEEEEEEEEEEEEE027190255100113EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-      {itemId: 2721, recipe: 'EEEEEEEEEEEEEEE027200255102551EEEEEEEEEEEEEEE', type: 'Standard', requirement: 3},
-    ].map((recipe) => (recipe.book = 'Food') && recipe),
-    // Dwarven
-    ...[
-      {itemId: 2822, recipe: '032180229503219EEEEEEEEEEEEEEE019880198801988', type: 'Standard', name: 'Cant Believe This Is Cherry'},
-      {itemId: 3226, recipe: '032180229503220EEEEEEEEEEEEEEE019880198801988', type: 'Standard', name: 'Grape Milkshake'},
-      {itemId: 3227, recipe: '032180229503221EEEEEEEEEEEEEEE019880198801988', type: 'Standard', name: 'Coco-Cooler Milkshake'},
-      {itemId: 3228, recipe: '032180229503241EEEEEEEEEEEEEEE019880198801988', type: 'Standard'},
-      {itemId: 3229, recipe: '0321802295EEEEE0322303222EEEEE019880198801988', type: 'Standard'},
-      {itemId: 3230, recipe: '0321802295EEEEE032230322403225019880198801988', type: 'Standard'},
-    ].map((recipe) => (recipe.book = 'Dwarven') && recipe),
-    // Material Bars
-    ...[
-      {itemId: 2236, recipe: '0222502234EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2235, recipe: '0222502225EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2237, recipe: '0222602226EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2238, recipe: '0222602226EEEEEEEEEE02233EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2238, recipe: 'EEEEE02237EEEEEEEEEE02233EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1, name: 'Steel Bar From Iron Bar'},
-      {itemId: 2239, recipe: '0222702227EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2240, recipe: '0222802228EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2241, recipe: '0222902229EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2242, recipe: '0223002230EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2243, recipe: '0223102231EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2244, recipe: '0223202232EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 1},
-    ].map((recipe) => (recipe.book = 'Material Bars') && recipe),
-    // Armor
-    ...[
-      {itemId: 2261, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02236EEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2262, recipe: 'EEEEE02235EEEEEEEEEEEEEEEEEEEE02235EEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2263, recipe: 'EEEEE02237EEEEEEEEEE02237EEEEE02237EEEEE02237', type: 'Standard', requirement: 1},
-      {itemId: 2264, recipe: 'EEEEE02238EEEEEEEEEE02238EEEEE02238EEEEE02238', type: 'Standard', requirement: 1},
-      {itemId: 2265, recipe: 'EEEEE02239EEEEEEEEEE02239EEEEE02239EEEEE02239', type: 'Standard', requirement: 1},
-      {itemId: 2266, recipe: 'EEEEE02240EEEEEEEEEE02240EEEEE022400224002240', type: 'Standard', requirement: 1},
-      {itemId: 2267, recipe: 'EEEEE02241EEEEEEEEEE02241EEEEE022410224102241', type: 'Standard', requirement: 1},
-      {itemId: 2268, recipe: 'EEEEE02242EEEEEEEEEEEEEEEEEEEE02242EEEEEEEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2269, recipe: 'EEEEE02243EEEEEEEEEE02243EEEEE02243EEEEE02243', type: 'Standard', requirement: 1},
-      {itemId: 2270, recipe: 'EEEEE02244EEEEEEEEEE02244EEEEE022440224402244', type: 'Standard', requirement: 1},
-      {itemId: 2761, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2762, recipe: 'EEEEE02235EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2763, recipe: 'EEEEE02237EEEEEEEEEE02237EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2764, recipe: 'EEEEE02238EEEEEEEEEE02238EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2765, recipe: 'EEEEE02239EEEEEEEEEE02239EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2766, recipe: 'EEEEE02240EEEEEEEEEE02240EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2767, recipe: 'EEEEE02241EEEEEEEEEE02241EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2849, recipe: 'EEEEE02242EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2850, recipe: 'EEEEE02243EEEEEEEEEE02243EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2851, recipe: 'EEEEE02244EEEEEEEEEE02244EEEEEEEEEE02627EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2862, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02627EEEEE02627', type: 'Standard', requirement: 1},
-      {itemId: 2908, recipe: 'EEEEE02236EEEEEEEEEEEEEEE0262702550EEEEEEEEEE', type: 'Standard', requirement: 1},
-    ].map((recipe) => (recipe.book = 'Armor') && recipe),
-    // Weapons
-    ...[
-      {itemId: 2641, recipe: '02236EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02236EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2642, recipe: '02235EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02235EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2643, recipe: '02237EEEEE02237EEEEE02237EEEEEEEEEE02237EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2644, recipe: '02238EEEEE02238EEEEE02238EEEEEEEEEE02238EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2645, recipe: '02239EEEEE02239EEEEE02239EEEEEEEEEE02239EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2646, recipe: '022400224002240EEEEE02240EEEEEEEEEE02240EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2647, recipe: '022410224102241EEEEE02241EEEEEEEEEE02241EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2648, recipe: '02242EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02242EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2649, recipe: '02243EEEEE02243EEEEE02243EEEEEEEEEE02243EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2650, recipe: '022440224402244EEEEE02244EEEEEEEEEE02244EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2852, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02236EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2853, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02235EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2854, recipe: 'EEEEE02627EEEEEEEEEE02237EEEEEEEEEE02237EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2855, recipe: 'EEEEE02627EEEEEEEEEE02238EEEEEEEEEE02238EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2856, recipe: 'EEEEE02627EEEEEEEEEE02239EEEEEEEEEE02239EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2857, recipe: 'EEEEE02627EEEEEEEEEE02240EEEEEEEEEE02240EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2858, recipe: 'EEEEE02627EEEEEEEEEE02241EEEEEEEEEE02241EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2859, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02242EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2860, recipe: 'EEEEE02627EEEEEEEEEE02243EEEEEEEEEE02243EEEEE', type: 'Standard', requirement: 1},
-      {itemId: 2861, recipe: 'EEEEE02627EEEEEEEEEE02244EEEEEEEEEE02244EEEEE', type: 'Standard', requirement: 1},
-    ].map((recipe) => (recipe.book = 'Weapons') && recipe),
-    // Recasting
-    ...[
-      {itemId: 2225, recipe: 'EEEEEEEEEEEEEEE026530223602653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Impure Bronze Bar To Ore'},
-      {itemId: 2666, recipe: 'EEEEEEEEEEEEEEE026530223502653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Bronze Bar To Ore'},
-      {itemId: 2668, recipe: 'EEEEEEEEEEEEEEE026530223702653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Iron Bar To Ore'},
-      {itemId: 2668, recipe: 'EEEEEEEEEEEEEEE026530223802653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Steel Bar To Ore'},
-      {itemId: 2670, recipe: 'EEEEEEEEEEEEEEE026530223902653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Gold Bar To Ore'},
-      {itemId: 2671, recipe: 'EEEEEEEEEEEEEEE026530224002653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Mithril Bar To Ore'},
-      {itemId: 2672, recipe: 'EEEEEEEEEEEEEEE026530224102653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Adamantium Bar To Ore'},
-      {itemId: 2673, recipe: 'EEEEEEEEEEEEEEE026530224202653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Quartz Bar To Dust'},
-      {itemId: 2675, recipe: 'EEEEEEEEEEEEEEE026530224302653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Jade Bar To Dust'},
-      {itemId: 2676, recipe: 'EEEEEEEEEEEEEEE026530224402653EEEEEEEEEEEEEEE', type: 'Downgrade', requirement: 1, name: 'Amethyst Bar To Dust'},
-      {itemId: 2656, recipe: 'EEEEEEEEEEEEEEE022340223502234EEEEE02653EEEEE', type: 'Downgrade', requirement: 1, name: 'Downgrade Bronze Bar'},
-      {itemId: 2237, recipe: 'EEEEEEEEEEEEEEEEEEEE02238EEEEEEEEEE02653EEEEE', type: 'Downgrade', requirement: 1, name: 'Downgrade Steel Bar'},
-      {itemId: 1987, recipe: 'EEEEEEEEEEEEEEEEEEEE02508EEEEEEEEEE02653EEEEE', type: 'Downgrade', requirement: 1, name: 'Melt Dwarven Gem'},
-    ].map((recipe) => (recipe.book = 'Recasting') && recipe),
-    // Jewelry
-    ...[
-      {itemId: 2537, recipe: 'EEEEEEEEEEEEEEEEEEEE0224202233EEEEEEEEEEEEEEE', type: 'Standard', requirement: 2},
-      {itemId: 2538, recipe: 'EEEEE01988EEEEEEEEEE02537EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 2},
-      {itemId: 2565, recipe: 'EEEEEEEEEEEEEEE001160224400116001160224400116', type: 'Standard', requirement: 2},
-      {itemId: 2564, recipe: 'EEEEEEEEEEEEEEE025490224402549025490224402549', type: 'Standard', requirement: 2},
-      {itemId: 2563, recipe: 'EEEEEEEEEEEEEEE023230224402323023230224402323', type: 'Standard', requirement: 2},
-    ].map((recipe) => (recipe.book = 'Jewelry') && recipe),
-    // Trading Decks
-    ...[
-      {itemId: 2369, recipe: 'EEEEEEEEEEEEEEE023580235902357EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2370, recipe: 'EEEEEEEEEEEEEEE023650236402366EEEEEEEEEEEEEEE', type: 'Standard', name: 'Biggest Banhammer'},
-      {itemId: 2371, recipe: 'EEEEEEEEEEEEEEE023610236702368EEEEEEEEEEEEEEE', type: 'Standard', name: 'Staff Beauty Parlor'},
-      {itemId: 2438, recipe: 'EEEEEEEEEEEEEEE024000238802410EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2372, recipe: 'EEEEEEEEEEEEEEE023690237002371EEEEEEEEEEEEEEE', type: 'Standard', name: 'Realm of Staff'},
-      {itemId: 2376, recipe: 'EEEEEEEEEEEEEEE023730237402375EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2384, recipe: 'EEEEEEEEEEEEEEE023810238302382EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2380, recipe: 'EEEEEEEEEEEEEEE023780237702379EEEEEEEEEEEEEEE', type: 'Standard', name: 'Ricks Portal Gun'},
-      {itemId: 2385, recipe: 'EEEEEEEEEEEEEEE023760238402380EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2401, recipe: 'EEEEEEEEEEEEEEE023900239202393EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2402, recipe: 'EEEEEEEEEEEEEEE023910239702394EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2403, recipe: 'EEEEEEEEEEEEEEE023950239602398EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2404, recipe: 'EEEEEEEEEEEEEEE024010240202403EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2468, recipe: '02372EEEEEEEEEEEEEEE02404EEEEE02385EEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Random Lootbox'},
-      {itemId: 2421, recipe: '02372EEEEEEEEEEEEEEE02404EEEEE02372EEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Dins Lootbox'},
-      {itemId: 2465, recipe: '02404EEEEEEEEEEEEEEE02372EEEEE02404EEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Farores Lootbox'},
-      {itemId: 2466, recipe: '02385EEEEEEEEEEEEEEE02372EEEEE02385EEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Nayrus Lootbox'},
-    ].map((recipe) => (recipe.book = 'Trading Decks') && recipe),
-    // Xmas Crafting
-    ...[
-      {itemId: 3107, recipe: 'EEEEEEEEEEEEEEEEEEEE0310503106EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3111, recipe: 'EEEEEEEEEEEEEEEEEEEE0310703110EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3112, recipe: 'EEEEE0311903119EEEEE0311903119EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3117, recipe: 'EEEEEEEEEEEEEEE031130311403115EEEEEEEEEEEEEEE', type: 'Standard', name: 'Christmas Impostor Bauble'},
-      {itemId: 3121, recipe: 'EEEEEEEEEE00114EEEEE0312000114EEEEEEEEEE00114', type: 'Standard', requirement: 2},
-      {itemId: 2296, recipe: 'EEEEEEEEEEEEEEEEEEEE02295EEEEEEEEEE02295EEEEE', type: 'Standard'},
-      {itemId: 2305, recipe: 'EEEEE02295EEEEE022950229602295EEEEE02295EEEEE', type: 'Standard'},
-      {itemId: 2298, recipe: 'EEEEE02688EEEEEEEEEE02296EEEEEEEEEE00126EEEEE', type: 'Standard'},
-      {itemId: 2299, recipe: 'EEEEE02297EEEEEEEEEE02298EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2303, recipe: 'EEEEE00126EEEEEEEEEE02296EEEEEEEEEE02688EEEEE', type: 'Standard'},
-      {itemId: 2300, recipe: 'EEEEE02233EEEEE022330223302233EEEEEEEEEEEEEEE', type: 'Standard', requirement: 2},
-      {itemId: 2307, recipe: '023060268902234022960230502300001260230502300', type: 'Standard'},
-      {itemId: 2701, recipe: 'EEEEEEEEEEEEEEEEEEEE0269802700EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2702, recipe: 'EEEEEEEEEEEEEEEEEEEE0269802699EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2703, recipe: 'EEEEEEEEEEEEEEEEEEEE0270002699EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2704, recipe: 'EEEEEEEEEEEEEEE027010270202703EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2972, recipe: 'EEEEEEEEEEEEEEEEEEEE0296902970EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2975, recipe: 'EEEEEEEEEEEEEEEEEEEE0297302974EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2976, recipe: 'EEEEEEEEEEEEEEEEEEEE0297202975EEEEEEEEEEEEEEE', type: 'Standard', name: 'Baby Yoda With Gingerbread'},
-      {itemId: 3340, recipe: 'EEEEEEEEEEEEEEE033280332903334EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3338, recipe: '033310333203333EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3339, recipe: 'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE033300333503336', type: 'Standard', name: 'Doomguy'},
-      {itemId: 3341, recipe: 'EEEEE03340EEEEEEEEEE03338EEEEEEEEEE03339EEEEE', type: 'Standard'},
-      {itemId: 3322, recipe: 'EEEEE03313EEEEE033130230703313EEEEE03313EEEEE', type: 'Upgrade'},
-    ].map((recipe) => (recipe.book = 'Xmas Crafting') && recipe),
-    // Birthday
-    ...[
-      {itemId: 2833, recipe: 'EEEEEEEEEEEEEEE0282902831EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2834, recipe: 'EEEEEEEEEEEEEEE0282902830EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2835, recipe: 'EEEEEEEEEEEEEEEEEEEE0283002831EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2836, recipe: 'EEEEEEEEEEEEEEE028330283402835EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2825, recipe: 'EEEEEEEEEEEEEEE028260282602826028260282602826', type: 'Standard', name: 'Birthday Licks Badge - 9th'},
-      {itemId: 3025, recipe: 'EEEEEEEEEEEEEEEEEEEE0302303024EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3028, recipe: 'EEEEEEEEEEEEEEEEEEEE0302603027EEEEEEEEEEEEEEE', type: 'Standard', name: 'What An Adventure'},
-      {itemId: 3029, recipe: 'EEEEEEEEEEEEEEEEEEEE0302503028EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3032, recipe: '03031EEEEE0303103031EEEEE0303103031EEEEE03031', type: 'Standard', name: 'Birthday Gazelle Badge - 10th'},
-      {itemId: 3154, recipe: 'EEEEEEEEEEEEEEE031510315203153EEEEEEEEEEEEEEE', type: 'Standard', name: 'Dr Mario'},
-      {itemId: 3158, recipe: 'EEEEEEEEEEEEEEE031550315603157EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3162, recipe: 'EEEEEEEEEEEEEEE031590316003161EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3163, recipe: '03154EEEEEEEEEEEEEEE03158EEEEEEEEEEEEEEE03162', type: 'Standard'},
-      {itemId: 3165, recipe: '03166EEEEEEEEEEEEEEE0316603166EEEEEEEEEE03166', type: 'Standard', name: 'Birthday Gazelle Badge - 11th'},
-      {itemId: 3378, recipe: '03379EEEEE03379EEEEE03379EEEEE03379EEEEE03379', type: 'Standard'},
-      {itemId: 3369, recipe: '029510297603029EEEEE02155EEEEE025950270402836', type: 'Standard', requirement: 2},
-      {itemId: 3371, recipe: '029510297603029EEEEE02153EEEEE025950270402836', type: 'Standard', requirement: 2},
-      {itemId: 3370, recipe: '029510297603029EEEEE02154EEEEE025950270402836', type: 'Standard', requirement: 2},
-      {itemId: 3373, recipe: '029510297603029EEEEE03384EEEEE025950270402836', type: 'Standard', requirement: 2},
-    ].map((recipe) => (recipe.book = 'Birthday') && recipe),
-    // Valentines
-    ...[
-      {itemId: 2988, recipe: 'EEEEEEEEEEEEEEE029860300002987EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2991, recipe: 'EEEEEEEEEEEEEEE029890300002990EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2992, recipe: 'EEEEEEEEEEEEEEE029880300002991EEEEEEEEEEEEEEE', type: 'Standard', name: 'Mr and Mrs Pac Man'},
-      {itemId: 2995, recipe: 'EEEEEEEEEEEEEEE029930300102994EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2998, recipe: 'EEEEEEEEEEEEEEE029960300102997EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2999, recipe: 'EEEEEEEEEEEEEEE029950300102998EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3143, recipe: 'EEEEE03002EEEEE03002EEEEE03002EEEEE03002EEEEE', type: 'Standard', name: 'Vegetal Symbol'},
-      {itemId: 3143, recipe: '02323EEEEE02323EEEEEEEEEEEEEEE02323EEEEE02323', type: 'Standard', requirement: 2, name: 'Mineral Symbol'},
-      {itemId: 3145, recipe: '022420224302242EEEEE02227EEEEEEEEEE02232EEEEE', type: 'Standard', requirement: 2, name: 'Cupids Magical Feather'},
-      {itemId: 3136, recipe: 'EEEEE03143EEEEEEEEEE03144EEEEE03145EEEEE03145', type: 'Standard', requirement: 2, name: 'Valentine 2022 Badge'},
-      {itemId: 3358, recipe: '03359EEEEE03359EEEEE03359EEEEE03359EEEEE03359', type: 'Standard', name: 'Special Box'},
-      {itemId: 3004, recipe: '02992EEEEE03163EEEEEEEEEEEEEEE02999EEEEE03270', type: 'Standard', name: 'Cupids Winged Boots'},
-    ].map((recipe) => (recipe.book = 'Valentines') && recipe),
-    // Halloween
-    ...[
-      {itemId: 2592, recipe: 'EEEEEEEEEEEEEEEEEEEE0259002591EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2593, recipe: 'EEEEEEEEEEEEEEEEEEEE0259102589EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2594, recipe: 'EEEEEEEEEEEEEEEEEEEE0258902590EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2595, recipe: 'EEEEEEEEEEEEEEE025920259302594EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2601, recipe: 'EEEEEEEEEEEEEEE026000260002600026000260002600', type: 'Standard'},
-      {itemId: 2947, recipe: 'EEEEEEEEEEEEEEEEEEEE0294502946EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2950, recipe: 'EEEEEEEEEEEEEEEEEEEE0294802949EEEEEEEEEEEEEEE', type: 'Standard', name: 'Skultilla The Cake Guard'},
-      {itemId: 2951, recipe: 'EEEEEEEEEEEEEEEEEEEE0294702950EEEEEEEEEEEEEEE', type: 'Standard', name: 'Who Eats Whom'},
-      {itemId: 2953, recipe: 'EEEEEEEEEEEEEEE029520295202952029520295202952', type: 'Standard'},
-      {itemId: 3268, recipe: 'EEEEEEEEEEEEEEE0326303265EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3269, recipe: 'EEEEEEEEEEEEEEE0326603267EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3270, recipe: 'EEEEEEEEEEEEEEE0326803269EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 3264, recipe: '032810328103281EEEEEEEEEEEEEEE032810328103281', type: 'Standard', name: 'Tombstone Badge'},
-    ].map((recipe) => (recipe.book = 'Halloween') && recipe),
-    // Adventure Club
-    ...[
-      {itemId: 2772, recipe: 'EEEEEEEEEEEEEEEEEEEE02844EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2774, recipe: 'EEEEEEEEEEEEEEE028440284402844EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2775, recipe: 'EEEEE02844EEEEEEEEEE02844EEEEEEEEEE02844EEEEE', type: 'Standard'},
-      {itemId: 2776, recipe: '028440284402844EEEEEEEEEEEEEEE028440284402844', type: 'Standard'},
-      {itemId: 2846, recipe: 'EEEEEEEEEEEEEEEEEEEE02841EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2845, recipe: 'EEEEEEEEEEEEEEEEEEEE02842EEEEEEEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2900, recipe: 'EEEEE02892EEEEE028920289202892EEEEE02892EEEEE', type: 'Standard'},
-      {itemId: 2801, recipe: 'EEEEEEEEEEEEEEE028160281402816EEEEEEEEEEEEEEE', type: 'Standard'},
-      {itemId: 2802, recipe: 'EEEEE02816EEEEE028160281402816EEEEE02816EEEEE', type: 'Standard'},
-      {itemId: 2803, recipe: '028140281602814028160289402816028140281602814', type: 'Standard'},
-      {itemId: 2847, recipe: 'EEEEE02813EEEEEEEEEE02813EEEEEEEEEE02813EEEEE', type: 'Standard'},
-      {itemId: 2901, recipe: 'EEEEE02816EEEEE028930289302893EEEEE02813EEEEE', type: 'Standard'},
-    ].map((recipe) => (recipe.book = 'Adventure Club') && recipe),
-    // Bling
-    ...[
-      {itemId: 2554, recipe: '021550215302154022390012102243025370253702537', type: 'Standard', requirement: 2, name: 'Unity Necklace'},
-      {itemId: 2584, recipe: '021550215302154022390253902243025850253702585', type: 'Standard', requirement: 2, name: 'Unity Band'},
-      {itemId: 2915, recipe: '02155EEEEE02154EEEEE00121EEEEEEEEEE02153EEEEE', type: 'Standard', requirement: 2},
-      {itemId: 2930, recipe: 'EEEEEEEEEEEEEEE0215400120EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Nayrus Username'},
-      {itemId: 2931, recipe: 'EEEEEEEEEEEEEEE0215300120EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Farores Username'},
-      {itemId: 2932, recipe: 'EEEEEEEEEEEEEEE0215500120EEEEEEEEEEEEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Dins Username'},
-      {itemId: 2639, recipe: '025080250802508025080250802508025080250802508', type: 'Standard', requirement: 2, name: 'Dwarven Discoball'},
-      {itemId: 2212, recipe: 'EEEEEEEEEEEEEEE000720007200072EEEEEEEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Irc Voice 8w'},
-      {itemId: 2212, recipe: 'EEEEE00175EEEEE001750017500175EEEEEEEEEEEEEEE', type: 'Standard', requirement: 2, name: 'Irc Voice 8w - Low Cost'},
-      {itemId: 3368, recipe: '022120221202212022120221202212EEEEE02549EEEEE', type: 'Standard', requirement: 2, name: 'Irc Voice 1y'},
-    ].map((recipe) => (recipe.book = 'Bling') && recipe),
+    {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', requirement: 1, name: 'Glass Shards From Sand'},
+    {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE00125EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', name: 'Glass Shards From Test Tube'},
+    {itemId: 2436, recipe: 'EEEEEEEEEEEEEEEEEEEE00124EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', name: 'Glass Shards From Vial'},
+    {itemId: 2437, recipe: 'EEEEEEEEEEEEEEEEEEEE00126EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', name: 'Glass Shards From Bowl'},
+    {itemId: 125, recipe: 'EEEEE01988EEEEEEEEEE01988EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', requirement: 1},
+    {itemId: 124, recipe: 'EEEEE01988EEEEE0198801988EEEEE0198801988EEEEE', book: 'Glass', type: 'Standard', requirement: 1},
+    {itemId: 126, recipe: '01988019880198801988EEEEE01988019880198801988', book: 'Glass', type: 'Standard', requirement: 1},
+    {itemId: 124, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02230EEEEE', book: 'Glass', type: 'Standard', requirement: 1, name: 'Dust Ore Vial'},
+    {itemId: 126, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEE02231EEEEE', book: 'Glass', type: 'Standard', requirement: 1, name: 'Dust Ore Bowl'},
+    {itemId: 66, recipe: 'EEEEEEEEEE00115EEEEE0012500114EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 98, recipe: 'EEEEEEEEEE00115EEEEE0012400114EEEEEEEEEE00115', book: 'Potions', type: 'Standard'},
+    {itemId: 99, recipe: '00115EEEEE0011500115001240011400115EEEEE00115', book: 'Potions', type: 'Standard'},
+    {itemId: 100, recipe: 'EEEEE00113EEEEE000990012600099EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 104, recipe: 'EEEEEEEEEE00111EEEEE0012500127EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 105, recipe: 'EEEEEEEEEE00111EEEEE0012400127EEEEEEEEEE00111', book: 'Potions', type: 'Standard'},
+    {itemId: 106, recipe: '00111EEEEE0011100111001240012700111EEEEE00111', book: 'Potions', type: 'Standard'},
+    {itemId: 107, recipe: 'EEEEE00113EEEEE001060012600106EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 127, recipe: 'EEEEEEEEEEEEEEEEEEEE0012500112EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 2433, recipe: 'EEEEEEEEEEEEEEE001240011400114EEEEEEEEEEEEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 2434, recipe: '001140011400114001140012600114EEEEE00113EEEEE', book: 'Potions', type: 'Standard'},
+    {itemId: 2580, recipe: 'EEEEEEEEEEEEEEEEEEEE0257902579EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2581, recipe: 'EEEEEEEEEEEEEEE001120258000112EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2582, recipe: 'EEEEEEEEEEEEEEE025810011300113EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2718, recipe: 'EEEEEEEEEEEEEEEEEEEE0271702717EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2719, recipe: 'EEEEEEEEEEEEEEEEEEEE0271800112EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2720, recipe: 'EEEEEEEEEEEEEEE027190255100113EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2721, recipe: 'EEEEEEEEEEEEEEE027200255102551EEEEEEEEEEEEEEE', book: 'Food', type: 'Standard', requirement: 3},
+    {itemId: 2822, recipe: '032180229503219EEEEEEEEEEEEEEE019880198801988', book: 'Food', type: 'Standard'},
+    {itemId: 3226, recipe: '032180229503220EEEEEEEEEEEEEEE019880198801988', book: 'Food', type: 'Standard'},
+    {itemId: 3227, recipe: '032180229503221EEEEEEEEEEEEEEE019880198801988', book: 'Food', type: 'Standard', name: 'Coco-Cooler Milkshake'},
+    {itemId: 3228, recipe: '032180229503241EEEEEEEEEEEEEEE019880198801988', book: 'Food', type: 'Standard'},
+    {itemId: 3229, recipe: '0321802295EEEEE0322303222EEEEE019880198801988', book: 'Food', type: 'Standard'},
+    {itemId: 3230, recipe: '0321802295EEEEE032230322403225019880198801988', book: 'Food', type: 'Standard'},
+    {itemId: 2236, recipe: '0222502234EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2235, recipe: '0222502225EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2237, recipe: '0222602226EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2238, recipe: '0222602226EEEEEEEEEE02233EEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2238, recipe: 'EEEEE02237EEEEEEEEEE02233EEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1, name: 'Steel Bar From Iron Bar'},
+    {itemId: 2239, recipe: '0222702227EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2240, recipe: '0222802228EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2241, recipe: '0222902229EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2242, recipe: '0223002230EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2243, recipe: '0223102231EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2244, recipe: '0223202232EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Material Bars', type: 'Standard', requirement: 1},
+    {itemId: 2261, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02236EEEEEEEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2262, recipe: 'EEEEE02235EEEEEEEEEEEEEEEEEEEE02235EEEEEEEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2263, recipe: 'EEEEE02237EEEEEEEEEE02237EEEEE02237EEEEE02237', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2264, recipe: 'EEEEE02238EEEEEEEEEE02238EEEEE02238EEEEE02238', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2265, recipe: 'EEEEE02239EEEEEEEEEE02239EEEEE02239EEEEE02239', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2266, recipe: 'EEEEE02240EEEEEEEEEE02240EEEEE022400224002240', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2267, recipe: 'EEEEE02241EEEEEEEEEE02241EEEEE022410224102241', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2268, recipe: 'EEEEE02242EEEEEEEEEEEEEEEEEEEE02242EEEEEEEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2269, recipe: 'EEEEE02243EEEEEEEEEE02243EEEEE02243EEEEE02243', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2270, recipe: 'EEEEE02244EEEEEEEEEE02244EEEEE022440224402244', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2761, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2762, recipe: 'EEEEE02235EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2763, recipe: 'EEEEE02237EEEEEEEEEE02237EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2764, recipe: 'EEEEE02238EEEEEEEEEE02238EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2765, recipe: 'EEEEE02239EEEEEEEEEE02239EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2766, recipe: 'EEEEE02240EEEEEEEEEE02240EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2767, recipe: 'EEEEE02241EEEEEEEEEE02241EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2849, recipe: 'EEEEE02242EEEEEEEEEEEEEEEEEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2850, recipe: 'EEEEE02243EEEEEEEEEE02243EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2851, recipe: 'EEEEE02244EEEEEEEEEE02244EEEEEEEEEE02627EEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2261, recipe: 'EEEEEEEEEEEEEEE0223602761EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Impure Bronze Segmentata To Cuirass'},
+    {itemId: 2262, recipe: 'EEEEEEEEEEEEEEE0223502762EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Bronze Segmentata To Cuirass'},
+    {itemId: 2263, recipe: '02237EEEEEEEEEE0223702763EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Iron Segmentata To Cuirass'},
+    {itemId: 2264, recipe: '02238EEEEEEEEEE0223802764EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Steel Segmentata To Cuirass'},
+    {itemId: 2265, recipe: '02239EEEEEEEEEE0223902765EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Gold Segmentata To Cuirass'},
+    {itemId: 2266, recipe: '02240EEEEEEEEEE0224002766EEEEE02240EEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Mithril Segmentata To Cuirass'},
+    {itemId: 2267, recipe: '02241EEEEEEEEEE0224102767EEEEE02241EEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Adamantium Segmentata To Cuirass'},
+    {itemId: 2268, recipe: 'EEEEEEEEEEEEEEE0224202849EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Quartz Lamellar To Chainmail'},
+    {itemId: 2269, recipe: '02243EEEEEEEEEE0224302850EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Jade Lamellar To Chainmail'},
+    {itemId: 2270, recipe: '02244EEEEEEEEEE0224402851EEEEE02244EEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1, name: 'Amethyst Lamellar To Chainmail'},
+    {itemId: 2862, recipe: 'EEEEE02236EEEEEEEEEEEEEEEEEEEE02627EEEEE02627', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2863, recipe: 'EEEEE02235EEEEEEEEEE02862EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2864, recipe: 'EEEEE02237EEEEEEEEEE02863EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2865, recipe: 'EEEEE02238EEEEEEEEEE02864EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2866, recipe: 'EEEEE02239EEEEEEEEEE02865EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2867, recipe: 'EEEEE02240EEEEEEEEEE02866EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2868, recipe: 'EEEEE02241EEEEEEEEEE02867EEEEE02627EEEEE02627', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2908, recipe: 'EEEEE02236EEEEEEEEEEEEEEE0262702550EEEEEEEEEE', book: 'Armor', type: 'Standard', requirement: 1},
+    {itemId: 2907, recipe: '0255002235EEEEEEEEEE029080262702550EEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2906, recipe: '0255002237EEEEE02550029070262702550EEEEEEEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2905, recipe: '0255002238EEEEE0255002906026270255002550EEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2321, recipe: '0232302239EEEEE0232302905026270232302239EEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2902, recipe: '0232302240EEEEEEEEEE02321026270232302240EEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2903, recipe: '0232302241EEEEEEEEEE02902026270232302241EEEEE', book: 'Armor', type: 'Upgrade', requirement: 1},
+    {itemId: 2261, recipe: 'EEEEEEEEEEEEEEE0223602261EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Impure Bronze Cuirass'},
+    {itemId: 2262, recipe: 'EEEEEEEEEEEEEEE0223502262EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Bronze Cuirass'},
+    {itemId: 2263, recipe: '02237EEEEEEEEEE0223702263EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Iron Cuirass'},
+    {itemId: 2264, recipe: '02238EEEEEEEEEE0223802264EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Steel Cuirass'},
+    {itemId: 2265, recipe: '02239EEEEEEEEEE0223902265EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Gold Cuirass'},
+    {itemId: 2266, recipe: '02240EEEEEEEEEE0224002266EEEEE02240EEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Mithril Cuirass'},
+    {itemId: 2267, recipe: '02241EEEEEEEEEE0224102267EEEEE02241EEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Adamantium Cuirass'},
+    {itemId: 2268, recipe: 'EEEEEEEEEEEEEEE0224202268EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Quartz Chainmail'},
+    {itemId: 2269, recipe: '02243EEEEEEEEEE0224302269EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Jade Chainmail'},
+    {itemId: 2270, recipe: '02244EEEEEEEEEE0224402270EEEEE02244EEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Amethyst Chainmail'},
+    {itemId: 2867, recipe: 'EEEEE02240EEEEEEEEEE02867EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Mithril Armguards'},
+    {itemId: 2868, recipe: 'EEEEE02241EEEEEEEEEE02868EEEEEEEEEEEEEEEEEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Adamantium Armguards'},
+    {itemId: 2321, recipe: 'EEEEE02323EEEEEEEEEE02321EEEEEEEEEE02239EEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Gold Power Gloves'},
+    {itemId: 2902, recipe: 'EEEEE02323EEEEEEEEEE02902EEEEEEEEEE02240EEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Mithril Power Gloves'},
+    {itemId: 2903, recipe: 'EEEEE02323EEEEEEEEEE02903EEEEEEEEEE02241EEEEE', book: 'Armor', type: 'Repair', requirement: 1, name: 'Repair Adamantium Power Gloves'},
+    {itemId: 2641, recipe: '02236EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02236EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2642, recipe: '02235EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02235EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2643, recipe: '02237EEEEE02237EEEEE02237EEEEEEEEEE02237EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2644, recipe: '02238EEEEE02238EEEEE02238EEEEEEEEEE02238EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2645, recipe: '02239EEEEE02239EEEEE02239EEEEEEEEEE02239EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2646, recipe: '022400224002240EEEEE02240EEEEEEEEEE02240EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2647, recipe: '022410224102241EEEEE02241EEEEEEEEEE02241EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2648, recipe: '02242EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE02242EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2649, recipe: '02243EEEEE02243EEEEE02243EEEEEEEEEE02243EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2650, recipe: '022440224402244EEEEE02244EEEEEEEEEE02244EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2852, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02236EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2853, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02235EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2854, recipe: 'EEEEE02627EEEEEEEEEE02237EEEEEEEEEE02237EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2855, recipe: 'EEEEE02627EEEEEEEEEE02238EEEEEEEEEE02238EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2856, recipe: 'EEEEE02627EEEEEEEEEE02239EEEEEEEEEE02239EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2857, recipe: 'EEEEE02627EEEEEEEEEE02240EEEEEEEEEE02240EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2858, recipe: 'EEEEE02627EEEEEEEEEE02241EEEEEEEEEE02241EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2859, recipe: 'EEEEE02627EEEEEEEEEEEEEEEEEEEEEEEEE02242EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2860, recipe: 'EEEEE02627EEEEEEEEEE02243EEEEEEEEEE02243EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2861, recipe: 'EEEEE02627EEEEEEEEEE02244EEEEEEEEEE02244EEEEE', book: 'Weapons', type: 'Standard', requirement: 1},
+    {itemId: 2641, recipe: 'EEEEEEEEEEEEEEE0223602852EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Impure Bronze Billhook To Claymore'},
+    {itemId: 2642, recipe: 'EEEEEEEEEEEEEEE0223502853EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Bronze Billhook To Claymore'},
+    {itemId: 2643, recipe: '02237EEEEEEEEEE0223702854EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Iron Billhook To Claymore'},
+    {itemId: 2644, recipe: '02238EEEEEEEEEE0223802855EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Steel Billhook To Claymore'},
+    {itemId: 2645, recipe: '02239EEEEEEEEEE0223902856EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Gold Billhook To Claymore'},
+    {itemId: 2646, recipe: '02240EEEEEEEEEE0224002857EEEEE02240EEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Mithril Billhook To Claymore'},
+    {itemId: 2647, recipe: '02241EEEEEEEEEE0224102858EEEEE02241EEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Adamantium Billhook To Claymore'},
+    {itemId: 2648, recipe: 'EEEEEEEEEEEEEEE0224202859EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Quartz Guandao To Khopesh'},
+    {itemId: 2649, recipe: '02243EEEEEEEEEE0224302860EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Jade Guandao To Khopesh'},
+    {itemId: 2650, recipe: '02244EEEEEEEEEE0224402861EEEEE02244EEEEEEEEEE', book: 'Weapons', type: 'Upgrade', requirement: 1, name: 'Amethyst Guandao To Khopesh'},
+    {itemId: 2641, recipe: 'EEEEEEEEEEEEEEE0223602641EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Impure Bronze Claymore'},
+    {itemId: 2642, recipe: 'EEEEEEEEEEEEEEE0223502642EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Bronze Claymore'},
+    {itemId: 2643, recipe: '02237EEEEEEEEEE0223702643EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Iron Claymore'},
+    {itemId: 2644, recipe: '02238EEEEEEEEEE0223802644EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Steel Claymore'},
+    {itemId: 2645, recipe: '02239EEEEEEEEEE0223902645EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Gold Claymore'},
+    {itemId: 2646, recipe: '02240EEEEEEEEEE0224002646EEEEE02240EEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Mithril Claymore'},
+    {itemId: 2647, recipe: '02241EEEEEEEEEE0224102647EEEEE02241EEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Adamantium Claymore'},
+    {itemId: 2648, recipe: 'EEEEEEEEEEEEEEE0224202648EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Quartz Khopesh'},
+    {itemId: 2649, recipe: '02243EEEEEEEEEE0224302649EEEEEEEEEEEEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Jade Khopesh'},
+    {itemId: 2650, recipe: '02244EEEEEEEEEE0224402650EEEEE02244EEEEEEEEEE', book: 'Weapons', type: 'Repair', requirement: 1, name: 'Repair Amethyst Khopesh'},
+    {itemId: 2225, recipe: 'EEEEEEEEEEEEEEE026530223602653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Impure Bronze Bar To Ore'},
+    {itemId: 2666, recipe: 'EEEEEEEEEEEEEEE026530223502653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Bronze Bar To Ore'},
+    {itemId: 2668, recipe: 'EEEEEEEEEEEEEEE026530223702653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Iron Bar To Ore'},
+    {itemId: 2668, recipe: 'EEEEEEEEEEEEEEE026530223802653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Steel Bar To Ore'},
+    {itemId: 2670, recipe: 'EEEEEEEEEEEEEEE026530223902653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Gold Bar To Ore'},
+    {itemId: 2671, recipe: 'EEEEEEEEEEEEEEE026530224002653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Mithril Bar To Ore'},
+    {itemId: 2672, recipe: 'EEEEEEEEEEEEEEE026530224102653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Adamantium Bar To Ore'},
+    {itemId: 2673, recipe: 'EEEEEEEEEEEEEEE026530224202653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Quartz Bar To Dust'},
+    {itemId: 2675, recipe: 'EEEEEEEEEEEEEEE026530224302653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Jade Bar To Dust'},
+    {itemId: 2676, recipe: 'EEEEEEEEEEEEEEE026530224402653EEEEEEEEEEEEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Amethyst Bar To Dust'},
+    {itemId: 2656, recipe: 'EEEEEEEEEEEEEEE022340223502234EEEEE02653EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Downgrade Bronze Bar'},
+    {itemId: 2237, recipe: 'EEEEEEEEEEEEEEEEEEEE02238EEEEEEEEEE02653EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Downgrade Steel Bar'},
+    {itemId: 1987, recipe: 'EEEEEEEEEEEEEEEEEEEE02508EEEEEEEEEE02653EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Melt Dwarven Gem'},
+    {itemId: 2642, recipe: '02653EEEEE0265302225026410222502653EEEEE02653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Impure Bronze Claymore To Bronze'},
+    {itemId: 2262, recipe: '02653EEEEE0265302225022610222502653EEEEE02653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Impure Bronze Cuirass To Bronze'},
+    {itemId: 2643, recipe: '02653EEEEE02653022370264202237026530223702653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Bronze Claymore To Iron'},
+    {itemId: 2263, recipe: '02653EEEEE02653022370226202237026530223702653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Bronze Cuirass To Iron'},
+    {itemId: 2644, recipe: '02653EEEEE02653022330264302233026530223302653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Iron Claymore To Steel'},
+    {itemId: 2264, recipe: '02653EEEEE02653022330226302233026530223302653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Iron Cuirass To Steel'},
+    {itemId: 2645, recipe: '02653EEEEE02653022390264402239026530223902653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Steel Claymore To Gold'},
+    {itemId: 2265, recipe: '02653EEEEE02653022390226402239026530223902653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Steel Cuirass To Gold'},
+    {itemId: 2646, recipe: '026530224002653022400264502240026530224002653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Gold Claymore To Mithril'},
+    {itemId: 2266, recipe: '026530224002653022400226502240026530224002653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Gold Cuirass To Mithril'},
+    {itemId: 2647, recipe: '026530224102653022410264602241026530224102653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Mithril Claymore To Adamantium'},
+    {itemId: 2267, recipe: '026530224102653022410226602241026530224102653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Mithril Cuirass To Adamantium'},
+    {itemId: 2649, recipe: '02653EEEEE02653022430264802243026530224302653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Quartz Khopesh To Jade'},
+    {itemId: 2269, recipe: '02653EEEEE02653022430226802243026530224302653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Quartz Chainmail To Jade'},
+    {itemId: 2650, recipe: '026530224402653022440264902244026530224402653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Jade Khopesh To Amethyst'},
+    {itemId: 2270, recipe: '026530224402653022440226902244026530224402653', book: 'Recasting', type: 'Upgrade', requirement: 1, name: 'Jade Chainmail To Amethyst'},
+    {itemId: 2543, recipe: 'EEEEE02653EEEEEEEEEE02732EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Loop of Aggression'},
+    {itemId: 2546, recipe: 'EEEEE02653EEEEEEEEEE02735EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Loop of Fortune'},
+    {itemId: 2540, recipe: 'EEEEE02653EEEEEEEEEE02729EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Loop of Luck'},
+    {itemId: 2544, recipe: 'EEEEE02653EEEEEEEEEE02733EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Loop of Aggression'},
+    {itemId: 2547, recipe: 'EEEEE02653EEEEEEEEEE02736EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Loop of Fortune'},
+    {itemId: 2541, recipe: 'EEEEE02653EEEEEEEEEE02730EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Loop of Luck'},
+    {itemId: 2545, recipe: 'EEEEE02653EEEEEEEEEE02734EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Loop of Aggression'},
+    {itemId: 2548, recipe: 'EEEEE02653EEEEEEEEEE02737EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Loop of Fortune'},
+    {itemId: 2542, recipe: 'EEEEE02653EEEEEEEEEE02731EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Loop of Luck'},
+    {itemId: 2566, recipe: 'EEEEE02653EEEEEEEEEE02738EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Prism of Aggression'},
+    {itemId: 2568, recipe: 'EEEEE02653EEEEEEEEEE02740EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Prism of Fortune'},
+    {itemId: 2567, recipe: 'EEEEE02653EEEEEEEEEE02739EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Quartz Prism of Luck'},
+    {itemId: 2569, recipe: 'EEEEE02653EEEEEEEEEE02741EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Trifocal of Aggression'},
+    {itemId: 2571, recipe: 'EEEEE02653EEEEEEEEEE02743EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Trifocal of Fortune'},
+    {itemId: 2570, recipe: 'EEEEE02653EEEEEEEEEE02742EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Jade Trifocal of Luck'},
+    {itemId: 2572, recipe: 'EEEEE02653EEEEEEEEEE02744EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Totality of Aggression'},
+    {itemId: 2574, recipe: 'EEEEE02653EEEEEEEEEE02746EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Totality of Fortune'},
+    {itemId: 2573, recipe: 'EEEEE02653EEEEEEEEEE02745EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Unpower Amethyst Totality of Luck'},
+    {itemId: 2761, recipe: 'EEEEE02653EEEEEEEEEE02261EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Impure Bronze Cuirass To Segmentata'},
+    {itemId: 2762, recipe: 'EEEEE02653EEEEEEEEEE02262EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Bronze Cuirass To Segmentata'},
+    {itemId: 2763, recipe: 'EEEEE02653EEEEEEEEEE02263EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Iron Cuirass To Segmentata'},
+    {itemId: 2764, recipe: 'EEEEE02653EEEEEEEEEE02264EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Steel Cuirass To Segmentata'},
+    {itemId: 2765, recipe: 'EEEEE02653EEEEEEEEEE02265EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Gold Cuirass To Segmentata'},
+    {itemId: 2766, recipe: 'EEEEE02653EEEEEEEEEE02266EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Mithril Cuirass To Segmentata'},
+    {itemId: 2767, recipe: 'EEEEE02653EEEEEEEEEE02267EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Adamantium Cuirass To Segmentata'},
+    {itemId: 2852, recipe: 'EEEEE02653EEEEEEEEEE02641EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Impure Bronze Claymore To Billhook'},
+    {itemId: 2853, recipe: 'EEEEE02653EEEEEEEEEE02642EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Bronze Claymore To Billhook'},
+    {itemId: 2854, recipe: 'EEEEE02653EEEEEEEEEE02643EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Iron Claymore To Billhook'},
+    {itemId: 2855, recipe: 'EEEEE02653EEEEEEEEEE02644EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Steel Claymore To Billhook'},
+    {itemId: 2856, recipe: 'EEEEE02653EEEEEEEEEE02645EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Gold Claymore To Billhook'},
+    {itemId: 2857, recipe: 'EEEEE02653EEEEEEEEEE02646EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Mithril Claymore To Billhook'},
+    {itemId: 2858, recipe: 'EEEEE02653EEEEEEEEEE02647EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Adamantium Claymore To Billhook'},
+    {itemId: 2849, recipe: 'EEEEE02653EEEEEEEEEE02268EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Quartz Chainmail To Lamellar'},
+    {itemId: 2850, recipe: 'EEEEE02653EEEEEEEEEE02269EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Jade Chainmail To Lamellar'},
+    {itemId: 2851, recipe: 'EEEEE02653EEEEEEEEEE02270EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Amethyst Chainmail To Lamellar'},
+    {itemId: 2859, recipe: 'EEEEE02653EEEEEEEEEE02648EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Quartz Khopesh To Guandao'},
+    {itemId: 2860, recipe: 'EEEEE02653EEEEEEEEEE02649EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Jade Khopesh To Guandao'},
+    {itemId: 2861, recipe: 'EEEEE02653EEEEEEEEEE02650EEEEEEEEEE02627EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Amethyst Khopesh To Guandao'},
+    {itemId: 2866, recipe: 'EEEEEEEEEEEEEEEEEEEE02867EEEEEEEEEE02653EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Mithril Armguards To Gold'},
+    {itemId: 2866, recipe: 'EEEEEEEEEEEEEEEEEEEE02868EEEEEEEEEE02653EEEEE', book: 'Recasting', type: 'Downgrade', requirement: 1, name: 'Adamantium Armguards To Gold'},
+    {itemId: 2537, recipe: 'EEEEEEEEEEEEEEEEEEEE0224202233EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2538, recipe: 'EEEEE01988EEEEEEEEEE02537EEEEEEEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2565, recipe: 'EEEEEEEEEEEEEEE001160224400116001160224400116', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2564, recipe: 'EEEEEEEEEEEEEEE025490224402549025490224402549', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2563, recipe: 'EEEEEEEEEEEEEEE023230224402323023230224402323', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2566, recipe: '025510224202551025510253802551025510223602551', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2568, recipe: '025500224202550025500253802550025500223602550', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2567, recipe: '025520224202552025520253802552025520223602552', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2543, recipe: 'EEEEE02551EEEEEEEEEE02539EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2546, recipe: 'EEEEE02550EEEEEEEEEE02539EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2540, recipe: 'EEEEE02552EEEEEEEEEE02539EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2569, recipe: '022430224302243001160253800116EEEEE02235EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2571, recipe: '022430224302243023230253802323EEEEE02235EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2570, recipe: '022430224302243025490253802549EEEEE02235EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2544, recipe: 'EEEEE00116EEEEE022430253902243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2547, recipe: 'EEEEE02323EEEEE022430253902243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2541, recipe: 'EEEEE02549EEEEE022430253902243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2572, recipe: '0224402244022440011602538001160256502239EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2574, recipe: '0224402244022440232302538023230256302239EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2573, recipe: '0224402244022440254902538025490256402239EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2545, recipe: '001160011600116022440253902244EEEEE02244EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2548, recipe: '023230232302323022440253902244EEEEE02244EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2542, recipe: '025490254902549022440253902244EEEEE02244EEEEE', book: 'Jewelry', type: 'Standard', requirement: 2},
+    {itemId: 2732, recipe: 'EEEEEEEEEEEEEEEEEEEE02543EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2735, recipe: 'EEEEEEEEEEEEEEEEEEEE02546EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2729, recipe: 'EEEEEEEEEEEEEEEEEEEE02540EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2733, recipe: 'EEEEE02243EEEEEEEEEE02544EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2736, recipe: 'EEEEE02243EEEEEEEEEE02547EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2730, recipe: 'EEEEE02243EEEEEEEEEE02541EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2734, recipe: 'EEEEE02244EEEEEEEEEE0254502244EEEEE02244EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2737, recipe: 'EEEEE02244EEEEEEEEEE0254802244EEEEE02244EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2731, recipe: 'EEEEE02244EEEEEEEEEE0254202244EEEEE02244EEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2738, recipe: 'EEEEEEEEEEEEEEE022420256602242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2740, recipe: 'EEEEEEEEEEEEEEE022420256802242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2739, recipe: 'EEEEEEEEEEEEEEE022420256702242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2741, recipe: 'EEEEE02243EEEEE022430256902243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2743, recipe: 'EEEEE02243EEEEE022430257102243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2742, recipe: 'EEEEE02243EEEEE022430257002243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2744, recipe: '022440224402244022440257202244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2746, recipe: '022440224402244022440257402244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2745, recipe: '022440224402244022440257302244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2369, recipe: 'EEEEEEEEEEEEEEE023580235902357EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2370, recipe: 'EEEEEEEEEEEEEEE023650236402366EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard', name: 'Biggest Banhammer'},
+    {itemId: 2371, recipe: 'EEEEEEEEEEEEEEE023610236702368EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard', name: 'Staff Beauty Parlor'},
+    {itemId: 2438, recipe: 'EEEEEEEEEEEEEEE024000238802410EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2372, recipe: 'EEEEEEEEEEEEEEE023690237002371EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard', name: 'Realm of Staff'},
+    {itemId: 2376, recipe: 'EEEEEEEEEEEEEEE023730237402375EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2384, recipe: 'EEEEEEEEEEEEEEE023810238302382EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2380, recipe: 'EEEEEEEEEEEEEEE023780237702379EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2385, recipe: 'EEEEEEEEEEEEEEE023760238402380EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2401, recipe: 'EEEEEEEEEEEEEEE023900239202393EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2402, recipe: 'EEEEEEEEEEEEEEE023910239702394EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2403, recipe: 'EEEEEEEEEEEEEEE023950239602398EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2404, recipe: 'EEEEEEEEEEEEEEE024010240202403EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
+    {itemId: 2468, recipe: '02372EEEEEEEEEEEEEEE02404EEEEE02385EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2, name: 'Random Lootbox'},
+    {itemId: 2421, recipe: '02372EEEEEEEEEEEEEEE02404EEEEE02372EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2},
+    {itemId: 2465, recipe: '02404EEEEEEEEEEEEEEE02372EEEEE02404EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2},
+    {itemId: 2466, recipe: '02385EEEEEEEEEEEEEEE02372EEEEE02385EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2},
+    {itemId: 3107, recipe: 'EEEEEEEEEEEEEEEEEEEE0310503106EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard', duplicated: true},
+    {itemId: 3111, recipe: 'EEEEEEEEEEEEEEEEEEEE0310703110EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3112, recipe: 'EEEEE0311903119EEEEE0311903119EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3117, recipe: 'EEEEEEEEEEEEEEE031130311403115EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3121, recipe: 'EEEEEEEEEE00114EEEEE0312000114EEEEEEEEEE00114', book: 'Xmas Crafting', type: 'Standard', requirement: 2},
+    {itemId: 2296, recipe: 'EEEEEEEEEEEEEEEEEEEE02295EEEEEEEEEE02295EEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2305, recipe: 'EEEEE02295EEEEE022950229602295EEEEE02295EEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2298, recipe: 'EEEEE02688EEEEEEEEEE02296EEEEEEEEEE00126EEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2299, recipe: 'EEEEE02297EEEEEEEEEE02298EEEEEEEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2303, recipe: 'EEEEE00126EEEEEEEEEE02296EEEEEEEEEE02688EEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2300, recipe: 'EEEEE02233EEEEE022330223302233EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard', requirement: 2},
+    {itemId: 2307, recipe: '023060268902234022960230502300001260230502300', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2701, recipe: 'EEEEEEEEEEEEEEEEEEEE0269802700EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2702, recipe: 'EEEEEEEEEEEEEEEEEEEE0269802699EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2703, recipe: 'EEEEEEEEEEEEEEEEEEEE0270002699EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2704, recipe: 'EEEEEEEEEEEEEEE027010270202703EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2972, recipe: 'EEEEEEEEEEEEEEEEEEEE0296902970EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2975, recipe: 'EEEEEEEEEEEEEEEEEEEE0297302974EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2976, recipe: 'EEEEEEEEEEEEEEEEEEEE0297202975EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3340, recipe: 'EEEEEEEEEEEEEEE033280332903334EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3338, recipe: '033310333203333EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 3339, recipe: 'EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE033300333503336', book: 'Xmas Crafting', type: 'Standard', name: 'Doomguy'},
+    {itemId: 3341, recipe: 'EEEEE03340EEEEEEEEEE03338EEEEEEEEEE03339EEEEE', book: 'Xmas Crafting', type: 'Standard'},
+    {itemId: 2833, recipe: 'EEEEEEEEEEEEEEE0282902831EEEEEEEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 2834, recipe: 'EEEEEEEEEEEEEEE0282902830EEEEEEEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 2835, recipe: 'EEEEEEEEEEEEEEEEEEEE0283002831EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 2836, recipe: 'EEEEEEEEEEEEEEE028330283402835EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 2825, recipe: 'EEEEEEEEEEEEEEE028260282602826028260282602826', book: 'Birthday', type: 'Standard', name: 'Birthday Licks Badge - 9th'},
+    {itemId: 3025, recipe: 'EEEEEEEEEEEEEEEEEEEE0302303024EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3028, recipe: 'EEEEEEEEEEEEEEEEEEEE0302603027EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3029, recipe: 'EEEEEEEEEEEEEEEEEEEE0302503028EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3032, recipe: '03031EEEEE0303103031EEEEE0303103031EEEEE03031', book: 'Birthday', type: 'Standard', name: 'Birthday Gazelle Badge - 10th'},
+    {itemId: 3154, recipe: 'EEEEEEEEEEEEEEE031510315203153EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3158, recipe: 'EEEEEEEEEEEEEEE031550315603157EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3162, recipe: 'EEEEEEEEEEEEEEE031590316003161EEEEEEEEEEEEEEE', book: 'Birthday', type: 'Standard'},
+    {itemId: 3163, recipe: '03154EEEEEEEEEEEEEEE03158EEEEEEEEEEEEEEE03162', book: 'Birthday', type: 'Standard'},
+    {itemId: 3165, recipe: '03166EEEEEEEEEEEEEEE0316603166EEEEEEEEEE03166', book: 'Birthday', type: 'Standard', name: 'Birthday Gazelle Badge - 11th'},
+    {itemId: 3378, recipe: '03379EEEEE03379EEEEE03379EEEEE03379EEEEE03379', book: 'Birthday', type: 'Standard'},
+    {itemId: 2988, recipe: 'EEEEEEEEEEEEEEE029860300002987EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 2991, recipe: 'EEEEEEEEEEEEEEE029890300002990EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 2992, recipe: 'EEEEEEEEEEEEEEE029880300002991EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 2995, recipe: 'EEEEEEEEEEEEEEE029930300102994EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 2998, recipe: 'EEEEEEEEEEEEEEE029960300102997EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 2999, recipe: 'EEEEEEEEEEEEEEE029950300102998EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard'},
+    {itemId: 3143, recipe: 'EEEEE03002EEEEE03002EEEEE03002EEEEE03002EEEEE', book: 'Valentines', type: 'Standard', name: 'Vegetal Symbol'},
+    {itemId: 3143, recipe: '02323EEEEE02323EEEEEEEEEEEEEEE02323EEEEE02323', book: 'Valentines', type: 'Standard', requirement: 2, name: 'Mineral Symbol'},
+    {itemId: 3145, recipe: '022420224302242EEEEE02227EEEEEEEEEE02232EEEEE', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3358, recipe: '03359EEEEE03359EEEEE03359EEEEE03359EEEEE03359', book: 'Valentines', type: 'Standard', name: 'Valentine 2022 Badge'},
+    {itemId: 3004, recipe: '02992EEEEE03163EEEEEEEEEEEEEEE02999EEEEE03270', book: 'Valentines', type: 'Standard'},
+    {itemId: 3136, recipe: 'EEEEE03143EEEEEEEEEE03144EEEEE03145EEEEE03145', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3147, recipe: 'EEEEE02551EEEEEEEEEE03136EEEEEEEEEE03145EEEEE', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3148, recipe: 'EEEEE02550EEEEEEEEEE03136EEEEEEEEEE03145EEEEE', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3146, recipe: 'EEEEE02552EEEEEEEEEE03136EEEEEEEEEE03145EEEEE', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3136, recipe: 'EEEEE02653EEEEE026530314702653EEEEE02653EEEEE', book: 'Valentines', type: 'Downgrade', requirement: 2, name: "Downgrade Cupid's Winged Boots of Aggression"},
+    {itemId: 3136, recipe: 'EEEEE02653EEEEE026530314802653EEEEE02653EEEEE', book: 'Valentines', type: 'Downgrade', requirement: 2, name: "Downgrade Cupid's Winged Boots of Fortune"},
+    {itemId: 3136, recipe: 'EEEEE02653EEEEE026530314602653EEEEE02653EEEEE', book: 'Valentines', type: 'Downgrade', requirement: 2, name: "Downgrade Cupid's Winged Boots of Luck"},
+    {itemId: 3349, recipe: '02549EEEEE02549EEEEE03348EEEEE02239EEEEE02239', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3352, recipe: '025490254902549EEEEE03349EEEEE022400224002240', book: 'Valentines', type: 'Upgrade', requirement: 2},
+    {itemId: 3353, recipe: '025490254902549025490335202241022410224102241', book: 'Valentines', type: 'Upgrade', requirement: 2},
+    {itemId: 3348, recipe: 'EEEEE02549EEEEEEEEEE03348EEEEEEEEEEEEEEEEEEEE', book: 'Valentines', type: 'Repair', requirement: 2, name: "Repair Cupid's Wings"},
+    {itemId: 3349, recipe: 'EEEEE02549EEEEEEEEEE03349EEEEEEEEEE02239EEEEE', book: 'Valentines', type: 'Repair', requirement: 2, name: "Repair Cupid's Gold Wings"},
+    {itemId: 3352, recipe: '02549EEEEE02549EEEEE03352EEEEEEEEEE02240EEEEE', book: 'Valentines', type: 'Repair', requirement: 2, name: "Repair Cupid's Mithril Wings"},
+    {itemId: 3353, recipe: '025490254902549EEEEE03353EEEEEEEEEE02241EEEEE', book: 'Valentines', type: 'Repair', requirement: 2, name: "Repair Cupid's Adamantium Wings"},
+    {itemId: 3364, recipe: 'EEEEE02653EEEEEEEEEE03349EEEEEEEEEE02627EEEEE', book: 'Valentines', type: 'Downgrade', requirement: 2},
+    {itemId: 3363, recipe: '02653EEEEE02653EEEEE03352EEEEE02627EEEEE02627', book: 'Valentines', type: 'Downgrade', requirement: 2},
+    {itemId: 3362, recipe: '026530265302653EEEEE03353EEEEE026270262702627', book: 'Valentines', type: 'Downgrade', requirement: 2},
+    {itemId: 3361, recipe: 'EEEEEEEEEEEEEEEEEEEE0255603360EEEEEEEEEEEEEEE', book: 'Valentines', type: 'Standard', requirement: 2},
+    {itemId: 3365, recipe: '026530265302653026530336102627026270262702627', book: 'Valentines', type: 'Downgrade', requirement: 2},
+    {itemId: 2592, recipe: 'EEEEEEEEEEEEEEEEEEEE0259002591EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2593, recipe: 'EEEEEEEEEEEEEEEEEEEE0259102589EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2594, recipe: 'EEEEEEEEEEEEEEEEEEEE0258902590EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2595, recipe: 'EEEEEEEEEEEEEEE025920259302594EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2601, recipe: 'EEEEEEEEEEEEEEE026000260002600026000260002600', book: 'Halloween', type: 'Standard'},
+    {itemId: 2947, recipe: 'EEEEEEEEEEEEEEEEEEEE0294502946EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2950, recipe: 'EEEEEEEEEEEEEEEEEEEE0294802949EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2951, recipe: 'EEEEEEEEEEEEEEEEEEEE0294702950EEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 2953, recipe: 'EEEEEEEEEEEEEEE029520295202952029520295202952', book: 'Halloween', type: 'Standard'},
+    {itemId: 3268, recipe: 'EEEEEEEEEEEEEEE0326303265EEEEEEEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 3269, recipe: 'EEEEEEEEEEEEEEE0326603267EEEEEEEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 3270, recipe: 'EEEEEEEEEEEEEEE0326803269EEEEEEEEEEEEEEEEEEEE', book: 'Halloween', type: 'Standard'},
+    {itemId: 3264, recipe: '032810328103281EEEEEEEEEEEEEEE032810328103281', book: 'Halloween', type: 'Standard', name: 'Tombstone Badge'},
+    {itemId: 2772, recipe: 'EEEEEEEEEEEEEEEEEEEE02844EEEEEEEEEEEEEEEEEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2774, recipe: 'EEEEEEEEEEEEEEE028440284402844EEEEEEEEEEEEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2775, recipe: 'EEEEE02844EEEEEEEEEE02844EEEEEEEEEE02844EEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2776, recipe: '028440284402844EEEEEEEEEEEEEEE028440284402844', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2846, recipe: 'EEEEEEEEEEEEEEEEEEEE02841EEEEEEEEEEEEEEEEEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2845, recipe: 'EEEEEEEEEEEEEEEEEEEE02842EEEEEEEEEEEEEEEEEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2900, recipe: 'EEEEE02892EEEEE028920289202892EEEEE02892EEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2801, recipe: 'EEEEEEEEEEEEEEE028160281402816EEEEEEEEEEEEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2802, recipe: 'EEEEE02816EEEEE028160281402816EEEEE02816EEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2803, recipe: '028140281602814028160289402816028140281602814', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2847, recipe: 'EEEEE02813EEEEEEEEEE02813EEEEEEEEEE02813EEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2901, recipe: 'EEEEE02816EEEEE028930289302893EEEEE02813EEEEE', book: 'Adventure Club', type: 'Standard'},
+    {itemId: 2554, recipe: '021550215302154022390012102243025370253702537', book: 'Bling', type: 'Standard', requirement: 2, name: 'Unity Necklace'},
+    {itemId: 2584, recipe: '021550215302154022390253902243025850253702585', book: 'Bling', type: 'Standard', requirement: 2, name: 'Unity Band'},
+    {itemId: 2915, recipe: '02155EEEEE02154EEEEE00121EEEEEEEEEE02153EEEEE', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2930, recipe: 'EEEEEEEEEEEEEEE0215400120EEEEEEEEEEEEEEEEEEEE', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2931, recipe: 'EEEEEEEEEEEEEEE0215300120EEEEEEEEEEEEEEEEEEEE', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2932, recipe: 'EEEEEEEEEEEEEEE0215500120EEEEEEEEEEEEEEEEEEEE', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2639, recipe: '025080250802508025080250802508025080250802508', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2760, recipe: '025080250802508025080004602508025080250802508', book: 'Bling', type: 'Standard', requirement: 2},
+    {itemId: 2212, recipe: 'EEEEEEEEEEEEEEE000720007200072EEEEEEEEEEEEEEE', book: 'Bling', type: 'Standard', requirement: 2, name: 'Irc Voice 8w'},
+    {itemId: 2212, recipe: 'EEEEE00175EEEEE001750017500175EEEEEEEEEEEEEEE', book: 'Bling', type: 'Standard', requirement: 2, name: 'Irc Voice 8w - Low Cost'},
+    {itemId: 3368, recipe: '022120221202212022120221202212EEEEE02549EEEEE', book: 'Bling', type: 'Standard', requirement: 2, name: 'Irc Voice 1y'},
+    {itemId: 2509, recipe: 'EEEEEEEEEEEEEEEEEEEE0251202508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Bronze Dwarf'},
+    {itemId: 2929, recipe: 'EEEEEEEEEEEEEEEEEEEE02512EEEEE02508EEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Quartz Dwarf'},
+    {itemId: 2510, recipe: 'EEEEEEEEEEEEEEEEEEEE0250902508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Bronze To Iron Dwarf'},
+    {itemId: 2510, recipe: 'EEEEEEEEEEEEEEEEEEEE0292902508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Quartz To Iron Dwarf'},
+    {itemId: 2511, recipe: 'EEEEEEEEEEEEEEEEEEEE0251002508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Gold Dwarf'},
+    {itemId: 2928, recipe: 'EEEEEEEEEEEEEEEEEEEE02510EEEEE02508EEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Jade Dwarf'},
+    {itemId: 2513, recipe: 'EEEEEEEEEEEEEEEEEEEE0251102508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Gold To Mithril Dwarf'},
+    {itemId: 2513, recipe: 'EEEEEEEEEEEEEEEEEEEE0292802508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Jade To Mithril Dwarf'},
+    {itemId: 2515, recipe: 'EEEEEEEEEEEEEEEEEEEE0251302508EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Adamantium Dwarf'},
+    {itemId: 2927, recipe: 'EEEEEEEEEEEEEEEEEEEE02513EEEEE02508EEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Amethyst Dwarf'},
+    {itemId: 2524, recipe: 'EEEEEEEEEEEEEEEEEEEE0252502525EEEEEEEEEEEEEEE', book: 'Pets', type: 'Upgrade', name: 'Green Slime'},
+    {itemId: 3237, recipe: '0252502524EEEEEEEEEEEEEEEEEEEEEEEEE0198702323', book: 'Pets', type: 'Upgrade', name: 'Rainbow Slime'},
+    {itemId: 3322, recipe: 'EEEEE03313EEEEE033130230703313EEEEE03313EEEEE', book: 'Pets', type: 'Upgrade'},
+    {itemId: 3323, recipe: 'EEEEE03325EEEEE033250332203325EEEEE03325EEEEE', book: 'Pets', type: 'Upgrade'},
+    {itemId: 3324, recipe: '033270332603327033260332303326033270332603327', book: 'Pets', type: 'Upgrade'},
+    {itemId: 2598, recipe: 'EEEEEEEEEEEEEEEEEEEE02595EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard'},
+    {itemId: 2599, recipe: '02585EEEEEEEEEE025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard', name: 'Ghost Billie (gold)'},
+    {itemId: 2690, recipe: 'EEEEEEEEEEEEEEEEEEEE02704EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard'},
+    {itemId: 2691, recipe: 'EEEEE02585EEEEE025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard'},
+    {itemId: 2333, recipe: 'EEEEEEEEEEEEEEEEEEEE02836EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard', name: 'Gazelle', duplicated: true},
+    {itemId: 2827, recipe: 'EEEEEEEEEE02585025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard', name: '[Au]zelle'},
+    {itemId: 3369, recipe: '029510297603029EEEEE02155EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
+    {itemId: 3371, recipe: '029510297603029EEEEE02153EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
+    {itemId: 3370, recipe: '029510297603029EEEEE02154EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
+    {itemId: 3373, recipe: '029510297603029EEEEE03384EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
   ];
   ///
   // #endregion Recipe definitions
@@ -1137,7 +1363,8 @@
 .crafting-panel-filters__categories-category input,
 .crafting-panel-filters__types-all input,
 .crafting-panel-filters__types-none input,
-.crafting-panel-filters__types-type input {
+.crafting-panel-filters__types-type input,
+.recipes__recipe input {
   display: none;
 }
 .crafting-panel-search__searchbox,
@@ -1151,7 +1378,8 @@
 .crafting-panel-filters__categories-category,
 .crafting-panel-filters__types-all,
 .crafting-panel-filters__types-none,
-.crafting-panel-filters__types-type {
+.crafting-panel-filters__types-type,
+.recipes__recipe {
   border-radius: 3px;
   border: none;
   padding: 2px 5px;
@@ -1170,19 +1398,24 @@
 .crafting-panel-filters__types-none {
   background-color: red;
 }
-.recipes__recipe {
-  border: 2px solid transparent;
-  margin-top: 3px;
-  margin-right: 5px;
+.crafting-panel-filters__types-type {
+  border: 1px solid transparent;
 }
-.recipes__recipe:focus {
-  border: 2px solid red;
+.crafting-panel-filters__types-type--repair {
+  border: 1px solid green;
+}
+.crafting-panel-filters__types-type--downgrade {
+  border: 1px solid red;
+}
+.crafting-panel-filters__types-type--upgrade {
+  border: 1px solid purple;
 }
 .recipe-buttons {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: .25rem;
 }
 .recipe-buttons--book-sort {
   flex-direction: column;
@@ -1194,6 +1427,22 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: .25rem;
+}
+.recipes__recipe {
+  border: 2px solid transparent;
+}
+.recipes__recipe--selected {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.4) 0 0);
+}
+.recipes__recipe--repair {
+  border: 2px solid green;
+}
+.recipes__recipe--downgrade {
+  border: 2px solid red;
+}
+.recipes__recipe--upgrade {
+  border: 2px solid purple;
 }
 
 
@@ -1264,13 +1513,17 @@ a.disabled {
   async function setRecipe() {
     if (isCrafting) return;
 
-    const {recipe: info} = $(this).data();
+    const elem = $(this);
+    const {recipe: info} = elem.data();
     const inventory = await getInventoryAmounts();
     const {itemId, name, recipe, requirement} = info;
     const counts = {};
     const resolvedName = resolveNames(name || ingredients[itemId].name);
 
     GM_setValue(gmKeyCurrentCraft, resolvedName);
+
+    recipeButtons.find('.recipes__recipe--selected').removeClass('recipes__recipe--selected');
+    elem.addClass('recipes__recipe--selected');
 
     craftingPanelTitle.data({name: resolvedName, available: inventory[itemId] || 0}).trigger(dataChangeEvent);
     craftingPanelResult.data({id: itemId}).trigger(dataChangeEvent);
@@ -1776,7 +2029,6 @@ a.disabled {
                 //
                 // #region Add type on/off buttons to DOM
                 //
-                // TODO implement types actually
                 $('<div class="crafting-panel-filters__types">').append(
                   $('<div class="crafting-panel-filters__types-row">').append(
                     '<h3 class="crafting-panel-filters__types-title">Types</h3>',
@@ -1794,6 +2046,18 @@ a.disabled {
                           'crafting-panel-filters__types-type--selected',
                           initialFilters.types.includes(type),
                         )
+                        .addClass(() => {
+                          switch (type) {
+                            case 'Repair':
+                              return ['crafting-panel-filters__types-type--repair'];
+                            case 'Upgrade':
+                              return ['crafting-panel-filters__types-type--upgrade'];
+                            case 'Downgrade':
+                              return ['crafting-panel-filters__types-type--downgrade'];
+                            default:
+                              return [];
+                          }
+                        })
                         .append(
                           $('<input type="checkbox" />')
                             .attr('checked', initialFilters.types.includes(type))
@@ -1869,7 +2133,9 @@ a.disabled {
               };
               const book = books[recipe.book];
               const recipeButton = $(
-                `<button class="recipes__recipe" />${resolveNames(recipe.name || item.name)}</button>`,
+                `<label class="recipes__recipe"><input type="button" />${resolveNames(
+                  recipe.name || item.name,
+                )}</label>`,
               )
                 .data(data)
                 .css({
@@ -1877,6 +2143,17 @@ a.disabled {
                   color: book.color,
                 })
                 .click(setRecipe);
+              switch (recipe.type) {
+                case 'Repair':
+                  recipeButton.addClass('recipes__recipe--repair');
+                  break;
+                case 'Upgrade':
+                  recipeButton.addClass('recipes__recipe--upgrade');
+                  break;
+                case 'Downgrade':
+                  recipeButton.addClass('recipes__recipe--downgrade');
+                  break;
+              }
               return recipeButton;
             }),
           )),
