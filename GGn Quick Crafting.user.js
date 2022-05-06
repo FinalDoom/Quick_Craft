@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.8.1
+// @version      2.8.2
 // @description  Craft multiple items easier
 // @author       KingKrab23
 // @author       KSS
@@ -109,7 +109,15 @@
             return;
           }
           inventoryAmounts = Object.fromEntries(
-            Object.values(data.response).map((item) => [item.itemid, parseInt(item.amount)]),
+            Object.values(data.response) // TODO not sure how multiple equippable items are represented
+              // TODO figure out if they always are amount===1 and summing here is correct
+              .sort(({itemida}, {itemidb}) => itemida - itemidb)
+              .map(({itemid, amount}) => [itemid, parseInt(amount)])
+              .reduce((all, next) => {
+                if (all.length && next[0] === all[all.length - 1][0]) all[all.length - a][1] += next[1];
+                else all.push(next);
+                return all;
+              }, []),
           );
           return inventoryAmounts;
         })
@@ -134,7 +142,7 @@
       const status = data.status;
       if (status !== 'success' || !'response' in data) {
         window.noty({type: 'error', text: `${name} crafting failed.`});
-        alert(`Crafting failed. Response from server: ${data}`);
+        alert(`Crafting failed. Response from server: ${JSON.stringify(data)}`);
         return false;
       } else {
         window.noty({type: 'success', text: `${name} was crafted successfully.`});
@@ -949,6 +957,24 @@
     {itemId: 2744, recipe: '022440224402244022440257202244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
     {itemId: 2746, recipe: '022440224402244022440257402244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
     {itemId: 2745, recipe: '022440224402244022440257302244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Upgrade', requirement: 2},
+    {itemId: 2732, recipe: 'EEEEEEEEEEEEEEEEEEEE02732EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Loop of Aggression'},
+    {itemId: 2735, recipe: 'EEEEEEEEEEEEEEEEEEEE02735EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Loop of Fortune'},
+    {itemId: 2729, recipe: 'EEEEEEEEEEEEEEEEEEEE02729EEEEEEEEEE02242EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Loop of Luck'},
+    {itemId: 2733, recipe: 'EEEEE02243EEEEEEEEEE02733EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Loop of Aggression'},
+    {itemId: 2736, recipe: 'EEEEE02243EEEEEEEEEE02736EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Loop of Fortune'},
+    {itemId: 2730, recipe: 'EEEEE02243EEEEEEEEEE02730EEEEEEEEEE02243EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Loop of Luck'},
+    {itemId: 2734, recipe: 'EEEEE02244EEEEEEEEEE0273402244EEEEE02244EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Loop of Aggression'},
+    {itemId: 2737, recipe: 'EEEEE02244EEEEEEEEEE0273702244EEEEE02244EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Loop of Fortune'},
+    {itemId: 2731, recipe: 'EEEEE02244EEEEEEEEEE0273102244EEEEE02244EEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Loop of Luck'},
+    {itemId: 2738, recipe: 'EEEEEEEEEEEEEEE022420273802242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Prism of Aggression'},
+    {itemId: 2740, recipe: 'EEEEEEEEEEEEEEE022420274002242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Prism of Fortune'},
+    {itemId: 2739, recipe: 'EEEEEEEEEEEEEEE022420273902242EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Quartz Prism of Luck'},
+    {itemId: 2741, recipe: 'EEEEE02243EEEEE022430274102243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Trifocal of Aggression'},
+    {itemId: 2743, recipe: 'EEEEE02243EEEEE022430274302243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Trifocal of Fortune'},
+    {itemId: 2742, recipe: 'EEEEE02243EEEEE022430274202243EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Jade Trifocal of Luck'},
+    {itemId: 2744, recipe: '022440224402244022440274402244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Totality of Aggression'},
+    {itemId: 2746, recipe: '022440224402244022440274602244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Totality of Fortune'},
+    {itemId: 2745, recipe: '022440224402244022440274502244EEEEEEEEEEEEEEE', book: 'Jewelry', type: 'Repair', requirement: 2, name: 'Repair Amethyst Totality of Luck'},
     {itemId: 2369, recipe: 'EEEEEEEEEEEEEEE023580235902357EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard'},
     {itemId: 2370, recipe: 'EEEEEEEEEEEEEEE023650236402366EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard', name: 'Biggest Banhammer'},
     {itemId: 2371, recipe: 'EEEEEEEEEEEEEEE023610236702368EEEEEEEEEEEEEEE', book: 'Trading Decks', type: 'Standard', name: 'Staff Beauty Parlor'},
@@ -967,7 +993,7 @@
     {itemId: 2465, recipe: '02404EEEEEEEEEEEEEEE02372EEEEE02404EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2},
     {itemId: 2466, recipe: '02385EEEEEEEEEEEEEEE02372EEEEE02385EEEEEEEEEE', book: 'Trading Decks', type: 'Standard', requirement: 2},
     {itemId: 3107, recipe: 'EEEEEEEEEEEEEEEEEEEE0310503106EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
-    {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard', duplicated: true},
+    {itemId: 3110, recipe: 'EEEEEEEEEEEEEEEEEEEE0310803109EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
     {itemId: 3111, recipe: 'EEEEEEEEEEEEEEEEEEEE0310703110EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
     {itemId: 3112, recipe: 'EEEEE0311903119EEEEE0311903119EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
     {itemId: 3117, recipe: 'EEEEEEEEEEEEEEE031130311403115EEEEEEEEEEEEEEE', book: 'Xmas Crafting', type: 'Standard'},
@@ -1090,7 +1116,7 @@
     {itemId: 2599, recipe: '02585EEEEEEEEEE025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard', name: 'Ghost Billie (gold)'},
     {itemId: 2690, recipe: 'EEEEEEEEEEEEEEEEEEEE02704EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard'},
     {itemId: 2691, recipe: 'EEEEE02585EEEEE025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard'},
-    {itemId: 2333, recipe: 'EEEEEEEEEEEEEEEEEEEE02836EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard', name: 'Gazelle', duplicated: true},
+    {itemId: 2333, recipe: 'EEEEEEEEEEEEEEEEEEEE02836EEEEE02385EEEEE02404', book: 'Pets', type: 'Standard', name: 'Gazelle'},
     {itemId: 2827, recipe: 'EEEEEEEEEE02585025950270402836EEEEEEEEEEEEEEE', book: 'Pets', type: 'Standard', name: '[Au]zelle'},
     {itemId: 3369, recipe: '029510297603029EEEEE02155EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
     {itemId: 3371, recipe: '029510297603029EEEEE02153EEEEE025950270402836', book: 'Pets', type: 'Standard', requirement: 2},
@@ -1111,8 +1137,7 @@
   //
   // #region Stylesheets
   //
-  const head = $('head');
-  head.append(`<style>
+  $('head').append(`<style>
 .crafting-clear {
   clear: both;
   margin-bottom: 1rem
@@ -1504,7 +1529,7 @@ a.disabled {
     craftingPanelTitle.data({name: undefined, available: 0}).trigger(dataChangeEvent);
     craftingPanelSlots.add(craftingPanelResult).data({id: 0}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: 0}).trigger(dataChangeEvent);
-    craftingIngredients.data({id: 0, count: 0, available: 0, purchasable: -1}).trigger(dataChangeEvent);
+    craftingActionsMenu.data({recipe: undefined});
     craftingInfoActions.data({available: 0, purchasable: -1}).trigger(dataChangeEvent);
     GM_deleteValue(gmKeyCurrentCraft);
   }
@@ -1651,13 +1676,12 @@ a.disabled {
     const craftNumber = craftNumberSelect.children('option:selected').val();
     const {recipe} = craftingActionsMenu.data();
 
-    await (async () => {
       for (let i = 0; i < craftNumber; i++) {
         await new Promise((resolve) =>
           setTimeout(async function () {
             let available = craftingInfoActions.data().available;
             if (await takeCraft(recipe)) {
-              available = resolveCraft(recipe, available);
+            available = await resolveCraft(recipe, available);
             }
             // Recalculate available for live display
             craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
@@ -1667,7 +1691,6 @@ a.disabled {
       }
       craftingActionsMenu.find('button, select').prop('disabled', false).removeClass('disabled');
       isCrafting = false;
-    })();
   }
 
   async function tryDoMaximumCraft() {

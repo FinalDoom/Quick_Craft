@@ -408,6 +408,28 @@ const recipeDefinitions = {
       {name: 'empowered amethyst totality of fortune', recipe: ['amethyst totality of fortune', [4], 'amethyst bar', [0, 1, 2, 3, 5]]},
       {name: 'empowered amethyst totality of luck', recipe: ['amethyst totality of luck', [4], 'amethyst bar', [0, 1, 2, 3, 5]]},
     ],
+    [
+      {name: 'repair quartz loop of aggression', recipe: ['empowered quartz loop of aggression', [4], 'quartz bar', [7]]},
+      {name: 'repair quartz loop of fortune', recipe: ['empowered quartz loop of fortune', [4], 'quartz bar', [7]]},
+      {name: 'repair quartz loop of luck', recipe: ['empowered quartz loop of luck', [4], 'quartz bar', [7]]},
+      {name: 'repair jade loop of aggression', recipe: ['empowered jade loop of aggression', [4], 'jade bar', [1, 7]]},
+      {name: 'repair jade loop of fortune', recipe: ['empowered jade loop of fortune', [4], 'jade bar', [1, 7]]},
+      {name: 'repair jade loop of luck', recipe: ['empowered jade loop of luck', [4], 'jade bar', [1, 7]]},
+      {name: 'repair amethyst loop of aggression', recipe: ['empowered amethyst loop of aggression', [4], 'amethyst bar', [1, 5, 7]]},
+      {name: 'repair amethyst loop of fortune', recipe: ['empowered amethyst loop of fortune', [4], 'amethyst bar', [1, 5, 7]]},
+      {name: 'repair amethyst loop of luck', recipe: ['empowered amethyst loop of luck', [4], 'amethyst bar', [1, 5, 7]]},
+    ],
+    [
+      {name: 'repair quartz prism of aggression', recipe: ['empowered quartz prism of aggression', [4], 'quartz bar', [3, 5]]},
+      {name: 'repair quartz prism of fortune', recipe: ['empowered quartz prism of fortune', [4], 'quartz bar', [3, 5]]},
+      {name: 'repair quartz prism of luck', recipe: ['empowered quartz prism of luck', [4], 'quartz bar', [3, 5]]},
+      {name: 'repair jade trifocal of aggression', recipe: ['empowered jade trifocal of aggression', [4], 'jade bar', [1, 3, 5]]},
+      {name: 'repair jade trifocal of fortune', recipe: ['empowered jade trifocal of fortune', [4], 'jade bar', [1, 3, 5]]},
+      {name: 'repair jade trifocal of luck', recipe: ['empowered jade trifocal of luck', [4], 'jade bar', [1, 3, 5]]},
+      {name: 'repair amethyst totality of aggression', recipe: ['empowered amethyst totality of aggression', [4], 'amethyst bar', [0, 1, 2, 3, 5]]},
+      {name: 'repair amethyst totality of fortune', recipe: ['empowered amethyst totality of fortune', [4], 'amethyst bar', [0, 1, 2, 3, 5]]},
+      {name: 'repair amethyst totality of luck', recipe: ['empowered amethyst totality of luck', [4], 'amethyst bar', [0, 1, 2, 3, 5]]},
+    ],
   ],
   'Trading Decks': [
     [
