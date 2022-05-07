@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.10.0
+// @version      2.10.1
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -134,6 +134,8 @@
 
   const recipeToItemsRegex = /.{5}/g;
   const RECIPE_EQUIPMENT_ITEM_REGEX = /(\d{5})z(\d{5,})x/g;
+  const DURABILITY_CANCELLED = 'BROKE';
+  const DURABILITY_CANCELLED_REGEXP = new RegExp(DURABILITY_CANCELLED, 'g');
   const EQUIP_CANCELLED = 'XXXXX';
   const EQUIP_CANCELLED_REGEXP = new RegExp(EQUIP_CANCELLED, 'g');
   const XP_CANCELLED = 'XPXPX';
@@ -145,15 +147,19 @@
   async function takeCraft(recipe) {
     const name = resolveNames(recipe.name, ingredients[recipe.itemId].name);
 
+    const repairThreshold = GM_getValue(gmKeyRepairThreshold, 0);
     const recipeWithEquip = recipe.recipe
       .match(recipeToItemsRegex)
       .map((item) => {
         if (item === blankSlot) return item;
-        const equips = equipment.filter((equip) => equip.itemid === parseInt(item));
+        const equips = equipment.filter(({itemid}) => itemid === parseInt(item));
         // Not an equippable item
         if (!equips.length) return item;
 
         // Resolve equippable item IDs
+        if (!equips.filter(({timeUntilBreak, equipLife}) => timeUntilBreak / equipLife <= repairThreshold).length)
+          return DURABILITY_CANCELLED;
+
         const withoutExperience = equips.filter(({experience}) => !experience);
         if (withoutExperience.length <= 1) {
           // Display a message if the only available item (pet) has experience
@@ -198,6 +204,10 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
       })
       .join('');
 
+    if (DURABILITY_CANCELLED_REGEXP.test(recipeWithEquip)) {
+      window.noty({type: 'error', text: `${name} requires item with lower durability. Please craft manually.`});
+      return false;
+    }
     if (XP_CANCELLED_REGEX.test(recipeWithEquip)) {
       window.noty({type: 'error', text: `${name} requires item that has XP. Please craft manually.`});
       return false;
@@ -1316,7 +1326,7 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
       equipment
         .filter(({equipped}) => equipped)
         // Only if it's broken under the repair threshold
-        .filter(({timeUntilBreak, equipLife}) => timeUntilBreak / equipLife < repairThreshold)
+        .filter(({timeUntilBreak, equipLife}) => timeUntilBreak / equipLife <= repairThreshold)
         .forEach(({itemid}) => {
           if (!(itemid in inventoryFull)) inventoryFull[itemid] = 0;
           ++inventoryFull[itemid];
@@ -1327,7 +1337,7 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
       .filter(({equipped}) => !equipped)
       .filter(
         ({timeUntilBreak, equipLife, itemid}) =>
-          itemid in inventoryFull && timeUntilBreak / equipLife >= repairThreshold,
+          itemid in inventoryFull && timeUntilBreak / equipLife > repairThreshold,
       )
       .forEach(({itemid}) => --inventoryFull[itemid]);
   }
@@ -2157,6 +2167,7 @@ a.disabled {
                           const checked = $(this).prop('checked');
                           GM_setValue(gmKeyEquippedRepair, checked);
                           updateInventory();
+                          craftingPanelTitle.add(craftingIngredients).trigger(dataChangeEvent);
 
                           // Just click the selected recipe, because getting all the data to the right places here is a pain
                           $('.recipes__recipe--selected').click();
@@ -2170,20 +2181,20 @@ a.disabled {
                       .attr('title', 'Durability required to allow repair crafts (% of total time left)')
                       .append(
                         '<input type="button" />',
-                        `<span>${
-                          GM_getValue(gmKeyRepairThreshold, 0) === 100 ? 99 : GM_getValue(gmKeyRepairThreshold, 0)
-                        }%</span>`,
+                        `<span>${Math.floor(GM_getValue(gmKeyRepairThreshold, 0))}%</span>`,
                       )
                       .click(function (event) {
                         if (event.target !== this) return; // Prevent double execution from span
                         const currentThreshold = GM_getValue(gmKeyRepairThreshold, 0);
                         let newThreshold = currentThreshold + 25;
+                        if (newThreshold === 100) newThreshold = 99.9999;
                         if (newThreshold > 100) newThreshold = 0;
                         GM_setValue(gmKeyRepairThreshold, newThreshold);
                         $(this)
                           .find('span')
-                          .text(`${newThreshold === 100 ? 99 : newThreshold}%`);
+                          .text(`${newThreshold > 99 ? 99 : newThreshold}%`);
                         updateInventory();
+                        craftingPanelTitle.add(craftingIngredients).trigger(dataChangeEvent);
 
                         // This might change what's showing on craftable/repair showing
                         const {craftable, types} = recipeButtons.data().filters;
