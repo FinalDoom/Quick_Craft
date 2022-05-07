@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.10.1
+// @version      2.10.2
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -1865,7 +1865,7 @@ a.disabled {
     craftingIngredients
       .each(function () {
         const elem = $(this);
-        const {count, id} = elem.data();
+        const {count, id, purchasable} = elem.data();
         elem.data({
           purchasable: ~purchasable
             ? Math.max(maxWithPurchase * count - ((id && inventoryFull[id]) || 0), 0)
