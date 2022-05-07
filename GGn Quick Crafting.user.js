@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.8.2
-// @description  Craft multiple items easier
+// @version      2.9.2
+// @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
 // @author       FinalDoom
@@ -26,6 +26,7 @@
 
   const CRAFT_TIME = 1000;
   const TEN_SECOND_DELAY_MILLIS = 11000;
+  const MAX_API_QUERIES_BEFORE_THROTTLE = 5;
 
   //
   // #endregion >>>END<<< user adjustable variables
@@ -34,9 +35,35 @@
   //
   // #region Helper functions
   //
+  const gmKeyCurrentCraft = 'current_craft';
+  const gmKeyRecipeFilters = 'recipe-filters';
+  const gmKeyRecipeSort = 'recipe-sort';
+  const gmKeyEquippedRepair = 'repair-equipped';
+
+  function logToConsole(logMethod, ...args) {
+    const resolvedArgs = args.map((arg) => (typeof arg === 'function' ? arg() : arg));
+    logMethod(...resolvedArgs);
+  }
+
+  const SCRIPT_START = new Date();
+  function timing(message, ...args) {
+    // logToConsole(console.debug, () => `[GGn Quick Crafting] (${new Date() - SCRIPT_START}) ${message}`, ...args);
+  }
+
+  function debug(message, ...args) {
+    //logToConsole(console.debug, `[GGn Quick Crafting] ${message}`, ...args);
+  }
+
+  function log(message, ...args) {
+    logToConsole(console.log, `[GGn Quick Crafting] ${message}`, ...args);
+  }
+
+  function error(message, ...args) {
+    logToConsole(console.error, `[GGn Quick Crafting] ${message}`, ...args);
+  }
 
   // Query the user for an API key. This is only done once, and the result is stored in script storage
-  function getApiKey() {
+  const API_KEY = (function getApiKey() {
     const key = GM_getValue('forumgames_apikey');
     if (!key) {
       const input = window.prompt(`Please input your GGn API key.
@@ -53,8 +80,7 @@
     }
 
     return key;
-  }
-  const API_KEY = getApiKey();
+  })();
 
   // Execute an API call and also handle throttling to 5 calls per 10 seconds
   async function apiCall(options) {
@@ -62,7 +88,7 @@
       const tenSecondTime = parseInt(window.localStorage.quickCrafterTenSecondTime) || 0;
       const nowTimeBeforeWait = new Date().getTime();
       if (
-        (parseInt(window.localStorage.quickCrafterApiRequests) || 0) >= 5 &&
+        (parseInt(window.localStorage.quickCrafterApiRequests) || 0) >= MAX_API_QUERIES_BEFORE_THROTTLE &&
         nowTimeBeforeWait - tenSecondTime < TEN_SECOND_DELAY_MILLIS
       ) {
         log(
@@ -89,42 +115,115 @@
       method: 'GET',
       url: '/api.php',
       headers: {'X-API-Key': API_KEY},
+    }).then((data) => {
+      const status = data.status;
+      if (status !== 'success' || !'response' in data) {
+        error(`API returned unsuccessful: ${status}`, data);
+        return;
+      }
+      return data.response;
     });
   }
 
-  let inventoryAmounts;
-  let fetching = false;
-  async function getInventoryAmounts() {
-    if (fetching || inventoryAmounts) {
-      while (!inventoryAmounts) await new Promise((r) => setTimeout(r, 30));
-      return inventoryAmounts;
+  const inventoryAmounts = await (async function getInventoryAmounts() {
+    return await apiCall({data: {request: 'items', type: 'inventory'}})
+      .then((response) => {
+        if (response === undefined) {
+          window.noty({type: 'error', text: `Quick Crafting loading inventory failed. Please check logs and reload.`});
+          return;
+        }
+        return Object.fromEntries(
+          Object.values(response)
+            .map(({itemid, amount}) => [parseInt(itemid), parseInt(amount)])
+            .sort(([itemida], [itemidb]) => itemida - itemidb)
+            // Combine equipment into single count (equipable items are represented separately as they have state)
+            .reduce((all, next) => {
+              if (all.length && next[0] === all[all.length - 1][0]) all[all.length - 1][1] += next[1];
+              else all.push(next);
+              return all;
+            }, []),
+        );
+      })
+      .catch((reason) => console.error(reason));
+  })();
+  if (inventoryAmounts === undefined) return;
+
+  let fetchingEquip = false;
+  let equipment;
+  async function getEquipment(refetch = false) {
+    if (fetchingEquip || (!refetch && equipment)) {
+      while (!equipment) await new Promise((r) => setTimeout(r, 30));
+      return equipment;
     } else {
       fetching = true;
-      return await apiCall({data: {request: 'items', type: 'inventory'}})
-        .then((data) => {
-          const status = data.status;
-          if (status !== 'success' || !'response' in data) {
-            error(`API returned unsuccessful: ${status}`, data);
-            page = -1;
+      await apiCall({data: {request: 'items', type: 'users_equippable'}})
+        .then((response) => {
+          if (response === undefined) {
+            window.noty({
+              type: 'error',
+              text: `Quick Crafting loading equippable failed. Please check logs and reload.`,
+            });
             return;
           }
-          inventoryAmounts = Object.fromEntries(
-            Object.values(data.response) // TODO not sure how multiple equippable items are represented
-              // TODO figure out if they always are amount===1 and summing here is correct
-              .sort(({itemida}, {itemidb}) => itemida - itemidb)
-              .map(({itemid, amount}) => [itemid, parseInt(amount)])
-              .reduce((all, next) => {
-                if (all.length && next[0] === all[all.length - 1][0]) all[all.length - a][1] += next[1];
-                else all.push(next);
-                return all;
-              }, []),
-          );
-          return inventoryAmounts;
+          equipment = response.map((item) => {
+            // Clean up the data.. it's real messy
+            if (item.timeUntilBreak === 'Null') {
+              delete item.timeUntilBreak;
+            }
+            ['id', 'itemid', 'experience', 'equippedBefore', 'timeUntilBreak'].forEach(
+              (prop) => prop in item && (item[prop] = parseInt(item[prop])),
+            );
+            return item;
+          });
+        })
+        .catch((reason) => console.error(reason));
+      if (!equipment) return;
+      return await apiCall({data: {request: 'items', type: 'users_equipped'}})
+        .then((response) => {
+          if (response === undefined) {
+            window.noty({
+              type: 'warning',
+              text: `Quick Crafting loading equipped failed. This should only affect repairs. Check logs and reload to fix.`,
+            });
+            return;
+          }
+          response
+            .map((item) => {
+              // Clean up the data.. it's real messy
+              delete item.breakTime;
+              ['buffID', 'equipid', 'experience', 'itemid', 'slotid'].forEach(
+                (prop) => (item[prop] = parseInt(item[prop])),
+              );
+
+              return item;
+            })
+            .forEach((item) => {
+              const equip = equipment.find((equip) => equip.id === item.equipid);
+              equip.equipped = true;
+              equip.slotId = item.slotid;
+            });
+          return equipment;
         })
         .catch((reason) => console.error(reason));
     }
   }
-  await getInventoryAmounts();
+  equipment = await getEquipment();
+
+  // Includes equipped items when option is selected.
+  let inventoryFull;
+  function updateInventory() {
+    inventoryFull = {...inventoryAmounts};
+    if (GM_getValue(gmKeyEquippedRepair, false)) {
+      // Add equipped to counts
+      equipment
+        .filter(({equipped}) => equipped)
+        .forEach(({itemid}) => {
+          if (!(itemid in inventoryFull)) inventoryFull[itemid] = 0;
+          ++inventoryFull[itemid];
+        });
+    }
+  }
+  updateInventory();
 
   function resolveNames(...potentialNames) {
     return $('<textarea />')
@@ -133,44 +232,128 @@
   }
 
   const recipeToItemsRegex = /.{5}/g;
+  const RECIPE_EQUIPMENT_ITEM_REGEX = /(\d{5})z(\d{5,})x/g;
+  const EQUIP_CANCELLED = 'XXXXX';
+  const EQUIP_CANCELLED_REGEXP = new RegExp(EQUIP_CANCELLED, 'g');
+  const XP_CANCELLED = 'XPXPX';
+  const XP_CANCELLED_REGEX = new RegExp(XP_CANCELLED, 'g');
 
+  function equippableItemId({itemid, id: equipId}) {
+    return `${itemid.toString().padStart(5, '0')}z${equipId.toString().padStart(5, '0')}x`;
+  }
   async function takeCraft(recipe) {
     const name = resolveNames(recipe.name, ingredients[recipe.itemId].name);
-    return await apiCall({
-      data: {request: 'items', type: 'crafting_result', action: 'take', recipe: recipe.recipe},
-    }).then((data) => {
-      const status = data.status;
-      if (status !== 'success' || !'response' in data) {
+
+    const recipeWithEquip = recipe.recipe
+      .match(recipeToItemsRegex)
+      .map((item) => {
+        if (item === blankSlot) return item;
+        const equips = equipment.filter((equip) => equip.itemid === parseInt(item));
+        // Not an equippable item
+        if (!equips.length) return item;
+
+        // Resolve equippable item IDs
+        const withoutExperience = equips.filter(({experience}) => !experience);
+        if (withoutExperience.length <= 1) {
+          // Display a message if the only available item (pet) has experience
+          if (!withoutExperience.length) return XP_CANCELLED;
+          return equippableItemId(withoutExperience[0]);
+        }
+        // Sort by timeUtilBreak
+        // Prioritize smallest timeUntilBreak
+        //   timeUntilBreak not in equip means unworn
+        withoutExperience.sort((a, b) => {
+          const timeA = timeUntilBreak in a ? a.timeUntilBreak : Number.MAX_SAFE_INTEGER;
+          const timeB = timeUntilBreak in b ? b.timeUntilBreak : Number.MAX_SAFE_INTEGER;
+          return timeA - timeB;
+        });
+
+        // All are unworn, just use first
+        if (!('timeUntilBreak' in equips[0])) return equippableItemId(equips[0]);
+
+        // Ask for id preference if more than one matching (eg. rings)
+        let chosen;
+        do {
+          chosen = window.prompt(
+            `Multiple potential equipment items available.
+Please enter the ID of the equipment you'd like to use to craft (or cancel).
+
+` +
+              equips
+                .map(
+                  ({id, timeUntilBreak, equipped}) =>
+                    `${id}: ${equipped ? '(equipped) ' : ''}${(timeUntilBreak / (3600 * 24)).toFixed(2)} days left`,
+                )
+                .join('\n'),
+            equips.map(({id}) => id).join(', '),
+          );
+          // Cancel/empty
+          if (!chosen) chosen = EQUIP_CANCELLED;
+          // Make sure a valid ID was entered
+          else if (!equips.filter(({id}) => id === parseInt(chosen)).length) chosen = null;
+        } while (!chosen);
+        if (parseInt(chosen)) return equippableItemId({itemid: item, id: chosen});
+        else return chosen;
+      })
+      .join('');
+
+    if (XP_CANCELLED_REGEX.test(recipeWithEquip)) {
+      window.noty({type: 'error', text: `${name} requires item that has XP. Please craft manually.`});
+      return false;
+    }
+    // Cancelled, stop here
+    if (EQUIP_CANCELLED_REGEXP.test(recipeWithEquip)) return false;
+
+    // Unequip equipped item to craft with it
+    const equipmentIdsToUnequip = RECIPE_EQUIPMENT_ITEM_REGEX.test(recipeWithEquip)
+      ? recipeWithEquip
+          .match(RECIPE_EQUIPMENT_ITEM_REGEX)
+          .map((match) => RECIPE_EQUIPMENT_ITEM_REGEX.exec(match)[2])
+          // Only if it's currently equipped
+          .filter((equipid) => equipment.find(({id, equipped}) => equipped && id === parseInt(equipid)))
+      : [];
+    const unequppedIds = (
+      await Promise.all(
+        equipmentIdsToUnequip.map((equipid) =>
+          apiCall({data: {request: 'items', type: 'unequip', equipid: equipid}}).then((response) => {
+            if (response === undefined) console.error(`Failed to unequip ${equipid}`);
+            else return equipid;
+          }),
+        ),
+      )
+    ).filter((id) => id);
+
+    const status = await apiCall({
+      data: {
+        request: 'items',
+        type: 'crafting_result',
+        action: 'take',
+        recipe: recipeWithEquip,
+      },
+    }).then((response) => {
+      if (response === undefined) {
         window.noty({type: 'error', text: `${name} crafting failed.`});
-        alert(`Crafting failed. Response from server: ${JSON.stringify(data)}`);
+        alert(`Crafting failed. Response from server: ${JSON.stringify(response)}`);
         return false;
       } else {
         window.noty({type: 'success', text: `${name} was crafted successfully.`});
         return true;
       }
     });
-  }
 
-  function logToConsole(logMethod, ...args) {
-    const resolvedArgs = args.map((arg) => (typeof arg === 'function' ? arg() : arg));
-    logMethod(...resolvedArgs);
-  }
+    // Re-equip unequipped items
+    await Promise.all(
+      unequppedIds.map((equipid) =>
+        apiCall({data: {request: 'items', type: 'equip', equipid: equipid}}).then((response) => {
+          if (response === undefined) console.error(`Failed to re-equip ${equipid}`, response);
+        }),
+      ),
+    );
 
-  const SCRIPT_START = new Date();
-  function timing(message, ...args) {
-    // logToConsole(console.debug, () => `[GGn Quick Crafting] (${new Date() - SCRIPT_START}) ${message}`, ...args);
-  }
+    // TODO inventory can be updated as part of unequip/reequip to fix dirty hack in resolveCraft
+    // But doing it here is too soon.. more consolidated data might help.
 
-  function debug(message, ...args) {
-    //logToConsole(console.debug, `[GGn Quick Crafting] ${message}`, ...args);
-  }
-
-  function log(message, ...args) {
-    logToConsole(console.log, `[GGn Quick Crafting] ${message}`, ...args);
-  }
-
-  function error(message, ...args) {
-    logToConsole(console.error, `[GGn Quick Crafting] ${message}`, ...args);
+    return status;
   }
 
   function chunkArray(chunkSize) {
@@ -186,7 +369,6 @@
       return resultArray;
     };
   }
-
   //
   // #endregion Helper functions
   //
@@ -203,6 +385,7 @@
   //
   // Maps ingredient IDs to partial info about them from API
   //
+  // TODO extract to external file
   // prettier-ignore
   const ingredients = {
     46: {name: 'Obsidian Plate Armor', image: 'static/common/items/Cover/Armor/2_black.png', category: 'Equipment', gold: '600', infStock: true},
@@ -702,6 +885,8 @@
   //    See https://gazellegames.net/wiki.php?action=article&id=401#_2452401087 for details
   //  name (optional) is the recipe display name. Item's name (via itemId) is used if omitted
   //
+  // TODO extract to external file
+  //
   // prettier-ignore
   const recipes = [
     {itemId: 1988, recipe: 'EEEEEEEEEEEEEEEEEEEE01987EEEEEEEEEEEEEEEEEEEE', book: 'Glass', type: 'Standard', requirement: 1, name: 'Glass Shards From Sand'},
@@ -1137,6 +1322,8 @@
   //
   // #region Stylesheets
   //
+  // TODO extract to external sass/scss
+  //
   $('head').append(`<style>
 .crafting-clear {
   clear: both;
@@ -1155,6 +1342,9 @@
 .crafting-panel__title {
   margin-bottom: .5rem;
   margin-top: 0;
+}
+.crafting-panel__title-equipped-count {
+  color: red;
 }
 .crafting-panel__column {
   display: flex;
@@ -1195,7 +1385,17 @@
   margin: 0 4px;
 }
 .crafting-panel-info__ingredients-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   margin-bottom: .5rem;
+}
+.crafting-panel-info__ingredients-header-text {
+  margin: 0;
+}
+.crafting-panel-info__ingredients-swap {
+  flex-grow: 1;
+  text-align: right;
 }
 .crafting-panel-info__ingredient-row {
   display: flex;
@@ -1235,6 +1435,9 @@
 .crafting-panel-info__ingredient--purchasable,
 .crafting-panel-info__available-with-purchase--purchasable {
   color: lightGreen;
+}
+.crafting-panel-info__ingredient-quantity-on-hand--equipped {
+  color: red;
 }
 .crafting-panel-actions {
   display: flex;
@@ -1487,12 +1690,9 @@ a.disabled {
   //
   // #region DOM functions
   //
-  const gmKeyCurrentCraft = 'current_craft';
   const dataChangeEvent = 'changeData';
   const filterChangeEvent = 'changeFilter';
   const sortChangeEvent = 'changeSort';
-  const gmKeyRecipeFilters = 'recipe-filters';
-  const gmKeyRecipeSort = 'recipe-sort';
 
   const types = ['Standard', 'Repair', 'Upgrade', 'Downgrade'];
   const initialFilters = GM_getValue(gmKeyRecipeFilters, {
@@ -1529,18 +1729,18 @@ a.disabled {
     craftingPanelTitle.data({name: undefined, available: 0}).trigger(dataChangeEvent);
     craftingPanelSlots.add(craftingPanelResult).data({id: 0}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: 0}).trigger(dataChangeEvent);
+    craftingIngredients.data({id: 0, count: 0, available: 0, equipped: 0, purchasable: -1}).trigger(dataChangeEvent);
     craftingActionsMenu.data({recipe: undefined});
     craftingInfoActions.data({available: 0, purchasable: -1}).trigger(dataChangeEvent);
     GM_deleteValue(gmKeyCurrentCraft);
   }
 
   const blankSlot = 'EEEEE';
-  async function setRecipe() {
+  function setRecipe() {
     if (isCrafting) return;
 
     const elem = $(this);
     const {recipe: info} = elem.data();
-    const inventory = await getInventoryAmounts();
     const {itemId, name, recipe, requirement} = info;
     const counts = {};
     const resolvedName = resolveNames(name || ingredients[itemId].name);
@@ -1550,7 +1750,7 @@ a.disabled {
     recipeButtons.find('.recipes__recipe--selected').removeClass('recipes__recipe--selected');
     elem.addClass('recipes__recipe--selected');
 
-    craftingPanelTitle.data({name: resolvedName, available: inventory[itemId] || 0}).trigger(dataChangeEvent);
+    craftingPanelTitle.data({name: resolvedName, available: inventoryAmounts[itemId]}).trigger(dataChangeEvent);
     craftingPanelResult.data({id: itemId}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: requirement}).trigger(dataChangeEvent);
 
@@ -1574,17 +1774,19 @@ a.disabled {
       craftingIngredients.eq(i).data({
         id: itemId || 0,
         count: (itemId && counts[itemId]) || 0,
-        available: (itemId && inventory[itemId]) || 0,
+        available: (itemId && inventoryFull[itemId]) || 0,
+        equipped: equipment.filter(({equipped, itemid}) => equipped && itemid === itemId).length,
         purchasable: -1,
       });
     });
     craftingIngredients.removeClass('crafting-panel-info__ingredient--purchasable').trigger(dataChangeEvent);
+    craftingActionsMenu.data({recipe: info});
 
     const available = Math.floor(
       Math.min(
         ...Object.entries(counts)
           .filter(([itemId, _]) => parseInt(itemId))
-          .map(([itemId, count]) => (inventory[itemId] || 0) / count),
+          .map(([itemId, count]) => (inventoryFull[itemId] || 0) / count),
       ),
     );
     craftingInfoActions.data({available: available, purchasable: -1}).trigger(dataChangeEvent);
@@ -1641,29 +1843,56 @@ a.disabled {
     updatePurchasable();
   }
 
-  async function resolveCraft(recipe, available) {
-    const inventory = await getInventoryAmounts();
-
+  function resolveCraft(recipe, available) {
     recipe.recipe
       .match(recipeToItemsRegex)
       .filter((item) => item !== blankSlot)
       .map((item) => parseInt(item))
       .forEach((item) => {
         // Update data on relevant craftingIngredient item if one matches
-        const ingredient = $(craftingIngredients.toArray().find((elem) => $(elem).data().id === item));
+        const ingredient = craftingIngredients.filter(function () {
+          return $(this).data().id === item;
+        });
+        if (!ingredient.length) return;
         const {count} = ingredient.data();
-        ingredient.data({available: --inventory[item]}).trigger(dataChangeEvent);
-        available = Math.min(available, Math.floor(inventory[item] / count));
+
+        // Dirty hack to make repairs behave correctly with updating numbers
+        // Just skip the item being repaired / "created"
+        if (recipe.type !== 'Repair' || item !== recipe.itemId) {
+          ingredient.data({available: --inventoryFull[item]}).trigger(dataChangeEvent);
+          --inventoryAmounts[item];
+        }
+        if (item === craftingPanelResult.data().id) {
+          // Set count on title for when tracking manual craft
+          craftingPanelTitle.data({available: inventoryFull[recipe.itemId]}).trigger(dataChangeEvent);
+        }
+        available = Math.min(available, Math.floor(inventoryFull[item] / count));
       });
-    if (!(recipe.itemId in inventory)) {
-      inventory[recipe.itemId] = 0;
-    }
-    ++inventory[recipe.itemId];
-    if (recipe.itemId === craftingPanelResult.data().id) {
-      // Set in inventory and on title
-      craftingPanelTitle.data({available: inventory[recipe.itemId]}).trigger(dataChangeEvent);
+    if (recipe.type !== 'Repair') {
+      if (!(recipe.itemId in inventoryFull)) {
+        inventoryFull[recipe.itemId] = 0;
+      }
+      if (!(recipe.itemId in inventoryAmounts)) {
+        inventoryAmounts[recipe.itemId] = 0;
+      }
+      ++inventoryFull[recipe.itemId];
+      ++inventoryAmounts[recipe.itemId];
+      // Also set on matching inventory lines for when tracking manual craft
+      craftingIngredients
+        .filter(function () {
+          return $(this).data().id === recipe.itemId;
+        })
+        .data({available: inventoryFull[recipe.itemId]})
+        .trigger(dataChangeEvent);
     }
 
+    if (recipe.itemId === craftingPanelResult.data().id) {
+      // Set count on title
+      craftingPanelTitle.data({available: inventoryFull[recipe.itemId]}).trigger(dataChangeEvent);
+    }
+
+    // Update equipment states for ater crafts
+    getEquipment(true);
     updatePurchasable();
     return available;
   }
@@ -1676,21 +1905,21 @@ a.disabled {
     const craftNumber = craftNumberSelect.children('option:selected').val();
     const {recipe} = craftingActionsMenu.data();
 
-      for (let i = 0; i < craftNumber; i++) {
-        await new Promise((resolve) =>
-          setTimeout(async function () {
-            let available = craftingInfoActions.data().available;
-            if (await takeCraft(recipe)) {
-            available = await resolveCraft(recipe, available);
-            }
-            // Recalculate available for live display
-            craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
-            resolve();
-          }, CRAFT_TIME),
-        );
-      }
-      craftingActionsMenu.find('button, select').prop('disabled', false).removeClass('disabled');
-      isCrafting = false;
+    for (let i = 0; i < craftNumber; i++) {
+      await new Promise((resolve) =>
+        setTimeout(async function () {
+          let available = craftingInfoActions.data().available;
+          if (await takeCraft(recipe)) {
+            available = resolveCraft(recipe, available);
+          }
+          // Recalculate available for live display
+          craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
+          resolve();
+        }, CRAFT_TIME),
+      );
+    }
+    craftingActionsMenu.find('button, select').prop('disabled', false).removeClass('disabled');
+    isCrafting = false;
   }
 
   async function tryDoMaximumCraft() {
@@ -1774,7 +2003,24 @@ a.disabled {
                 // #region Crafting text/actions display
                 //
                 (craftingInfoActions = $('<div class="crafting-panel-info-actions">').append(
-                  '<div class="crafting-panel-info__ingredients-header">Ingredients:</div>',
+                  $('<div class="crafting-panel-info__ingredients-header">').append(
+                    '<h3 class="crafting-panel-info__ingredients-header-text">Ingredients:</h3>',
+                    $(
+                      '<label class="crafting-panel-info__ingredients-swap" title="Switches item counts between needed/have and have/needed">',
+                    ).append(
+                      'N/H switch',
+                      $('<input type="checkbox" />')
+                        .prop('checked', GM_getValue('NHswitch', false))
+                        .change(function () {
+                          const checked = $(this).prop('checked');
+                          $('.crafting-panel-info__ingredient-quantity').toggleClass(
+                            'crafting-panel-info__ingredient-quantity--swapped',
+                            checked,
+                          );
+                          GM_setValue('NHswitch', checked);
+                        }),
+                    ),
+                  ),
                   ...(craftingIngredients = $(
                     Array.from(new Array(9)).map(() => $(`<div class="crafting-panel-info__ingredient-row">`)[0]),
                   )
@@ -1822,8 +2068,8 @@ a.disabled {
                       tryDoMaximumCraft,
                     ),
                   )),
-                  $('<button class="crafting-panel-actions__clear-craft-button">Clear</button>').click(() =>
-                    resetQuickCraftingMenu(),
+                  $('<button class="crafting-panel-actions__clear-craft-button">Clear</button>').click(
+                    resetQuickCraftingMenu,
                   ),
                 )),
               ),
@@ -1871,17 +2117,20 @@ a.disabled {
                         GM_setValue('SEG', checked);
                       }),
                   ),
-                  $('<label title="Switches item counts between needed/have and have/needed">').append(
-                    'N/H switch',
+                  $('<label>').append(
+                    'Allow equipped item repair',
                     $('<input type="checkbox" />')
-                      .prop('checked', GM_getValue('NHswitch', false))
-                      .change(function () {
+                      .prop('checked', GM_getValue(gmKeyEquippedRepair, false))
+                      .change(async function () {
                         const checked = $(this).prop('checked');
-                        $('.crafting-panel-info__ingredient-quantity').toggleClass(
-                          'crafting-panel-info__ingredient-quantity--swapped',
-                          checked,
-                        );
-                        GM_setValue('NHswitch', checked);
+                        GM_setValue(gmKeyEquippedRepair, checked);
+                        updateInventory();
+
+                        // Just click the selected recipe, because getting all the data to the right places here is a pain
+                        $('.recipes__recipe--selected').click();
+                        // This might change what's showing on craftable/repair showing
+                        const {craftable, types} = recipeButtons.data().filters;
+                        if (craftable && types.includes('Repair')) recipeButtons.trigger(filterChangeEvent);
                       }),
                   ),
                 ),
@@ -2251,7 +2500,7 @@ a.disabled {
   });
 
   craftingIngredients
-    .data({id: 0, count: 0, available: 0, purchasable: -1})
+    .data({id: 0, count: 0, available: 0, equipped: 0, purchasable: -1})
     .on(dataChangeEvent, function () {
       const elem = $(this);
       const link = elem.find('.crafting-panel-info__ingredient-shop-link');
@@ -2260,13 +2509,18 @@ a.disabled {
       const perCraft = elem.find('.crafting-panel-info__ingredient-quantity-per-craft');
       const purchaseWrapper = elem.find('.crafting-panel-info__ingredient-quantity-purchasable');
       const purchaseNeeded = elem.find('.crafting-panel-info__ingredient-quantity-purchasable-value');
-      const {id, count, available, purchasable} = elem.data();
+      const {id, count, available, equipped, purchasable} = elem.data();
       if (id && count) {
         link
           .attr('href', `https://gazellegames.net/shop.php?ItemID=${id}`)
           .toggleClass('crafting-panel-info__ingredient-shop-link--purchasable', ingredients[id].infStock);
         nameNode.text(`${resolveNames(ingredients[id].name)}:`);
-        onHand.text(available);
+        onHand
+          .text(available)
+          .toggleClass(
+            'crafting-panel-info__ingredient-quantity-on-hand--equipped',
+            GM_getValue(gmKeyEquippedRepair, false) && !!equipped,
+          );
         perCraft.text(count);
         purchaseNeeded.text(~purchasable ? purchasable : undefined);
         if (!~purchasable) purchaseWrapper.hide();
@@ -2335,10 +2589,9 @@ a.disabled {
       } else $(this).append(recipes);
       GM_setValue(gmKeyRecipeSort, sort);
     })
-    .on(filterChangeEvent, async function () {
+    .on(filterChangeEvent, function () {
       const {filters} = $(this).data();
       const {books, categories, craftable, includeIngredients, search, types} = filters;
-      const inventory = await getInventoryAmounts();
       const allIngredients = ingredients;
       $(this)
         .find('.recipes__recipe')
@@ -2386,15 +2639,15 @@ a.disabled {
   const oldCleanupCraftingResult = window.cleanupCraftingResult;
 
   window.takeCraftingResult = (recipe) => {
-    manualCraftRecipe = recipe;
+    manualCraftRecipe = recipe.replace(RECIPE_EQUIPMENT_ITEM_REGEX, '$1');
     oldTakeCraftingResult(recipe);
   };
 
-  window.cleanupCraftingResult = async () => {
+  window.cleanupCraftingResult = () => {
     oldCleanupCraftingResult();
     const recipe = recipes.find(({recipe}) => recipe === manualCraftRecipe);
     craftingInfoActions
-      .data('available', await resolveCraft(recipe, craftingInfoActions.data().available))
+      .data('available', resolveCraft(recipe, craftingInfoActions.data().available))
       .trigger(dataChangeEvent);
   };
 
