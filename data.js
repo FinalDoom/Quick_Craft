@@ -814,18 +814,27 @@ function getSparseIngredientsAndRecipes() {
         if (!recipeItems.includes(parseInt(ingred.id))) false && console.log('dropping', ingred);
         return recipeItems.includes(parseInt(ingred.id));
       })
-      .map((ingred) => [
-        parseInt(ingred.id),
-        {
-          name: ingred.name,
-          image: ingred.image,
-          category: ingred.category,
-          gold: ingred.gold,
-          // stock: ingred.stock,
-          infStock: ingred.infStock,
-          // description: ingred.description,
-        },
-      ]),
+      .map((ingred) => {
+        const life =
+          'equipLife' in ingred
+            ? {
+                equipLife: ingred.equipLife * 3600, // hours to seconds
+              }
+            : {};
+        return [
+          parseInt(ingred.id),
+          {
+            name: ingred.name,
+            image: ingred.image,
+            category: ingred.category,
+            gold: ingred.gold,
+            // stock: ingred.stock,
+            infStock: ingred.infStock,
+            ...life,
+            // description: ingred.description,
+          },
+        ];
+      }),
   );
   console.log('Items', window.items);
   window.recipes = Object.keys(recipesApiCache).flatMap((book) =>

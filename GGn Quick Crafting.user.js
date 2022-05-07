@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.9.3
+// @version      2.10.0
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -39,6 +39,7 @@
   const gmKeyRecipeFilters = 'recipe-filters';
   const gmKeyRecipeSort = 'recipe-sort';
   const gmKeyEquippedRepair = 'repair-equipped';
+  const gmKeyRepairThreshold = 'repair-threshold';
 
   function logToConsole(logMethod, ...args) {
     const resolvedArgs = args.map((arg) => (typeof arg === 'function' ? arg() : arg));
@@ -124,106 +125,6 @@
       return data.response;
     });
   }
-
-  const inventoryAmounts = await (async function getInventoryAmounts() {
-    return await apiCall({data: {request: 'items', type: 'inventory'}})
-      .then((response) => {
-        if (response === undefined) {
-          window.noty({type: 'error', text: `Quick Crafting loading inventory failed. Please check logs and reload.`});
-          return;
-        }
-        return Object.fromEntries(
-          Object.values(response)
-            .map(({itemid, amount}) => [parseInt(itemid), parseInt(amount)])
-            .sort(([itemida], [itemidb]) => itemida - itemidb)
-            // Combine equipment into single count (equipable items are represented separately as they have state)
-            .reduce((all, next) => {
-              if (all.length && next[0] === all[all.length - 1][0]) all[all.length - 1][1] += next[1];
-              else all.push(next);
-              return all;
-            }, []),
-        );
-      })
-      .catch((reason) => console.error(reason));
-  })();
-  if (inventoryAmounts === undefined) return;
-
-  let fetchingEquip = false;
-  let equipment;
-  async function getEquipment(refetch = false) {
-    if (fetchingEquip || (!refetch && equipment)) {
-      while (!equipment) await new Promise((r) => setTimeout(r, 30));
-      return equipment;
-    } else {
-      fetching = true;
-      await apiCall({data: {request: 'items', type: 'users_equippable'}})
-        .then((response) => {
-          if (response === undefined) {
-            window.noty({
-              type: 'error',
-              text: `Quick Crafting loading equippable failed. Please check logs and reload.`,
-            });
-            return;
-          }
-          equipment = response.map((item) => {
-            // Clean up the data.. it's real messy
-            if (item.timeUntilBreak === 'Null') {
-              delete item.timeUntilBreak;
-            }
-            ['id', 'itemid', 'experience', 'equippedBefore', 'timeUntilBreak'].forEach(
-              (prop) => prop in item && (item[prop] = parseInt(item[prop])),
-            );
-            return item;
-          });
-        })
-        .catch((reason) => console.error(reason));
-      if (!equipment) return;
-      return await apiCall({data: {request: 'items', type: 'users_equipped'}})
-        .then((response) => {
-          if (response === undefined) {
-            window.noty({
-              type: 'warning',
-              text: `Quick Crafting loading equipped failed. This should only affect repairs. Check logs and reload to fix.`,
-            });
-            return;
-          }
-          response
-            .map((item) => {
-              // Clean up the data.. it's real messy
-              delete item.breakTime;
-              ['buffID', 'equipid', 'experience', 'itemid', 'slotid'].forEach(
-                (prop) => (item[prop] = parseInt(item[prop])),
-              );
-
-              return item;
-            })
-            .forEach((item) => {
-              const equip = equipment.find((equip) => equip.id === item.equipid);
-              equip.equipped = true;
-              equip.slotId = item.slotid;
-            });
-          return equipment;
-        })
-        .catch((reason) => console.error(reason));
-    }
-  }
-  equipment = await getEquipment();
-
-  // Includes equipped items when option is selected.
-  let inventoryFull;
-  function updateInventory() {
-    inventoryFull = {...inventoryAmounts};
-    if (GM_getValue(gmKeyEquippedRepair, false)) {
-      // Add equipped to counts
-      equipment
-        .filter(({equipped}) => equipped)
-        .forEach(({itemid}) => {
-          if (!(itemid in inventoryFull)) inventoryFull[itemid] = 0;
-          ++inventoryFull[itemid];
-        });
-    }
-  }
-  updateInventory();
 
   function resolveNames(...potentialNames) {
     return $('<textarea />')
@@ -437,16 +338,16 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     2242: {name: 'Quartz Bar', image: 'static/common/items/Items/Ore/quartz_bar.png', category: 'Crafting Materials', gold: '2500', infStock: false},
     2243: {name: 'Jade Bar', image: 'static/common/items/Items/Ore/jade_bar.png', category: 'Crafting Materials', gold: '5000', infStock: false},
     2244: {name: 'Amethyst Bar', image: 'static/common/items/Items/Ore/amethyst_bar.png', category: 'Crafting Materials', gold: '16000', infStock: false},
-    2261: {name: 'Impure Bronze Cuirass', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Cuirass.png', category: 'Equipment', gold: '2300', infStock: false},
-    2262: {name: 'Bronze Cuirass', image: 'https://ptpimg.me/3mf3lw.png', category: 'Equipment', gold: '4000', infStock: false},
-    2263: {name: 'Iron Cuirass', image: 'static/common/items/Cover/Body Armor/Iron_Cuirass.png', category: 'Equipment', gold: '16000', infStock: false},
-    2264: {name: 'Steel Cuirass', image: 'static/common/items/Cover/Body Armor/Steel_Cuirass.png', category: 'Equipment', gold: '18000', infStock: false},
-    2265: {name: 'Gold Cuirass', image: 'static/common/items/Cover/Body Armor/Gold_Cuirass.png', category: 'Equipment', gold: '28000', infStock: false},
-    2266: {name: 'Mithril Cuirass', image: 'static/common/items/Cover/Body Armor/Mithril_Cuirass.png', category: 'Equipment', gold: '55000', infStock: false},
-    2267: {name: 'Adamantium Cuirass', image: 'static/common/items/Cover/Body Armor/Adamantium_Cuirass.png', category: 'Equipment', gold: '160000', infStock: false},
-    2268: {name: 'Quartz Chainmail', image: 'static/common/items/Cover/Body Armor/Quartz_Chainmail.png', category: 'Equipment', gold: '5000', infStock: false},
-    2269: {name: 'Jade Chainmail', image: 'static/common/items/Cover/Body Armor/Jade_Chainmail.png', category: 'Equipment', gold: '20000', infStock: false},
-    2270: {name: 'Amethyst Chainmail', image: 'static/common/items/Cover/Body Armor/Amethyst_Chainmail.png', category: 'Equipment', gold: '80000', infStock: false},
+    2261: {name: 'Impure Bronze Cuirass', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Cuirass.png', category: 'Equipment', gold: '2300', infStock: false, equipLife: 2592000},
+    2262: {name: 'Bronze Cuirass', image: 'https://ptpimg.me/3mf3lw.png', category: 'Equipment', gold: '4000', infStock: false, equipLife: 2592000},
+    2263: {name: 'Iron Cuirass', image: 'static/common/items/Cover/Body Armor/Iron_Cuirass.png', category: 'Equipment', gold: '16000', infStock: false, equipLife: 2592000},
+    2264: {name: 'Steel Cuirass', image: 'static/common/items/Cover/Body Armor/Steel_Cuirass.png', category: 'Equipment', gold: '18000', infStock: false, equipLife: 2592000},
+    2265: {name: 'Gold Cuirass', image: 'static/common/items/Cover/Body Armor/Gold_Cuirass.png', category: 'Equipment', gold: '28000', infStock: false, equipLife: 2592000},
+    2266: {name: 'Mithril Cuirass', image: 'static/common/items/Cover/Body Armor/Mithril_Cuirass.png', category: 'Equipment', gold: '55000', infStock: false, equipLife: 2592000},
+    2267: {name: 'Adamantium Cuirass', image: 'static/common/items/Cover/Body Armor/Adamantium_Cuirass.png', category: 'Equipment', gold: '160000', infStock: false, equipLife: 2592000},
+    2268: {name: 'Quartz Chainmail', image: 'static/common/items/Cover/Body Armor/Quartz_Chainmail.png', category: 'Equipment', gold: '5000', infStock: false, equipLife: 2592000},
+    2269: {name: 'Jade Chainmail', image: 'static/common/items/Cover/Body Armor/Jade_Chainmail.png', category: 'Equipment', gold: '20000', infStock: false, equipLife: 2592000},
+    2270: {name: 'Amethyst Chainmail', image: 'static/common/items/Cover/Body Armor/Amethyst_Chainmail.png', category: 'Equipment', gold: '80000', infStock: false, equipLife: 2592000},
     2295: {name: 'Pile of Snow', image: 'static/common/items/Items/Christmas/snow.png', category: 'Crafting Materials', gold: '700', infStock: true},
     2296: {name: 'Snowball', image: 'static/common/items/Items/Christmas/snowball_small.png', category: 'Crafting Materials', gold: '1400', infStock: false},
     2297: {name: 'Candy Cane', image: 'static/common/items/Items/Christmas/candycane.png', category: 'Crafting Materials', gold: '1000', infStock: true},
@@ -457,7 +358,7 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     2305: {name: 'Large Snowball', image: 'static/common/items/Items/Christmas/snowball.png', category: 'Crafting Materials', gold: '4200', infStock: false},
     2306: {name: 'Carrot', image: 'static/common/items/Items/Christmas/carrot.png', category: 'Crafting Materials', gold: '3500', infStock: true},
     2307: {name: 'Snowman', image: 'static/common/items/Items/Christmas/snowman.png', category: 'Stat potions', gold: '27500', infStock: false},
-    2321: {name: 'Gold Power Gloves', image: 'static/common/items/Cover/Gloves/Power_Gloves.png', category: 'Equipment', gold: '105000', infStock: true},
+    2321: {name: 'Gold Power Gloves', image: 'static/common/items/Cover/Gloves/Power_Gloves.png', category: 'Equipment', gold: '105000', infStock: true, equipLife: 2592000},
     2323: {name: 'Ruby', image: 'static/common/items/Items/Gems/ruby.png', category: 'Crafting Materials', gold: '25000', infStock: true},
     2333: {name: 'Gazelle Pet', image: 'static/common/items/Cover/Pets/gazelle.png', category: 'Equipment', gold: '12000', infStock: false},
     2357: {name: 'The Golden Daedy', image: 'static/common/items/Items/Card/Staff_The_Golden_Daedy.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -569,16 +470,16 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     2601: {name: 'Halloween Pumpkin Badge', image: 'static/common/items/Items/Badges/Halloween_Pumpkin_Badge.png', category: 'User badges', gold: '13500', infStock: false},
     2627: {name: 'Blacksmith Tongs', image: 'static/common/items/Items/Recast/blacksmith_tongs.png', category: 'Crafting Materials', gold: '50', infStock: true},
     2639: {name: 'Dwarven Disco Ball', image: 'static/common/items/Cover/Clothing/disco_ball.png', category: 'Equipment', gold: '900000', infStock: false},
-    2641: {name: 'Impure Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Claymore.png', category: 'Equipment', gold: '2300', infStock: false},
-    2642: {name: 'Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Claymore.png', category: 'Equipment', gold: '4000', infStock: false},
-    2643: {name: 'Iron Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Claymore.png', category: 'Equipment', gold: '16000', infStock: false},
-    2644: {name: 'Steel Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Claymore.png', category: 'Equipment', gold: '18000', infStock: false},
-    2645: {name: 'Gold Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Claymore.png', category: 'Equipment', gold: '28000', infStock: false},
-    2646: {name: 'Mithril Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Claymore.png', category: 'Equipment', gold: '55000', infStock: false},
-    2647: {name: 'Adamantium Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Claymore.png', category: 'Equipment', gold: '160000', infStock: false},
-    2648: {name: 'Quartz Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Khopesh.png', category: 'Equipment', gold: '5000', infStock: false},
-    2649: {name: 'Jade Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Khopesh.png', category: 'Equipment', gold: '20000', infStock: false},
-    2650: {name: 'Amethyst Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Khopesh.png', category: 'Equipment', gold: '80000', infStock: false},
+    2641: {name: 'Impure Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Impure_Bronze_Claymore.png', category: 'Equipment', gold: '2300', infStock: false, equipLife: 2592000},
+    2642: {name: 'Bronze Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Bronze_Claymore.png', category: 'Equipment', gold: '4000', infStock: false, equipLife: 2592000},
+    2643: {name: 'Iron Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Iron_Claymore.png', category: 'Equipment', gold: '16000', infStock: false, equipLife: 2592000},
+    2644: {name: 'Steel Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Steel_Claymore.png', category: 'Equipment', gold: '18000', infStock: false, equipLife: 2592000},
+    2645: {name: 'Gold Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Gold_Claymore.png', category: 'Equipment', gold: '28000', infStock: false, equipLife: 2592000},
+    2646: {name: 'Mithril Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Mithril_Claymore.png', category: 'Equipment', gold: '55000', infStock: false, equipLife: 2592000},
+    2647: {name: 'Adamantium Claymore', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Adamantium_Claymore.png', category: 'Equipment', gold: '160000', infStock: false, equipLife: 2592000},
+    2648: {name: 'Quartz Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Quartz_Khopesh.png', category: 'Equipment', gold: '5000', infStock: false, equipLife: 2592000},
+    2649: {name: 'Jade Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Jade_Khopesh.png', category: 'Equipment', gold: '20000', infStock: false, equipLife: 2592000},
+    2650: {name: 'Amethyst Khopesh', image: 'static/common/items/Cover/Two-Handed Melee Weapon/Amethyst_Khopesh.png', category: 'Equipment', gold: '80000', infStock: false, equipLife: 2592000},
     2653: {name: 'Flux', image: 'static/common/items/Items/Recast/flux.png', category: 'Crafting Materials', gold: '50', infStock: true},
     2656: {name: 'Impure Bronze Bar x2', image: 'static/common/items/Items/Ore/impure_bronze_bar.png', category: 'Crafting Materials', gold: '2500', infStock: false},
     2666: {name: 'Bronze Alloy Mix x2', image: 'static/common/items/Items/Ore/bronze.png', category: 'Crafting Materials', gold: '2000', infStock: false},
@@ -605,24 +506,24 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     2719: {name: 'Garlic Emerald-Baguette', image: 'static/common/items/Items/Food/garlic_emerald.png', category: 'Buffs', gold: '2500', infStock: false},
     2720: {name: 'Artisan Emerald-Baguette', image: 'static/common/items/Items/Food/artisan_emerald.png', category: 'Buffs', gold: '6000', infStock: false},
     2721: {name: 'Gazellian Emerald-Baguette', image: 'static/common/items/Items/Food/gazellian_emerald.png', category: 'Buffs', gold: '8000', infStock: false},
-    2729: {name: 'Empowered Quartz Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzringluck.png', category: 'Equipment', gold: '6600', infStock: false},
-    2730: {name: 'Empowered Jade Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjaderingluck.png', category: 'Equipment', gold: '27000', infStock: false},
-    2731: {name: 'Empowered Amethyst Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystringluck.png', category: 'Equipment', gold: '115000', infStock: false},
-    2732: {name: 'Empowered Quartz Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzringaggression.png', category: 'Equipment', gold: '7000', infStock: false},
-    2733: {name: 'Empowered Jade Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjaderingaggression.png', category: 'Equipment', gold: '31000', infStock: false},
-    2734: {name: 'Empowered Amethyst Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystringaggression.png', category: 'Equipment', gold: '127000', infStock: false},
-    2735: {name: 'Empowered Quartz Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzringfortune.png', category: 'Equipment', gold: '8500', infStock: false},
-    2736: {name: 'Empowered Jade Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjaderingfortune.png', category: 'Equipment', gold: '46000', infStock: false},
-    2737: {name: 'Empowered Amethyst Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystringfortune.png', category: 'Equipment', gold: '172000', infStock: false},
-    2738: {name: 'Empowered Quartz Prism of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckaggression.png', category: 'Equipment', gold: '18400', infStock: false},
-    2739: {name: 'Empowered Quartz Prism of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckluck.png', category: 'Equipment', gold: '16000', infStock: false},
-    2740: {name: 'Empowered Quartz Prism of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckfortune.png', category: 'Equipment', gold: '27400', infStock: false},
-    2741: {name: 'Empowered Jade Trifocal of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckaggression.png', category: 'Equipment', gold: '55750', infStock: false},
-    2742: {name: 'Empowered Jade Trifocal of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckluck.png', category: 'Equipment', gold: '47750', infStock: false},
-    2743: {name: 'Empowered Jade Trifocal of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckfortune.png', category: 'Equipment', gold: '85750', infStock: false},
-    2744: {name: 'Empowered Amethyst Totality of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckaggression.png', category: 'Equipment', gold: '230750', infStock: false},
-    2745: {name: 'Empowered Amethyst Totality of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckluck.png', category: 'Equipment', gold: '206750', infStock: false},
-    2746: {name: 'Empowered Amethyst Totality of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckfortune.png', category: 'Equipment', gold: '320750', infStock: false},
+    2729: {name: 'Empowered Quartz Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzringluck.png', category: 'Equipment', gold: '6600', infStock: false, equipLife: 7776000},
+    2730: {name: 'Empowered Jade Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjaderingluck.png', category: 'Equipment', gold: '27000', infStock: false, equipLife: 7776000},
+    2731: {name: 'Empowered Amethyst Loop of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystringluck.png', category: 'Equipment', gold: '115000', infStock: false, equipLife: 7776000},
+    2732: {name: 'Empowered Quartz Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzringaggression.png', category: 'Equipment', gold: '7000', infStock: false, equipLife: 7776000},
+    2733: {name: 'Empowered Jade Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjaderingaggression.png', category: 'Equipment', gold: '31000', infStock: false, equipLife: 7776000},
+    2734: {name: 'Empowered Amethyst Loop of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystringaggression.png', category: 'Equipment', gold: '127000', infStock: false, equipLife: 7776000},
+    2735: {name: 'Empowered Quartz Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzringfortune.png', category: 'Equipment', gold: '8500', infStock: false, equipLife: 7776000},
+    2736: {name: 'Empowered Jade Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjaderingfortune.png', category: 'Equipment', gold: '46000', infStock: false, equipLife: 7776000},
+    2737: {name: 'Empowered Amethyst Loop of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystringfortune.png', category: 'Equipment', gold: '172000', infStock: false, equipLife: 7776000},
+    2738: {name: 'Empowered Quartz Prism of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckaggression.png', category: 'Equipment', gold: '18400', infStock: false, equipLife: 7776000},
+    2739: {name: 'Empowered Quartz Prism of Luck', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckluck.png', category: 'Equipment', gold: '16000', infStock: false, equipLife: 7776000},
+    2740: {name: 'Empowered Quartz Prism of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredquartzneckfortune.png', category: 'Equipment', gold: '27400', infStock: false, equipLife: 7776000},
+    2741: {name: 'Empowered Jade Trifocal of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckaggression.png', category: 'Equipment', gold: '55750', infStock: false, equipLife: 7776000},
+    2742: {name: 'Empowered Jade Trifocal of Luck', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckluck.png', category: 'Equipment', gold: '47750', infStock: false, equipLife: 7776000},
+    2743: {name: 'Empowered Jade Trifocal of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredjadeneckfortune.png', category: 'Equipment', gold: '85750', infStock: false, equipLife: 7776000},
+    2744: {name: 'Empowered Amethyst Totality of Aggression', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckaggression.png', category: 'Equipment', gold: '230750', infStock: false, equipLife: 7776000},
+    2745: {name: 'Empowered Amethyst Totality of Luck', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckluck.png', category: 'Equipment', gold: '206750', infStock: false, equipLife: 7776000},
+    2746: {name: 'Empowered Amethyst Totality of Fortune', image: 'static/common/items/Cover/Jewelry/empoweredamethystneckfortune.png', category: 'Equipment', gold: '320750', infStock: false, equipLife: 7776000},
     2760: {name: 'Dwarven Disco Plate', image: 'static/common/items/Cover/Body Armor/Disco_Plate.png', category: 'Equipment', gold: '800000', infStock: false},
     2761: {name: 'Impure Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Impure_Bronze_Segmentata.png', category: 'Equipment', gold: '1150', infStock: false},
     2762: {name: 'Bronze Segmentata', image: 'static/common/items/Cover/Body Armor/Bronze_Segmentata.png', category: 'Equipment', gold: '2000', infStock: false},
@@ -676,15 +577,15 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     2864: {name: 'Iron Armguards', image: 'static/common/items/Cover/Arm Armor/Iron_Armguards.png', category: 'Equipment', gold: '7250', infStock: false},
     2865: {name: 'Steel Armguards', image: 'static/common/items/Cover/Arm Armor/Steel_Armguards.png', category: 'Equipment', gold: '11750', infStock: false},
     2866: {name: 'Gold Armguards', image: 'static/common/items/Cover/Arm Armor/Gold_Armguards.png', category: 'Equipment', gold: '18750', infStock: false},
-    2867: {name: 'Mithril Armguards', image: 'static/common/items/Cover/Arm Armor/Mithril_Armguards.png', category: 'Equipment', gold: '29750', infStock: false},
-    2868: {name: 'Adamantium Armguards', image: 'static/common/items/Cover/Arm Armor/Adamantium_Armguards.png', category: 'Equipment', gold: '61750', infStock: false},
+    2867: {name: 'Mithril Armguards', image: 'static/common/items/Cover/Arm Armor/Mithril_Armguards.png', category: 'Equipment', gold: '29750', infStock: false, equipLife: 7776000},
+    2868: {name: 'Adamantium Armguards', image: 'static/common/items/Cover/Arm Armor/Adamantium_Armguards.png', category: 'Equipment', gold: '61750', infStock: false, equipLife: 7776000},
     2892: {name: 'Glowing Ash', image: 'https://ptpimg.me/3i2xd1.png', category: 'Items', gold: '50', infStock: false},
     2893: {name: 'Troll Tooth', image: 'https://ptpimg.me/mrr24x.png', category: 'Items', gold: '50', infStock: false},
     2894: {name: 'Advanced Hide', image: 'https://ptpimg.me/1d6926.png', category: 'Items', gold: '50', infStock: false},
     2900: {name: 'Burning Ash Cloud', image: 'https://ptpimg.me/n7900m.png', category: 'Attacks', gold: '7500', infStock: false},
     2901: {name: 'Troll Tooth Necklace', image: 'https://ptpimg.me/480516.png', category: 'Items', gold: '3500', infStock: false},
-    2902: {name: 'Mithril Power Gloves', image: 'https://ptpimg.me/xiq9n9.png', category: 'Equipment', gold: '190000', infStock: false},
-    2903: {name: 'Adamantium Power Gloves', image: 'https://ptpimg.me/850f5v.png', category: 'Equipment', gold: '305000', infStock: false},
+    2902: {name: 'Mithril Power Gloves', image: 'https://ptpimg.me/xiq9n9.png', category: 'Equipment', gold: '190000', infStock: false, equipLife: 2592000},
+    2903: {name: 'Adamantium Power Gloves', image: 'https://ptpimg.me/850f5v.png', category: 'Equipment', gold: '305000', infStock: false, equipLife: 2592000},
     2905: {name: 'Steel Power Gloves', image: 'https://ptpimg.me/oqwww2.png', category: 'Equipment', gold: '37000', infStock: false},
     2906: {name: 'Iron Power Gloves', image: 'https://ptpimg.me/999ex6.png', category: 'Equipment', gold: '22500', infStock: false},
     2907: {name: 'Bronze Power Gloves', image: 'https://ptpimg.me/v98n53.png', category: 'Equipment', gold: '11000', infStock: false},
@@ -758,9 +659,9 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     3143: {name: 'Symbol of Love', image: 'https://ptpimg.me/cf9vfc.png', category: 'Crafting Materials', gold: '100000', infStock: false},
     3144: {name: 'Old Worn Boots', image: 'https://ptpimg.me/66unrh.png', category: 'Crafting Materials', gold: '10000', infStock: true},
     3145: {name: 'Cupid&#39;s Magical Feather', image: 'https://ptpimg.me/004ho6.png', category: 'Crafting Materials', gold: '21500', infStock: false},
-    3146: {name: 'Cupid&#39;s Winged Boots of Luck', image: 'https://ptpimg.me/1bx3k2.png', category: 'Equipment', gold: '200000', infStock: false},
-    3147: {name: 'Cupid&#39;s Winged Boots of Aggression', image: 'https://ptpimg.me/3983q6.png', category: 'Equipment', gold: '200000', infStock: false},
-    3148: {name: 'Cupid&#39;s Winged Boots of Fortune', image: 'https://ptpimg.me/mopf18.png', category: 'Equipment', gold: '200000', infStock: false},
+    3146: {name: 'Cupid&#39;s Winged Boots of Luck', image: 'https://ptpimg.me/1bx3k2.png', category: 'Equipment', gold: '200000', infStock: false, equipLife: 5184000},
+    3147: {name: 'Cupid&#39;s Winged Boots of Aggression', image: 'https://ptpimg.me/3983q6.png', category: 'Equipment', gold: '200000', infStock: false, equipLife: 5184000},
+    3148: {name: 'Cupid&#39;s Winged Boots of Fortune', image: 'https://ptpimg.me/mopf18.png', category: 'Equipment', gold: '200000', infStock: false, equipLife: 5184000},
     3151: {name: 'Bill Rizer', image: 'static/common/items/Items/Card/11th_Birthday_Bill_Rizer.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3152: {name: 'Donkey Kong', image: 'static/common/items/Items/Card/11th_Birthday_Donkey_Kong.png', category: 'Trading Cards', gold: '3000', infStock: false},
     3153: {name: 'Duck Hunt Dog', image: 'static/common/items/Items/Card/11th_Birthday_Duck_Hunt_Dog.png', category: 'Trading Cards', gold: '3000', infStock: false},
@@ -820,10 +721,10 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
     3339: {name: 'Doomguy ', image: 'static/common/items/Items/Card/Christmas2021_Doomguy.png', category: 'Trading Cards', gold: '10000', infStock: false},
     3340: {name: 'Grievous', image: 'static/common/items/Items/Card/Christmas2021_Grievous.png', category: 'Trading Cards', gold: '10000', infStock: false},
     3341: {name: 'Have a Breathtaking Christmas', image: 'https://gazellegames.net/static/common/items/Items/Card/Christmas2021_Have_a_Breathtaking_Christmas.png', category: 'Trading Cards', gold: '35000', infStock: false},
-    3348: {name: 'Cupid&#39;s Wings', image: 'static/common/items/Items/Valentine2022/cupids_wings_avatar.png', category: 'Equipment', gold: '10000', infStock: true},
-    3349: {name: 'Cupid&#39;s Gold Wings', image: 'static/common/items/Items/Valentine2022/cupids_gold_wings_avatar.png', category: 'Equipment', gold: '36000', infStock: false},
-    3352: {name: 'Cupid&#39;s Mithril Wings', image: 'static/common/items/Items/Valentine2022/cupids_mithril_wings_avatar.png', category: 'Equipment', gold: '87000', infStock: false},
-    3353: {name: 'Cupid&#39;s Adamantium Wings', image: 'static/common/items/Items/Valentine2022/cupids_adamantium_wings_avatar.png', category: 'Equipment', gold: '239000', infStock: false},
+    3348: {name: 'Cupid&#39;s Wings', image: 'static/common/items/Items/Valentine2022/cupids_wings_avatar.png', category: 'Equipment', gold: '10000', infStock: true, equipLife: 7776000},
+    3349: {name: 'Cupid&#39;s Gold Wings', image: 'static/common/items/Items/Valentine2022/cupids_gold_wings_avatar.png', category: 'Equipment', gold: '36000', infStock: false, equipLife: 7776000},
+    3352: {name: 'Cupid&#39;s Mithril Wings', image: 'static/common/items/Items/Valentine2022/cupids_mithril_wings_avatar.png', category: 'Equipment', gold: '87000', infStock: false, equipLife: 7776000},
+    3353: {name: 'Cupid&#39;s Adamantium Wings', image: 'static/common/items/Items/Valentine2022/cupids_adamantium_wings_avatar.png', category: 'Equipment', gold: '239000', infStock: false, equipLife: 7776000},
     3358: {name: 'Valentine&#39;s Day 2022 Badge', image: 'static/common/items/Items/Valentine2022/valentines_badge_shop.png', category: 'User badges', gold: '15000', infStock: false},
     3359: {name: 'Rose Petals', image: 'static/common/items/Items/Valentine2022/rose_petals.png', category: 'Crafting Materials', gold: '3750', infStock: false},
     3360: {name: 'Cupid&#39;s Tiara', image: 'static/common/items/Items/Valentine2022/cupids_tiara.png', category: 'Equipment', gold: '30000', infStock: false},
@@ -1316,6 +1217,126 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
   //
 
   //
+  // #region Inventory fetching
+  //
+  const inventoryAmounts = await (async function getInventoryAmounts() {
+    return await apiCall({data: {request: 'items', type: 'inventory'}})
+      .then((response) => {
+        if (response === undefined) {
+          window.noty({type: 'error', text: `Quick Crafting loading inventory failed. Please check logs and reload.`});
+          return;
+        }
+        return Object.fromEntries(
+          Object.values(response)
+            .map(({itemid, amount}) => [parseInt(itemid), parseInt(amount)])
+            .sort(([itemida], [itemidb]) => itemida - itemidb)
+            // Combine equipment into single count (equipable items are represented separately as they have state)
+            .reduce((all, next) => {
+              if (all.length && next[0] === all[all.length - 1][0]) all[all.length - 1][1] += next[1];
+              else all.push(next);
+              return all;
+            }, []),
+        );
+      })
+      .catch((reason) => console.error(reason));
+  })();
+  if (inventoryAmounts === undefined) return;
+
+  let fetchingEquip = false;
+  let equipment;
+  async function getEquipment(refetch = false) {
+    if (fetchingEquip || (!refetch && equipment)) {
+      while (!equipment) await new Promise((r) => setTimeout(r, 30));
+      return equipment;
+    } else {
+      fetching = true;
+      await apiCall({data: {request: 'items', type: 'users_equippable'}})
+        .then((response) => {
+          if (response === undefined) {
+            window.noty({
+              type: 'error',
+              text: `Quick Crafting loading equippable failed. Please check logs and reload.`,
+            });
+            return;
+          }
+          equipment = response.map((item) => {
+            // Clean up the data.. it's real messy
+            if (item.timeUntilBreak === 'Null') {
+              delete item.timeUntilBreak;
+            }
+            ['id', 'itemid', 'experience', 'equippedBefore', 'timeUntilBreak'].forEach(
+              (prop) => prop in item && (item[prop] = parseInt(item[prop])),
+            );
+            if (item.itemid in ingredients) {
+              item.equipLife = ingredients[item.itemid].equipLife;
+            }
+            return item;
+          });
+        })
+        .catch((reason) => console.error(reason));
+      if (!equipment) return;
+      return await apiCall({data: {request: 'items', type: 'users_equipped'}})
+        .then((response) => {
+          if (response === undefined) {
+            window.noty({
+              type: 'warning',
+              text: `Quick Crafting loading equipped failed. This should only affect repairs. Check logs and reload to fix.`,
+            });
+            return;
+          }
+          response
+            .map((item) => {
+              // Clean up the data.. it's real messy
+              delete item.breakTime;
+              ['buffID', 'equipid', 'experience', 'itemid', 'slotid'].forEach(
+                (prop) => (item[prop] = parseInt(item[prop])),
+              );
+
+              return item;
+            })
+            .forEach((item) => {
+              const equip = equipment.find((equip) => equip.id === item.equipid);
+              equip.equipped = true;
+              equip.slotId = item.slotid;
+            });
+          return equipment;
+        })
+        .catch((reason) => console.error(reason));
+    }
+  }
+  equipment = await getEquipment();
+
+  // Includes equipped items when option is selected.
+  let inventoryFull;
+  function updateInventory() {
+    const repairThreshold = GM_getValue(gmKeyRepairThreshold, 0) / 100;
+    inventoryFull = {...inventoryAmounts};
+    if (GM_getValue(gmKeyEquippedRepair, false)) {
+      // Add equipped to counts
+      equipment
+        .filter(({equipped}) => equipped)
+        // Only if it's broken under the repair threshold
+        .filter(({timeUntilBreak, equipLife}) => timeUntilBreak / equipLife < repairThreshold)
+        .forEach(({itemid}) => {
+          if (!(itemid in inventoryFull)) inventoryFull[itemid] = 0;
+          ++inventoryFull[itemid];
+        });
+    }
+    // Exclude equipment in inventory also if not broken enough
+    equipment
+      .filter(({equipped}) => !equipped)
+      .filter(
+        ({timeUntilBreak, equipLife, itemid}) =>
+          itemid in inventoryFull && timeUntilBreak / equipLife >= repairThreshold,
+      )
+      .forEach(({itemid}) => --inventoryFull[itemid]);
+  }
+  updateInventory();
+  //
+  // #endregion Inventory fetching
+  //
+
+  //
   // #region Document building
   //
 
@@ -1522,21 +1543,45 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
 .crafting-panel-settings {
   display: flex;
   flex-direction: column;
-  flex: 50%;
+}
+.crafting-panel-sorts__wrapper {
+  flex: 45%;
 }
 .crafting-panel-settings {
+  flex: 55%;
   align-items: end;
 }
 .crafting-panel-settings input {
   margin: 0;
   margin-left: .5rem;
 }
+.crafting-panel-settings__repair-row {
+  align-items: center;
+}
+.crafting-panel-settings__repair-threshold {
+  background: gray;
+  border: 1px solid green;
+  border-radius: 3px;
+  padding: 1px 4px;
+  text-align: center;
+  width: 25px;
+}
+.crafting-panel-settings__repair-threshold input {
+  display: none;
+}
+.crafting-panel-settings__repair-threshold span {
+  pointer-events: none;
+}
 .crafting-panel-sorts {
   display: flex;
   flex-direction: row;
+  gap: .5rem;
 }
 .crafting-panel-sorts__title {
   display: inline-block;
+}
+.crafting-panel-sorts__select {
+  max-width: 140px;
 }
 .crafting-panel-sorts__title,
 .crafting-panel-filters__title,
@@ -1726,10 +1771,10 @@ a.disabled {
 
   function resetQuickCraftingMenu() {
     // set all the IDs to 0/reset
-    craftingPanelTitle.data({name: undefined, available: 0}).trigger(dataChangeEvent);
+    craftingPanelTitle.data({name: undefined, id: 0}).trigger(dataChangeEvent);
     craftingPanelSlots.add(craftingPanelResult).data({id: 0}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: 0}).trigger(dataChangeEvent);
-    craftingIngredients.data({id: 0, count: 0, available: 0, equipped: 0, purchasable: -1}).trigger(dataChangeEvent);
+    craftingIngredients.data({id: 0, count: 0, purchasable: -1}).trigger(dataChangeEvent);
     craftingActionsMenu.data({recipe: undefined});
     craftingInfoActions.data({available: 0, purchasable: -1}).trigger(dataChangeEvent);
     GM_deleteValue(gmKeyCurrentCraft);
@@ -1750,7 +1795,7 @@ a.disabled {
     recipeButtons.find('.recipes__recipe--selected').removeClass('recipes__recipe--selected');
     elem.addClass('recipes__recipe--selected');
 
-    craftingPanelTitle.data({name: resolvedName, available: inventoryAmounts[itemId]}).trigger(dataChangeEvent);
+    craftingPanelTitle.data({name: resolvedName, id: itemId}).trigger(dataChangeEvent);
     craftingPanelResult.data({id: itemId}).trigger(dataChangeEvent);
     craftingPanelRequirement.data({requirement: requirement}).trigger(dataChangeEvent);
 
@@ -1774,8 +1819,6 @@ a.disabled {
       craftingIngredients.eq(i).data({
         id: itemId || 0,
         count: (itemId && counts[itemId]) || 0,
-        available: (itemId && inventoryFull[itemId]) || 0,
-        equipped: equipment.filter(({equipped, itemid}) => equipped && itemid === itemId).length,
         purchasable: -1,
       });
     });
@@ -1812,9 +1855,11 @@ a.disabled {
     craftingIngredients
       .each(function () {
         const elem = $(this);
-        const {count, available, purchasable} = elem.data();
+        const {count, id} = elem.data();
         elem.data({
-          purchasable: ~purchasable ? Math.max(maxWithPurchase * count - available, 0) : purchasable,
+          purchasable: ~purchasable
+            ? Math.max(maxWithPurchase * count - ((id && inventoryFull[id]) || 0), 0)
+            : purchasable,
         });
       })
       .trigger(dataChangeEvent);
@@ -1859,12 +1904,8 @@ a.disabled {
         // Dirty hack to make repairs behave correctly with updating numbers
         // Just skip the item being repaired / "created"
         if (recipe.type !== 'Repair' || item !== recipe.itemId) {
-          ingredient.data({available: --inventoryFull[item]}).trigger(dataChangeEvent);
+          ingredient.data({available: --inventoryFull[item]});
           --inventoryAmounts[item];
-        }
-        if (item === craftingPanelResult.data().id) {
-          // Set count on title for when tracking manual craft
-          craftingPanelTitle.data({available: inventoryFull[recipe.itemId]}).trigger(dataChangeEvent);
         }
         available = Math.min(available, Math.floor(inventoryFull[item] / count));
       });
@@ -1877,19 +1918,9 @@ a.disabled {
       }
       ++inventoryFull[recipe.itemId];
       ++inventoryAmounts[recipe.itemId];
-      // Also set on matching inventory lines for when tracking manual craft
-      craftingIngredients
-        .filter(function () {
-          return $(this).data().id === recipe.itemId;
-        })
-        .data({available: inventoryFull[recipe.itemId]})
-        .trigger(dataChangeEvent);
     }
 
-    if (recipe.itemId === craftingPanelResult.data().id) {
-      // Set count on title
-      craftingPanelTitle.data({available: inventoryFull[recipe.itemId]}).trigger(dataChangeEvent);
-    }
+    craftingPanelTitle.add(craftingIngredients).trigger(dataChangeEvent);
 
     // Update equipment states for ater crafts
     getEquipment(true);
@@ -2117,17 +2148,43 @@ a.disabled {
                         GM_setValue('SEG', checked);
                       }),
                   ),
-                  $('<label>').append(
-                    'Allow equipped item repair',
-                    $('<input type="checkbox" />')
-                      .prop('checked', GM_getValue(gmKeyEquippedRepair, false))
-                      .change(async function () {
-                        const checked = $(this).prop('checked');
-                        GM_setValue(gmKeyEquippedRepair, checked);
+                  $('<div class="crafting-panel-settings__repair-row crafting-panel__row">').append(
+                    $('<label>').append(
+                      'Allow equipped item repair',
+                      $('<input type="checkbox" />')
+                        .prop('checked', GM_getValue(gmKeyEquippedRepair, false))
+                        .change(async function () {
+                          const checked = $(this).prop('checked');
+                          GM_setValue(gmKeyEquippedRepair, checked);
+                          updateInventory();
+
+                          // Just click the selected recipe, because getting all the data to the right places here is a pain
+                          $('.recipes__recipe--selected').click();
+
+                          // This might change what's showing on craftable/repair showing
+                          const {craftable, types} = recipeButtons.data().filters;
+                          if (craftable && types.includes('Repair')) recipeButtons.trigger(filterChangeEvent);
+                        }),
+                    ),
+                    $('<label class="crafting-panel-settings__repair-threshold">')
+                      .attr('title', 'Durability required to allow repair crafts (% of total time left)')
+                      .append(
+                        '<input type="button" />',
+                        `<span>${
+                          GM_getValue(gmKeyRepairThreshold, 0) === 100 ? 99 : GM_getValue(gmKeyRepairThreshold, 0)
+                        }%</span>`,
+                      )
+                      .click(function (event) {
+                        if (event.target !== this) return; // Prevent double execution from span
+                        const currentThreshold = GM_getValue(gmKeyRepairThreshold, 0);
+                        let newThreshold = currentThreshold + 25;
+                        if (newThreshold > 100) newThreshold = 0;
+                        GM_setValue(gmKeyRepairThreshold, newThreshold);
+                        $(this)
+                          .find('span')
+                          .text(`${newThreshold === 100 ? 99 : newThreshold}%`);
                         updateInventory();
 
-                        // Just click the selected recipe, because getting all the data to the right places here is a pain
-                        $('.recipes__recipe--selected').click();
                         // This might change what's showing on craftable/repair showing
                         const {craftable, types} = recipeButtons.data().filters;
                         if (craftable && types.includes('Repair')) recipeButtons.trigger(filterChangeEvent);
@@ -2137,7 +2194,7 @@ a.disabled {
                 $('<div class="crafting-panel-sorts__wrapper">').append(
                   $(`<div class="crafting-panel-sorts">`).append(
                     $('<h3 class="crafting-panel-sorts__title">Sort:</h3>'),
-                    $('<select>')
+                    $('<select class="crafting-panel-sorts__select">')
                       .append(
                         Object.entries(sorts).map(
                           ([value, text]) =>
@@ -2444,10 +2501,11 @@ a.disabled {
   // #region DOM Data and Mutation observers
   //
   craftingPanelTitle
-    .data({name: undefined, available: 0})
+    .data({name: undefined, id: 0})
     .on(dataChangeEvent, function () {
       const elem = $(this);
-      const {name, available} = elem.data();
+      const {name, id} = elem.data();
+      const available = inventoryFull[id];
       if (name) {
         elem.text(`${name}${available ? ' (' + available + ' in inventory)' : ''}`).css('visible', '');
       } else elem.html('&nbsp;').css('visible', 'hidden');
@@ -2500,7 +2558,7 @@ a.disabled {
   });
 
   craftingIngredients
-    .data({id: 0, count: 0, available: 0, equipped: 0, purchasable: -1})
+    .data({id: 0, count: 0, purchasable: -1})
     .on(dataChangeEvent, function () {
       const elem = $(this);
       const link = elem.find('.crafting-panel-info__ingredient-shop-link');
@@ -2509,7 +2567,9 @@ a.disabled {
       const perCraft = elem.find('.crafting-panel-info__ingredient-quantity-per-craft');
       const purchaseWrapper = elem.find('.crafting-panel-info__ingredient-quantity-purchasable');
       const purchaseNeeded = elem.find('.crafting-panel-info__ingredient-quantity-purchasable-value');
-      const {id, count, available, equipped, purchasable} = elem.data();
+      const {id, count, purchasable} = elem.data();
+      const available = (id && inventoryFull[id]) || 0;
+      const equipped = (id && inventoryFull[id] - (inventoryAmounts[id] || 0)) || 0;
       if (id && count) {
         link
           .attr('href', `https://gazellegames.net/shop.php?ItemID=${id}`)
@@ -2604,8 +2664,11 @@ a.disabled {
             // Filter on category
             categories.includes(category) &&
             // Filter on craftable/purchasable
+            // --Not craftable
             (!craftable ||
+              // --Craftable
               Object.entries(ingredients).every(([id, count]) => inventoryFull[id] >= count) ||
+              // --Purchasable (Fall through that also includes craftable)
               (craftable === 2 && purchasable)) &&
             // Filter on type
             types.includes(type) &&
