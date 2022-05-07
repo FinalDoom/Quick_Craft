@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.9.2
+// @version      2.9.3
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -2599,12 +2599,17 @@ a.disabled {
           const recipeLabel = $(this);
           const {book, category, ingredients, purchasable, recipe, type} = recipeLabel.data();
           if (
+            // Filter on book
             books.includes(book) &&
+            // Filter on category
             categories.includes(category) &&
+            // Filter on craftable/purchasable
             (!craftable ||
-              Object.entries(ingredients).every(([id, count]) => inventory[id] >= count) ||
+              Object.entries(ingredients).every(([id, count]) => inventoryFull[id] >= count) ||
               (craftable === 2 && purchasable)) &&
+            // Filter on type
             types.includes(type) &&
+            // Filter by search
             (!search ||
               allIngredients[recipe.itemId].name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
               (includeIngredients &&
