@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.10.3
+// @version      2.10.4
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -1955,6 +1955,7 @@ a.disabled {
           }
           // Recalculate available for live display
           craftingInfoActions.data({available: available}).trigger(dataChangeEvent);
+          if (recipeButtons.data().filters.craftable) recipeButtons.trigger(filterChangeEvent);
           resolve();
         }, CRAFT_TIME),
       );
