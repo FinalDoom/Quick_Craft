@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.10.2
+// @version      2.10.3
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -1758,7 +1758,7 @@ a.disabled {
     search: undefined,
     includeIngredients: true,
   });
-  const initialSort = GM_getValue(gmKeyRecipeSort, 'books');
+  const initialSort = GM_getValue(gmKeyRecipeSort, 'book');
   const sorts = {
     alpha: 'Alphabetical',
     gold: 'Gold Value',
