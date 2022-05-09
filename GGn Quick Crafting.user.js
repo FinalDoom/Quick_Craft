@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GGn Quick Crafter
 // @namespace    http://tampermonkey.net/
-// @version      2.10.4
+// @version      2.10.5
 // @description  Craft multiple items easier including repair equipped
 // @author       KingKrab23
 // @author       KSS
@@ -170,8 +170,8 @@
         // Prioritize smallest timeUntilBreak
         //   timeUntilBreak not in equip means unworn
         withoutExperience.sort((a, b) => {
-          const timeA = timeUntilBreak in a ? a.timeUntilBreak : Number.MAX_SAFE_INTEGER;
-          const timeB = timeUntilBreak in b ? b.timeUntilBreak : Number.MAX_SAFE_INTEGER;
+          const timeA = 'timeUntilBreak' in a ? a.timeUntilBreak : Number.MAX_SAFE_INTEGER;
+          const timeB = 'timeUntilBreak' in b ? b.timeUntilBreak : Number.MAX_SAFE_INTEGER;
           return timeA - timeB;
         });
 
