@@ -144,6 +144,10 @@
   function equippableItemId({itemid, id: equipId}) {
     return `${itemid.toString().padStart(5, '0')}z${equipId.toString().padStart(5, '0')}x`;
   }
+
+  const AUTH_KEY = new URLSearchParams($('link[rel="alternate"]').attr('href')).get('authkey');
+  const getCraftUrl = (customRecipe) =>
+    `https://gazellegames.net/user.php?action=ajaxtakecraftingresult&recipe=${customRecipe}&auth=${AUTH_KEY}`;
   async function takeCraft(recipe) {
     const name = resolveNames(recipe.name, ingredients[recipe.itemId].name);
 
@@ -234,23 +238,27 @@ Please enter the ID of the equipment you'd like to use to craft (or cancel).
       )
     ).filter((id) => id);
 
-    const status = await apiCall({
-      data: {
-        request: 'items',
-        type: 'crafting_result',
-        action: 'take',
-        recipe: recipeWithEquip,
-      },
-    }).then((response) => {
-      if (response === undefined) {
+    const status = await $.ajax({
+      url: getCraftUrl(recipeWithEquip),
+    })
+      .then((data) => {
+        // We can detect if this is an equipment craft here
+        // console.log('Equipment craft', data.EquipID);
+
+        if ($.isEmptyObject(data) || data.EquipId !== '') {
+          window.noty({type: 'success', text: `${name} was crafted successfully.`});
+          return true;
+        } else {
+          window.noty({type: 'error', text: `${name} crafting failed.`});
+          alert(`Crafting failed. Response from server: ${JSON.stringify(data)}`);
+          return false;
+        }
+      })
+      .catch((reason) => {
         window.noty({type: 'error', text: `${name} crafting failed.`});
-        alert(`Crafting failed. Response from server: ${JSON.stringify(response)}`);
+        alert(`Crafting failed. Response from server: ${JSON.stringify(reason)}`);
         return false;
-      } else {
-        window.noty({type: 'success', text: `${name} was crafted successfully.`});
-        return true;
-      }
-    });
+      });
 
     // Re-equip unequipped items
     await Promise.all(
@@ -1899,11 +1907,15 @@ a.disabled {
   }
 
   function resolveCraft(recipe, available) {
+    let equipmentCraft = !!equipment.find(({itemid}) => recipe.itemId === itemid);
     recipe.recipe
       .match(recipeToItemsRegex)
       .filter((item) => item !== blankSlot)
       .map((item) => parseInt(item))
       .forEach((item) => {
+        // Did we craft equipment?
+        equipmentCraft |= !!equipment.find(({itemid}) => item === itemid);
+
         // Update data on relevant craftingIngredient item if one matches
         const ingredient = craftingIngredients.filter(function () {
           return $(this).data().id === item;
@@ -1933,7 +1945,7 @@ a.disabled {
     craftingPanelTitle.add(craftingIngredients).trigger(dataChangeEvent);
 
     // Update equipment states for ater crafts
-    getEquipment(true);
+    getEquipment(equipmentCraft);
     updatePurchasable();
     return available;
   }
@@ -2729,6 +2741,7 @@ a.disabled {
     craftingInfoActions
       .data('available', resolveCraft(recipe, craftingInfoActions.data().available))
       .trigger(dataChangeEvent);
+    recipeButtons.trigger(filterChangeEvent);
   };
 
   // Persist selected recipe
