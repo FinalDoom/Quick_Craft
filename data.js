@@ -99,9 +99,9 @@ const recipeDefinitions = {
       {name: 'golden umaro', recipe: ['amethyst', [1], 'Lame Pumpkin Trio', [3], 'Christmas Cheer', [4], 'Supreme Gazelle', [5]]},
       {name: 'gazelle (pet)', recipe: ['Supreme Gazelle', [4], 'Interdimensional Portal', [6], 'Goal Pole', [8]], result: 'gazelle'},
       {name: '[Au]zelle', recipe: ['amethyst', [2], 'Lame Pumpkin Trio', [3], 'Christmas Cheer', [4], 'Supreme Gazelle', [5]]},
-      {name: 'Red Dragon', recipe: ['Dins flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
-      {name: 'Green Dragon', recipe: ['Farores flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
-      {name: 'Blue Dragon', recipe: ['Nayrus flame', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Red Dragon', recipe: ["Din's flame", [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Green Dragon', recipe: ["Farore's flame", [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
+      {name: 'Blue Dragon', recipe: ["Nayru's flame", [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
       {name: 'Gold Dragon', recipe: ['golden egg', [4], 'Who Eats Whom', [0], 'Baby Yoda With Gingerbread', [1], 'After Party', [2], 'Lame Pumpkin Trio', [6], 'Christmas Cheer', [7], 'Supreme Gazelle', [8]]},
     ],
   ],
@@ -630,16 +630,16 @@ const recipeDefinitions = {
   Bling: [
     [
       {name: 'Jazzier Pants', recipe: ['Jazz Pants', [4, 5]]},
-      {name: 'Disco Pants', recipe: ['Nayrus flame', [1], 'Farores flame', [3], 'Dins flame', [5], 'Jazzier Pants', [4]]},
-      {name: 'Devils Pantaloons', recipe: ['Nayrus flame', [1], 'Farores flame', [3], 'Dins flame', [5], 'Disco Pants', [4]]},
-      {name: 'Unity Necklace', recipe: ['Dins flame', [0], 'Farores flame', [1], 'Nayrus flame', [2], 'gold bar', [3], 'flawless amethyst', [4], 'jade bar', [5], 'carbon-crystalline quartz', [6, 7, 8]]},
-      {name: 'Unity Band', recipe: ['Dins flame', [0], 'Farores flame', [1], 'Nayrus flame', [2], 'gold bar', [3], 'silver ring of gazellia', [4], 'jade bar', [5], 'carbon-crystalline quartz', [7], 'amethyst', [6, 8]]},
-      {name: 'Gods Cradle', recipe: ['Dins flame', [0], 'Farores flame', [1], 'Nayrus flame', [2], 'carbon-crystalline quartz', [3, 5, 6, 8], 'flawless amethyst', [7], "monarch's crown", [4]]},
-      {name: 'Gods Pennant', recipe: ['Dins flame', [0], 'Farores flame', [1], 'Nayrus flame', [2], 'carbon-crystalline quartz', [3, 5, 6, 8], 'flawless amethyst', [7], "lucky deity's wings", [4]]},
-      {name: 'Flame Badge', recipe: ['Dins flame', [0], 'Farores flame', [7], 'Nayrus flame', [2], 'flawless amethyst', [4]]},
-      {name: 'Nayrus Username', recipe: ['Nayrus flame', [3], 'green onyx gem', [4]]},
-      {name: 'Farores Username', recipe: ['Farores flame', [3], 'green onyx gem', [4]]},
-      {name: 'Dins Username', recipe: ['Dins flame', [3], 'green onyx gem', [4]]},
+      {name: 'Disco Pants', recipe: ["Nayru's flame", [1], "Farore's flame", [3], "Din's flame", [5], 'Jazzier Pants', [4]]},
+      {name: "Devil's Pantaloons", recipe: ["Nayru's flame", [1], "Farore's flame", [3], "Din's flame", [5], 'Disco Pants', [4]]},
+      {name: 'Unity Necklace', recipe: ["Din's flame", [0], "Farore's flame", [1], "Nayru's flame", [2], 'gold bar', [3], 'flawless amethyst', [4], 'jade bar', [5], 'carbon-crystalline quartz', [6, 7, 8]]},
+      {name: 'Unity Band', recipe: ["Din's flame", [0], "Farore's flame", [1], "Nayru's flame", [2], 'gold bar', [3], 'silver ring of gazellia', [4], 'jade bar', [5], 'carbon-crystalline quartz', [7], 'amethyst', [6, 8]]},
+      {name: "God's Cradle", recipe: ["Din's flame", [0], "Farore's flame", [1], "Nayru's flame", [2], 'carbon-crystalline quartz', [3, 5, 6, 8], 'flawless amethyst', [7], "monarch's crown", [4]]},
+      {name: "God's Pennant", recipe: ["Din's flame", [0], "Farore's flame", [1], "Nayru's flame", [2], 'carbon-crystalline quartz', [3, 5, 6, 8], 'flawless amethyst', [7], "lucky deity's wings", [4]]},
+      {name: 'Flame Badge', recipe: ["Din's flame", [0], "Farore's flame", [7], "Nayru's flame", [2], 'flawless amethyst', [4]]},
+      {name: "Nayru's Username", recipe: ["Nayru's flame", [3], 'green onyx gem', [4]]},
+      {name: "Farore's Username", recipe: ["Farore's flame", [3], 'green onyx gem', [4]]},
+      {name: "Din's Username", recipe: ["Din's flame", [3], 'green onyx gem', [4]]},
       {name: 'Dwarven Disco Ball', recipe: ['dwarven gem', [0, 1, 2, 3, 4, 5, 6, 7, 8]]},
       {name: 'Dwarven Disco Plate', recipe: ['dwarven gem', [0, 1, 2, 3, 5, 6, 7, 8], 'obsidian plate armor', [4]]},
       {name: 'irc voice 8w', recipe: ['irc voice 2 weeks', [3, 4, 5]]},
@@ -665,7 +665,7 @@ async function recipeStringToFullInfo(recipe) {
   });
 }
 function resolveName(name) {
-  return $('<textarea />').html(name).text();
+  return $('<textarea />').html(name).text().trim();
 }
 const itemIdStringCache = Object.fromEntries(
   itemsApiCache.map((item) => [
@@ -753,7 +753,6 @@ const types = ['Standard', 'Repair', 'Upgrade', 'Downgrade'];
 const upgrades = {Segmentata: 'Cuirass', Lamellar: 'Chainmail', Billhook: 'Claymore', Guandao: 'Khopesh'};
 const metalTiers = ['Impure Bronze', 'Bronze', 'Iron', 'Steel', 'Gold', 'Mithril', 'Adamantium'];
 const magicTiers = ['Quartz', 'Jade', 'Amethyst'];
-const pantsTiers = ['Jazz', 'Jazzier', 'Disco', "Devil's"];
 function isUpgrade(ingredient, result) {
   let match;
   // Pet upgrades to higher tiers
@@ -781,18 +780,13 @@ function isUpgrade(ingredient, result) {
         ingredient,
       ) ||
     // Discount pants
-    result.replace('Pantaloons', 'Pants') ===
-      pantsTiers.reduce(
-        (upgraded, tier, i) =>
-          upgraded === ingredient && i <= pantsTiers.length - 2 ? upgraded.replace(tier, pantsTiers[i + 1]) : upgraded,
-        ingredient,
-      ) ||
+    result.replace('Pantaloons', 'Pants').endsWith('Pants') ||
     // Cupid's Wings (metal tier handled above) and Cupids Winged Boots
     (result === "Cupid's Gold Wings" && ingredient === "Cupid's Wings") ||
     ((match = result.match(/(Cupid's Winged Boots) of (?:Aggression|Fortune|Luck)/)) && match[1] === ingredient) ||
     // Gods Items (special cases)
-    result === 'Gods Cradle' ||
-    result === 'Gods Pennant'
+    result === "God's Cradle" ||
+    result === "God's Pennant"
   );
 }
 function getRecipeType(recipe) {
@@ -853,7 +847,7 @@ function getSparseIngredientsAndRecipes() {
         return [
           parseInt(ingred.id),
           {
-            name: ingred.name,
+            name: resolveName(ingred.name),
             image: ingred.image,
             category: ingred.category,
             gold: ingred.gold,
