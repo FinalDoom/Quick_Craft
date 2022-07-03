@@ -1,0 +1,62 @@
+{
+  "name": "gazelle_quick_craft",
+  "version": "2.10.6",
+  "description": "Craft multiple items more easily including equipment repair",
+  "main": "index.js",
+  "keywords": [
+    "craft",
+    "quick craft",
+    "gazelle",
+    "games",
+    "repair",
+    "equipment",
+    "upgrade"
+  ],
+  "author": "FinalDoom",
+  "license": "ISC",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FinalDoom/Quick_Craft/"
+  },
+  "scripts": {
+    "build": "npx rollup --config rollup.config.js",
+    "watch": "npx rollup --config rollup.config.js --watch",
+    "serve": "node -r esm server.js",
+    "start": "node -r esm server.js",
+    "build:release": "npx rollup --config rollup.config.js --sourcemap 0 --file dist/release-$npm_package_version.user.js",
+    "build:release:win32": "npx rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
+    "version": "npm run build:release && git add dist/release-$npm_package_version.user.js",
+    "prepublishOnly": "npm run build:release && git add dist/release-$npm_package_version.user.js",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register test/**/*.ts"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/plugin-proposal-class-properties": "^7.17.12",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-typescript": "^7.17.12",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@rollup/plugin-typescript": "^8.3.2",
+    "@types/greasemonkey": "^4.0.2",
+    "@types/jquery": "^3.5.14",
+    "colorette": "^2.0.16",
+    "deep-object-diff": "^1.1.7",
+    "esm": "^3.2.25",
+    "jquery": "^3.6.0",
+    "node-sass": "^7.0.1",
+    "prettier": "^2.7.1",
+    "rollup": "^2.75.3",
+    "rollup-plugin-scss": "^3",
+    "rollup-plugin-userscript-metablock": "^0.3.1",
+    "serve": "^13.0.2",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.2"
+  },
+  "config": {
+    "port": "8124"
+  }
+}
