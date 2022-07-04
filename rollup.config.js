@@ -4,7 +4,6 @@ import json from '@rollup/plugin-json';
 import metablock from 'rollup-plugin-userscript-metablock';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import scss from 'rollup-plugin-scss';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 
@@ -19,15 +18,8 @@ export default {
     file: 'dist/bundle.user.js',
     format: 'iife',
     name: 'rollupUserScript',
-    banner: () =>
-      fs.existsSync('./LICENSE')
-        ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '*/\n\n/* globals React, ReactDOM */'
-        : '',
+    banner: () => (fs.existsSync('./LICENSE') ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '*/\n' : ''),
     sourcemap: true,
-    globals: {
-      react: 'React',
-      'react-dom': 'ReactDOM',
-    },
   },
   plugins: [
     replace({
@@ -35,7 +27,7 @@ export default {
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,
     }),
-    nodeResolve({extensions: ['.js', '.ts', '.tsx']}),
+    nodeResolve({extensions: ['.js', '.ts']}),
     json(),
     typescriptPlugin({typescript}),
     commonjs({
@@ -46,7 +38,6 @@ export default {
     metablock({
       file: './meta.js',
       override: {
-        name: pkg.name,
         version: pkg.version,
         description: pkg.description,
         homepage: pkg.homepage,
@@ -54,9 +45,5 @@ export default {
         license: pkg.license,
       },
     }),
-    scss({
-      insert: true,
-    }),
   ],
-  external: (id) => /^react(-dom)?$/.test(id),
 };
