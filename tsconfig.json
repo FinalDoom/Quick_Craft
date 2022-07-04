@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "jsx": "react",
     "module": "es6",
-    "typeRoots": ["./types", "./node_modules/@types", "./typings.d.ts"]
+    "typeRoots": ["./types", "./node_modules/@types", "./typings.d.ts"],
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules"],
   "include": ["./src/"]

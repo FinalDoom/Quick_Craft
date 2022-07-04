@@ -1,5 +1,6 @@
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 import metablock from 'rollup-plugin-userscript-metablock';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
@@ -13,7 +14,7 @@ const pkg = require('./package.json');
 fs.mkdir('dist/', {recursive: true}, () => null);
 
 export default {
-  input: 'src/index.js',
+  input: 'src/index.ts',
   output: {
     file: 'dist/bundle.user.js',
     format: 'iife',
@@ -35,6 +36,7 @@ export default {
       preventAssignment: true,
     }),
     nodeResolve({extensions: ['.js', '.ts', '.tsx']}),
+    json(),
     typescriptPlugin({typescript}),
     commonjs({
       include: ['node_modules/**'],
