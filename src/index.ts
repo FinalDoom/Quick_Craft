@@ -1,5 +1,7 @@
 'use strict';
 
+import './style/main.scss';
+
 import {GazelleApi} from './api';
 import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated_data/recipe_info';
 import {take_craft} from './helpers/crafter';
@@ -52,60 +54,6 @@ Please disable this userscript until you have one as this prompt will continue t
       return match.toUpperCase();
     });
   }
-
-  //
-  // #region Stylesheets
-  //
-  const styleExtraBookSpace = document.createElement('style');
-  styleExtraBookSpace.innerHTML = `
-.recipe_buttons {
-    row-gap: 1rem;
-}`;
-  const styleIngredientQuantity = document.createElement('style');
-  styleIngredientQuantity.innerHTML = `
-.ingredient_quantity {
-    flex-direction: row;
-}`;
-  const styleIngredientQuantitySwap = document.createElement('style');
-  styleIngredientQuantitySwap.innerHTML = `
-.ingredient_quantity {
-    flex-direction: row-reverse;
-}`;
-  const styleMain = document.createElement('style');
-  styleMain.innerHTML = `
-.disabled {
-    background-color: #333 !important;
-    color: #666 !important;
-    pointer-events: none;
-}
-a.disabled {
-    pointer-events: none;
-}
-.quick_craft_button {
-    margin-left: 2rem;
-    background-color: orange;
-}
-.quick_craft_button_confirm {
-    background-color: red;
-}
-.recipe_buttons {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-}`;
-  document.head.append(styleMain);
-
-  if (await GM.getValue('SEG', false)) {
-    document.head.append(styleExtraBookSpace);
-  }
-  if (STORE.switchNeedHave) {
-    document.head.append(styleIngredientQuantitySwap);
-  } else {
-    document.head.append(styleIngredientQuantity);
-  }
-  //
-  // #endregion Stylesheets
-  //
 
   let craftingSubmenu: HTMLDivElement;
   let isCrafting = false;
@@ -177,11 +125,7 @@ a.disabled {
         })();
       };
       const craftingActions = document.createElement('div');
-      craftingActions.style.display = 'flex';
-      craftingActions.style.flexDirection = 'row';
-      craftingActions.style.columnGap = '.25rem';
-      craftingActions.style.alignItems = 'center';
-      craftingActions.style.alignSelf = 'center';
+      craftingActions.classList.add('crafting-panel-actions');
 
       craftNumberSelect = document.createElement('select');
       craftingActions.append(craftNumberSelect);
@@ -201,13 +145,13 @@ a.disabled {
 
       const maxButton = document.createElement('button');
       craftingActions.append(maxButton);
-      maxButton.classList.add('quick_craft_button');
+      maxButton.classList.add('crafting-panel-actions__max-craft-button');
       maxButton.innerText = 'Craft maximum';
       maxButton.addEventListener('click', function () {
-        if (!maxButton.classList.contains('quick_craft_button_confirm')) {
+        if (!maxButton.classList.contains('crafting-panel-actions__max-craft-button--confirm')) {
           craftNumberSelect.value = String(currentCraft.available);
           maxButton.innerText = '** CONFIRM **';
-          maxButton.classList.add('quick_craft_button_confirm');
+          maxButton.classList.add('crafting-panel-actions__max-craft-button--confirm');
         } else {
           maxButton.innerText = '-- Crafting --';
           doCraft();
@@ -223,13 +167,12 @@ a.disabled {
     const createIngredientLine = (ingredient: IngredientTemp, maxWithPurchase: number) => {
       const {id: ingredId, name: ingredName, onHand: qtyOnHand, qty: qtyPerCraft} = ingredient;
       const line = document.createElement('div');
+      line.classList.add('crafting-panel-info__ingredient-row');
+      if (STORE.switchNeedHave) {
+        line.classList.add('crafting-panel-info__ingredient-quantity--swapped');
+      }
       // Color ingredients marked purchased
-      if (purchasable.includes(ingredName)) line.style.color = 'lightGreen';
-      line.style.display = 'flex';
-      line.style.flexDirection = 'row';
-      line.style.columnGap = '.25rem';
-      line.style.alignItems = 'center';
-      line.style.alignSelf = 'center';
+      if (purchasable.includes(ingredName)) line.classList.add('crafting-panel-info__ingredient--purchasable');
       line.addEventListener('click', () => {
         if (purchasable.includes(ingredName)) {
           delete purchasable[purchasable.indexOf(ingredName)];
@@ -241,22 +184,16 @@ a.disabled {
 
       const quickCraft = document.createElement('a');
       line.append(quickCraft);
-      quickCraft.classList.add('quick_craft_button');
+      quickCraft.classList.add('crafting-panel-info__ingredient-shop-link');
       quickCraft.innerText = '$';
       quickCraft.href = `https://gazellegames.net/shop.php?ItemID=${ingredId}`;
       quickCraft.target = '_blank';
-      quickCraft.style.borderRadius = '50%';
-      quickCraft.style.backgroundColor = 'yellow';
-      quickCraft.style.color = 'black';
-      quickCraft.style.cursor = 'pointer';
-      quickCraft.style.padding = '0 .25rem';
 
       line.append(`${titleCaseFromUnderscored(ingredName)}:`);
 
       const quantity = document.createElement('div');
       line.append(quantity);
-      quantity.style.display = 'inline-flex';
-      quantity.classList.add('ingredient_quantity');
+      quantity.classList.add('crafting-panel-info__ingredient-quantity');
 
       const onHand = document.createElement('span');
       onHand.innerText = String(qtyOnHand);
@@ -287,30 +224,25 @@ a.disabled {
 
     craftingSubmenu = document.createElement('div');
     document.getElementById('current_craft_box').append(craftingSubmenu);
+    craftingSubmenu.classList.add('crafting-panel');
     craftingSubmenu.id = 'crafting-submenu';
-    craftingSubmenu.style.textAlign = 'center';
-    craftingSubmenu.style.marginBottom = '1rem';
-    craftingSubmenu.style.display = 'flex';
-    craftingSubmenu.style.flexDirection = 'column';
-    craftingSubmenu.style.rowGap = '1rem';
 
     const heading = document.createElement('div');
     craftingSubmenu.append(heading);
+    heading.classList.add('crafting-panel__title');
     heading.innerText = ingredients[recipe.itemId].name;
-    heading.style.marginBottom = '.5rem';
     if (INVENTORY.itemCount(String(recipe.itemId)) > 0) {
       heading.innerText = heading.innerText + ` (${INVENTORY.itemCount(String(recipe.itemId))} in inventory)`;
     }
 
     const ingredientHeader = document.createElement('div');
     craftingSubmenu.append(ingredientHeader);
-    ingredientHeader.style.marginBottom = '.5rem';
+    ingredientHeader.classList.add('crafting-panel-info__ingredients-header');
     ingredientHeader.innerText = 'Ingredients:';
 
     const ingredientsDiv = document.createElement('div');
     craftingSubmenu.append(ingredientsDiv);
-    ingredientsDiv.style.display = 'flex';
-    ingredientsDiv.style.flexDirection = 'column';
+    ingredientsDiv.classList.add('crafting-panel-info__ingredients-column');
     currentCraft.ingredients.forEach((ingredient) =>
       ingredientsDiv.append(createIngredientLine(ingredient, maxWithPurchase)),
     );
@@ -318,14 +250,13 @@ a.disabled {
     const max = document.createElement('span');
     craftingSubmenu.append(max);
     max.innerText = `Max available craft(s): ${currentCraft.available}`;
-    max.style.marginBottom = '1rem';
+    max.classList.add('crafting-panel-info__ingredients-max');
 
     if (currentCraft.available !== maxWithPurchase) {
       const maxInfo = document.createElement('span');
       max.append(maxInfo);
       maxInfo.innerText = `(${maxWithPurchase})`;
       maxInfo.title = 'Max possible if additional ingredients are purchased';
-      maxInfo.style.marginLeft = '5px';
     }
 
     const info = document.createElement('sup');
@@ -343,26 +274,6 @@ a.disabled {
 
   let saveDebounce: number;
 
-  const bookColors = {
-    Glass: {bgcolor: 'white', color: 'black'},
-    Potions: {bgcolor: 'green', color: 'white'},
-    // Luck: {bgcolor: 'blue', color: 'white'},
-    Food: {bgcolor: 'wheat', color: 'black'},
-    Pets: {bgcolor: 'brown', color: 'beige'},
-    Material_Bars: {bgcolor: 'purple', color: 'white'},
-    Armor: {bgcolor: 'darkblue', color: 'white'},
-    Weapons: {bgcolor: 'darkred', color: 'white'},
-    Recasting: {bgcolor: 'gray', color: 'white'},
-    Jewelry: {bgcolor: 'deeppink', color: 'white'},
-    Bling: {bgcolor: 'gold', color: 'darkgray'},
-    Trading_Decks: {bgcolor: '#15273F', color: 'white'},
-    Xmas_Crafting: {bgcolor: 'red', color: 'lightgreen'},
-    Birthday: {bgcolor: 'dark', color: 'gold'},
-    Valentines: {bgcolor: 'pink', color: 'deeppink'},
-    Adventure_Club: {bgcolor: 'yellow', color: 'black'},
-    Halloween: {bgcolor: 'gray', color: 'black'},
-  };
-
   //
   // Creates a Recipe button.
   //
@@ -370,37 +281,29 @@ a.disabled {
     const name = recipe.name || ingredients[recipe.itemId].name;
 
     const button = document.createElement('button');
-    button.classList.add(`recipe_button-book_${recipe.book.replace(/ /g, '_')}`);
+    button.classList.add(
+      'recipes__recipe',
+      `recipes__recipe--book-${recipe.book.toLocaleLowerCase().replace(/ /g, '-')}`,
+    );
     button.id = `recipe_button-${name.replace(/ /g, '_')}`;
     button.innerText = name;
-    button.style.backgroundColor = bookColors[recipe.book.replace(/ /g, '_')].bgcolor;
-    button.style.color = bookColors[recipe.book.replace(/ /g, '_')].color;
-    button.style.border = '2px solid transparent';
-    button.style.marginTop = '3px';
-    button.style.marginRight = '5px';
 
-    button.addEventListener('focus', () => (button.style.border = '2px solid red'));
-    button.addEventListener('blur', () => (button.style.border = '2px solid transparent'));
-    button.addEventListener('click', () => open_crafting_submenu(recipe, []));
+    button.addEventListener('click', () => {
+      document.querySelector('.recipes__recipe--selected')?.classList.remove('recipes__recipe--selected');
+      button.classList.add('recipes__recipe--selected');
+      open_crafting_submenu(recipe, []);
+    });
 
     return button;
   };
 
   const clearDiv = document.createElement('div');
+  clearDiv.classList.add('crafting-clear');
   document.getElementById('crafting_recipes').before(clearDiv);
-  clearDiv.style.clear = 'both';
-  clearDiv.style.marginBottom = '1rem';
 
   const quickCrafter = document.createElement('div');
   document.getElementById('crafting_recipes').before(quickCrafter);
   quickCrafter.id = 'quick-crafter';
-  quickCrafter.style.display = 'block';
-  quickCrafter.style.margin = '0 auto 1rem';
-  quickCrafter.style.backgroundColor = 'rgba(19,9,0,.7)';
-  quickCrafter.style.padding = '5px';
-  quickCrafter.style.width = '100%';
-  quickCrafter.style.maxWidth = '1100px';
-  quickCrafter.style.minWidth = '200px';
 
   const currentCraft = document.createElement('div');
   quickCrafter.append(currentCraft);
@@ -413,18 +316,13 @@ a.disabled {
 
   const clear = document.createElement('button');
   quickCrafter.append(clear);
-  clear.classList.add('quick_craft_button');
+  clear.classList.add('crafting-panel-actions__clear-craft-button');
   clear.innerText = 'Clear';
-  clear.style.marginBottom = '1rem';
-  clear.style.backgroundColor = 'red';
   clear.addEventListener('click', close_crafting_submenu);
 
   const row = document.createElement('div');
   quickCrafter.append(row);
-  row.style.display = 'flex';
-  row.style.flexDirection = 'row';
-  row.style.columnGap = '.25rem';
-  row.style.alignItems = 'center';
+  row.classList.add('crafting-panel-actions__craft-row');
 
   const rowHelp = document.createElement('span');
   row.append(rowHelp);
@@ -432,9 +330,8 @@ a.disabled {
 
   const hideAll = document.createElement('button');
   row.append(hideAll);
-  hideAll.classList.add('quick_craft_button');
+  hideAll.classList.add('crafting-panel-filters__books-hide');
   hideAll.innerText = 'Hide all';
-  hideAll.style.backgroundColor = 'red';
   hideAll.addEventListener('click', function () {
     BOOKS.forEach((book) => {
       if (STORE.selectedBooks.includes(book))
@@ -444,9 +341,8 @@ a.disabled {
 
   const showAll = document.createElement('button');
   row.append(showAll);
-  showAll.classList.add('quick_craft_button');
+  showAll.classList.add('crafting-panel-filters__books-show');
   showAll.innerText = 'Show all';
-  showAll.style.backgroundColor = 'green';
   showAll.addEventListener('click', function () {
     BOOKS.forEach((book) => {
       if (!STORE.selectedBooks.includes(book))
@@ -464,9 +360,9 @@ a.disabled {
   betweenBooks.addEventListener('change', function () {
     const checked = betweenBooks.checked;
     if (checked) {
-      document.head.append(styleExtraBookSpace);
+      document.querySelector<HTMLDivElement>('.recipe-buttons').classList.add('recipe-buttons--extra-space');
     } else {
-      document.removeChild(styleExtraBookSpace);
+      document.querySelector<HTMLDivElement>('.recipe-buttons').classList.remove('recipe-buttons--extra-space');
     }
     GM.setValue('SEG', checked);
   });
@@ -476,18 +372,17 @@ a.disabled {
   const nhSwitch = document.createElement('input');
   nhSwitchLabel.append(nhSwitch, 'NH switch');
   nhSwitch.type = 'checkbox';
-  nhSwitch.classList.add('quick_craft_button');
   nhSwitch.title = 'Switches between needed/have and have/needed';
   nhSwitch.checked = STORE.switchNeedHave;
   nhSwitch.addEventListener('change', function () {
     const checked = nhSwitch.checked;
-    if (checked) {
-      styleIngredientQuantity.remove();
-      document.head.append(styleIngredientQuantitySwap);
-    } else {
-      styleIngredientQuantitySwap.remove();
-      document.head.append(styleIngredientQuantity);
-    }
+    Array.from(document.querySelectorAll<HTMLDivElement>('.crafting-panel-info__ingredient-row')).forEach((elem) => {
+      if (checked) {
+        elem.classList.add('crafting-panel-info__ingredient-quantity--swapped');
+      } else {
+        elem.classList.remove('crafting-panel-info__ingredient-quantity--swapped');
+      }
+    });
     STORE.switchNeedHave = checked;
   });
 
@@ -496,35 +391,39 @@ a.disabled {
   //
   const recipeButtons = document.createElement('div');
   quickCrafter.append(recipeButtons);
-  recipeButtons.style.marginBottom = '2rem';
-  recipeButtons.style.display = 'flex';
-  recipeButtons.style.flexDirection = 'row';
-  recipeButtons.style.columnGap = '.25rem';
-  recipeButtons.style.alignItems = 'center';
+  recipeButtons.classList.add('crafting-panel-filters__books-row');
 
   BOOKS.forEach((name) => {
-    const {bgcolor, color} = bookColors[name.replace(/ /g, '_')];
-
     const button = document.createElement('button');
     recipeButtons.append(button);
+    button.classList.add(
+      'crafting-panel-filters__books-button',
+      `crafting-panel-filters__books-button--book-${name.toLocaleLowerCase().replace(/ /g, '-')}`,
+    );
+    if (STORE.selectedBooks.includes(name)) button.classList.add('crafting-panel-filters__books-button--selected');
     button.id = `${name.replace(/ /g, '_')}`;
-    button.classList.add('qcbutton_book');
     button.innerText = name;
-    button.style.backgroundColor = bgcolor;
-    button.style.color = color;
-    button.style.opacity = STORE.selectedBooks.includes(name) ? '1' : '0.2';
     button.addEventListener('click', function () {
       if (saveDebounce) window.clearTimeout(saveDebounce);
       const selected = STORE.selectedBooks;
       const disabled = selected.includes(name);
-      button.style.opacity = disabled ? '0.2' : '1';
-      document.getElementById(`recipe_book_section-${name.replace(/ /g, '_')}`).style.display = disabled ? 'none' : '';
+      if (disabled) {
+        document
+          .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
+          .classList.add('recipe-buttons__book-section--disabled');
+      } else {
+        document
+          .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
+          .classList.remove('recipe-buttons__book-section--disabled');
+      }
       Array.from(
         document.querySelectorAll<HTMLButtonElement>(`.recipe_button-book_${name.replace(/ /g, '_')}`),
       ).forEach((elem) => (elem.disabled = disabled));
       if (disabled) {
+        button.classList.remove('crafting-panel-filters__books-button--selected');
         delete selected[selected.indexOf(name)];
       } else {
+        button.classList.add('crafting-panel-filters__books-button--selected');
         selected.push(name);
       }
       STORE.selectedBooks = selected.flat();
@@ -539,14 +438,19 @@ a.disabled {
   //
   const recipeButtonDiv = document.createElement('div');
   quickCrafter.append(recipeButtonDiv);
-  recipeButtonDiv.classList.add('recipe_buttons');
+  recipeButtonDiv.classList.add('recipe-buttons', 'recipe-buttons--book-sort');
+  if (await GM.getValue('SEG', false)) recipeButtonDiv.classList.add('recipe-buttons--extra-space');
 
   BOOKS.forEach((bookName) => {
     const bookSection = document.createElement('div');
     recipeButtonDiv.append(bookSection);
-    bookSection.classList.add('recipe_book_section');
-    bookSection.id = `recipe_book_section-${bookName.replace(/ /g, '_')}`;
-    bookSection.style.display = !STORE.selectedBooks.includes(bookName) ? 'none' : '';
+    bookSection.classList.add('recipe-buttons__book-section');
+    if (!STORE.selectedBooks.includes(bookName)) {
+      bookSection.classList.add('recipe-buttons__book-section--disabled');
+    } else {
+      bookSection.classList.remove('recipe-buttons__book-section--disabled');
+    }
+    bookSection.id = `recipe-buttons__book-section-${bookName.replace(/ /g, '_')}`;
 
     recipes.filter(({book}) => book === bookName).forEach((recipe) => bookSection.append(createRecipeButton(recipe)));
   });
@@ -556,9 +460,7 @@ a.disabled {
 
   const credit = document.createElement('p');
   quickCrafter.append(credit);
-  credit.style.float = 'right';
-  credit.style.marginTop = '-20px';
-  credit.style.marginRight = '5px';
+  credit.classList.add('credits');
   credit.innerHTML = `Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${pkg.version}</a>`;
 
   // Persist selected recipe

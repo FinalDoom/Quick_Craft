@@ -4,6 +4,7 @@ import json from '@rollup/plugin-json';
 import metablock from 'rollup-plugin-userscript-metablock';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
+import scss from 'rollup-plugin-scss';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import typescript from 'typescript';
 
@@ -27,7 +28,10 @@ export default {
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,
     }),
-    nodeResolve({extensions: ['.js', '.ts']}),
+    scss({
+      insert: true,
+      runtime: require('sass'),
+    }),
     json(),
     typescriptPlugin({typescript}),
     commonjs({

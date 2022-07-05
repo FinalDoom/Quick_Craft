@@ -1,0 +1,18 @@
+@mixin flex {
+  display: flex;
+}
+
+@mixin flex-column {
+  @include flex;
+  flex-direction: column;
+}
+
+@mixin flex-row {
+  @include flex;
+  flex-direction: row;
+}
+
+@mixin flex-row-reverse {
+  @include flex;
+  flex-direction: row-reverse;
+}

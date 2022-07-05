@@ -1,0 +1,98 @@
+@use 'types';
+
+@mixin books {
+  &--repair {
+    @include types.repair;
+    border-width: 2px;
+  }
+
+  &--downgrade {
+    @include types.downgrade;
+    border-width: 2px;
+  }
+
+  &--upgrade {
+    @include types.upgrade;
+    border-width: 2px;
+  }
+
+  &--book-potions {
+    background-color: green;
+    color: white;
+  }
+
+  &--book-glass {
+    background-color: white;
+    color: black;
+  }
+
+  &--book-material-bars {
+    background-color: purple;
+    color: white;
+  }
+
+  &--book-armor {
+    background-color: darkblue;
+    color: white;
+  }
+
+  &--book-xmas-crafting {
+    background-color: red;
+    color: lightgreen;
+  }
+
+  &--book-jewelry {
+    background-color: deeppink;
+    color: white;
+  }
+
+  &--book-food {
+    background-color: wheat;
+    color: black;
+  }
+
+  &--book-halloween {
+    background-color: gray;
+    color: black;
+  }
+
+  &--book-trading-decks {
+    background-color: #15273f;
+    color: white;
+  }
+
+  &--book-bling {
+    background-color: gold;
+    color: darkgray;
+  }
+
+  &--book-weapons {
+    background-color: darkred;
+    color: white;
+  }
+
+  &--book-recasting {
+    background-color: gray;
+    color: white;
+  }
+
+  &--book-adventure-club {
+    background-color: yellow;
+    color: black;
+  }
+
+  &--book-birthday {
+    background-color: darkgray;
+    color: gold;
+  }
+
+  &--book-pets {
+    background-color: brown;
+    color: beige;
+  }
+
+  &--book-valentines {
+    background-color: pink;
+    color: deeppink;
+  }
+}
