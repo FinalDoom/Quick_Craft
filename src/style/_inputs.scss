@@ -1,0 +1,12 @@
+@mixin button-base {
+  border-radius: 3px;
+  border: none;
+  padding: 2px 5px;
+  background: gray;
+}
+
+@mixin hide-input {
+  & input {
+    display: none;
+  }
+}
