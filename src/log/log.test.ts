@@ -1,4 +1,4 @@
-import Log, {ConsoleLog, LogLevel} from '../src/log';
+import Log, {ConsoleLog, LogLevel} from './log';
 import {describe} from 'mocha';
 import {stdout, stderr} from 'test-console';
 import {expect} from 'chai';

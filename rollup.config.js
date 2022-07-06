@@ -14,13 +14,20 @@ const pkg = require('./package.json');
 fs.mkdir('dist/', {recursive: true}, () => null);
 
 export default {
-  input: 'src/index.ts',
+  input: 'src/index.tsx',
   output: {
     file: 'dist/bundle.user.js',
     format: 'iife',
     name: 'rollupUserScript',
-    banner: () => (fs.existsSync('./LICENSE') ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '*/\n' : ''),
+    banner: () =>
+      fs.existsSync('./LICENSE')
+        ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '*/\n\n/* globals React, ReactDOM */'
+        : '',
     sourcemap: true,
+    globals: {
+      react: 'React',
+      'react-dom': 'ReactDOM',
+    },
   },
   plugins: [
     replace({
@@ -28,6 +35,7 @@ export default {
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,
     }),
+    nodeResolve({extensions: ['.js', '.ts', '.tsx']}),
     scss({
       insert: true,
       runtime: require('sass'),
@@ -50,4 +58,5 @@ export default {
       },
     }),
   ],
+  external: (id) => /^react(-dom)?$/.test(id),
 };

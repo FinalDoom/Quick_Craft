@@ -23,7 +23,7 @@ interface StorableGM {
   switchNeedHave: boolean;
 }
 interface StorableLocalStorage {}
-interface Storable extends StorableGM, StorableLocalStorage {}
+export interface Storable extends StorableGM, StorableLocalStorage {}
 export default interface Store extends Storable {}
 
 type GMKeys = {[key in keyof StorableGM]: string};

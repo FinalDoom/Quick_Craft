@@ -1,16 +1,18 @@
 'use strict';
 
 import './style/main.scss';
+import pkg from '../package.json';
 
+import React from 'react';
+import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
 import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated/recipe_info';
 import {take_craft} from './helpers/crafter';
+import IngredientLine, {IngredientTemp} from './ingredient-line/ingredient-line';
 import {ConsoleLog} from './log/log';
 import {Inventory} from './models/inventory';
 import {QuickCraftStore} from './store/store';
 import CountingSet from './util/counting-set';
-
-import pkg from '../package.json';
 
 const CRAFT_TIME = 1000;
 
@@ -49,12 +51,6 @@ Please disable this userscript until you have one as this prompt will continue t
 
   // TODO rest of the script that was pulled from original userscript with minor changes
 
-  function titleCaseFromUnderscored(str) {
-    return str.replace(/_/g, ' ').replace(/(?:^|\s)\w/g, function (match) {
-      return match.toUpperCase();
-    });
-  }
-
   let craftingSubmenu: HTMLDivElement;
   let isCrafting = false;
 
@@ -64,8 +60,6 @@ Please disable this userscript until you have one as this prompt will continue t
       STORE.currentCraft = craftingSubmenu = undefined;
     }
   }
-
-  type IngredientTemp = {id: number; name: string; onHand: number; qty: number};
 
   async function open_crafting_submenu(recipe: GeneratedRecipe, purchasable: Array<string>) {
     if (isCrafting) return;
@@ -165,51 +159,24 @@ Please disable this userscript until you have one as this prompt will continue t
     STORE.currentCraft = recipeName;
 
     const createIngredientLine = (ingredient: IngredientTemp, maxWithPurchase: number) => {
-      const {id: ingredId, name: ingredName, onHand: qtyOnHand, qty: qtyPerCraft} = ingredient;
-      const line = document.createElement('div');
-      line.classList.add('crafting-panel-info__ingredient-row');
-      if (STORE.switchNeedHave) {
-        line.classList.add('crafting-panel-info__ingredient-quantity--swapped');
-      }
-      // Color ingredients marked purchased
-      if (purchasable.includes(ingredName)) line.classList.add('crafting-panel-info__ingredient--purchasable');
-      line.addEventListener('click', () => {
-        if (purchasable.includes(ingredName)) {
-          delete purchasable[purchasable.indexOf(ingredName)];
+      const togglePurchasable = () => {
+        if (purchasable.includes(ingredient.name)) {
+          delete purchasable[purchasable.indexOf(ingredient.name)];
           purchasable = purchasable.flat();
-        } else if (purchasable.length < currentCraft.ingredients.length - 1) purchasable.push(ingredName);
+        } else if (purchasable.length < currentCraft.ingredients.length - 1) purchasable.push(ingredient.name);
         close_crafting_submenu();
         open_crafting_submenu(recipe, purchasable);
-      });
+      };
 
-      const quickCraft = document.createElement('a');
-      line.append(quickCraft);
-      quickCraft.classList.add('crafting-panel-info__ingredient-shop-link');
-      quickCraft.innerText = '$';
-      quickCraft.href = `https://gazellegames.net/shop.php?ItemID=${ingredId}`;
-      quickCraft.target = '_blank';
-
-      line.append(`${titleCaseFromUnderscored(ingredName)}:`);
-
-      const quantity = document.createElement('div');
-      line.append(quantity);
-      quantity.classList.add('crafting-panel-info__ingredient-quantity');
-
-      const onHand = document.createElement('span');
-      onHand.innerText = String(qtyOnHand);
-      const sep = document.createElement('span');
-      sep.innerText = '/';
-      const perCraft = document.createElement('span');
-      perCraft.innerText = String(qtyPerCraft);
-      quantity.append(onHand, sep, perCraft);
-
-      if (maxWithPurchase > qtyOnHand / qtyPerCraft) {
-        const needed = document.createElement('span');
-        needed.title = 'Needed for max possible crafts';
-        needed.innerText = ` (+${maxWithPurchase * qtyPerCraft - qtyOnHand})`;
-      }
-
-      return line;
+      return (
+        <IngredientLine
+          click={togglePurchasable}
+          ingredient={ingredient}
+          maxCraftableWithPurchase={maxWithPurchase}
+          purchasable={purchasable.includes(ingredient.name)}
+          store={STORE}
+        />
+      );
     };
 
     const maxWithPurchase = purchasable.length
@@ -243,8 +210,11 @@ Please disable this userscript until you have one as this prompt will continue t
     const ingredientsDiv = document.createElement('div');
     craftingSubmenu.append(ingredientsDiv);
     ingredientsDiv.classList.add('crafting-panel-info__ingredients-column');
-    currentCraft.ingredients.forEach((ingredient) =>
-      ingredientsDiv.append(createIngredientLine(ingredient, maxWithPurchase)),
+    const root = createRoot(ingredientsDiv);
+    root.render(
+      <React.Fragment>
+        {currentCraft.ingredients.map((ingredient) => createIngredientLine(ingredient, maxWithPurchase))}
+      </React.Fragment>,
     );
 
     const max = document.createElement('span');
