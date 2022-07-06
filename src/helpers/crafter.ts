@@ -1,4 +1,4 @@
-import {GeneratedRecipe, ingredients} from '../generated_data/recipe_info';
+import {GeneratedRecipe, ingredients} from '../generated/recipe_info';
 
 const authKey = new URLSearchParams(document.querySelector<HTMLLinkElement>('link[rel="alternate"]').href).get(
   'authkey',

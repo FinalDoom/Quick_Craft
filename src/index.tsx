@@ -2,12 +2,12 @@
 
 import './style/main.scss';
 
-import {GazelleApi} from './api';
-import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated_data/recipe_info';
+import {GazelleApi} from './api/api';
+import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated/recipe_info';
 import {take_craft} from './helpers/crafter';
-import {ConsoleLog} from './log';
+import {ConsoleLog} from './log/log';
 import {Inventory} from './models/inventory';
-import {QuickCraftStore} from './store';
+import {QuickCraftStore} from './store/store';
 import CountingSet from './util/counting-set';
 
 import pkg from '../package.json';

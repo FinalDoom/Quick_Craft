@@ -1,4 +1,4 @@
-import {Book, Category, CATEGORIES, RecipeType, RECIPE_TYPES} from './generated_data/recipe_info';
+import {Book, Category, CATEGORIES, RecipeType, RECIPE_TYPES} from '../generated/recipe_info';
 
 enum Sort {
   alpha = 'Alphabetical',

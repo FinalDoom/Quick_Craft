@@ -28,7 +28,7 @@
     "build:release:win32": "npx rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
     "version": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
     "prepublishOnly": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register test/**/*.ts",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register src/**/*.test.ts",
     "addRecipe": "yarn build && node dist/scripts/add-recipe.js"
   },
   "devDependencies": {

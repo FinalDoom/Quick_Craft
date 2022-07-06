@@ -1,5 +1,5 @@
 import {diff} from 'deep-object-diff';
-import Api, {EquipmentInfo} from '../api';
+import Api, {EquipmentInfo} from '../api/api';
 import {Observable} from '../util/observable';
 
 type ItemCounts = Record<string, number>;
