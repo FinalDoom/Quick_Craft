@@ -3,8 +3,9 @@
 import './style/main.scss';
 import pkg from '../package.json';
 
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import {createRoot} from 'react-dom/client';
+import ReactTestUtils from 'react-dom/test-utils';
 import {GazelleApi} from './api/api';
 import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated/recipe_info';
 import {take_craft} from './helpers/crafter';
@@ -13,6 +14,11 @@ import {ConsoleLog} from './log/log';
 import {Inventory} from './models/inventory';
 import {QuickCraftStore} from './store/store';
 import CountingSet from './util/counting-set';
+import RecipeButton from './button/variants/recipe-button';
+import BookButton from './button/variants/book-button';
+import Button from './button/button';
+import MaxCraftButton from './button/variants/max-craft-button';
+import Checkbox from './checkbox/checkbox';
 
 const CRAFT_TIME = 1000;
 
@@ -77,8 +83,8 @@ Please disable this userscript until you have one as this prompt will continue t
         currentCraft.available = avail;
       }
       currentCraft.ingredients.push({
-        name: recipeName,
-        id: recipe.itemId,
+        name: ingredients[Number(id)].name,
+        id: Number(id),
         qty: perCraft,
         onHand: onHand,
       });
@@ -88,7 +94,6 @@ Please disable this userscript until you have one as this prompt will continue t
       if (available <= 0) {
         return '';
       }
-      let craftNumberSelect: HTMLSelectElement;
 
       const doCraft = async () => {
         // Disable crafting buttons and craft switching
@@ -102,10 +107,10 @@ Please disable this userscript until you have one as this prompt will continue t
           elem.classList.add('disabled');
         });
 
-        let craftNumber = Number(craftNumberSelect.querySelector<HTMLOptionElement>('option:selected').value);
+        let count = Number(document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value);
 
         await (async () => {
-          for (let i = 0; i < craftNumber; i++) {
+          for (let i = 0; i < count; i++) {
             await new Promise<void>((resolve) =>
               setTimeout(function () {
                 take_craft(recipe);
@@ -118,41 +123,34 @@ Please disable this userscript until you have one as this prompt will continue t
           await open_crafting_submenu(recipe, purchasable);
         })();
       };
-      const craftingActions = document.createElement('div');
-      craftingActions.classList.add('crafting-panel-actions');
 
-      craftNumberSelect = document.createElement('select');
-      craftingActions.append(craftNumberSelect);
-      Array(currentCraft.available)
-        .fill(undefined)
-        .forEach((_, i) => {
-          const option = document.createElement('option');
-          option.value = `${i + 1}`;
-          option.innerText = `${i + 1}`;
-          craftNumberSelect.append(option);
-        });
-
-      const craftButton = document.createElement('button');
-      craftingActions.append(craftButton);
-      craftButton.innerText = 'Craft';
-      craftButton.addEventListener('click', doCraft);
-
-      const maxButton = document.createElement('button');
-      craftingActions.append(maxButton);
-      maxButton.classList.add('crafting-panel-actions__max-craft-button');
-      maxButton.innerText = 'Craft maximum';
-      maxButton.addEventListener('click', function () {
-        if (!maxButton.classList.contains('crafting-panel-actions__max-craft-button--confirm')) {
-          craftNumberSelect.value = String(currentCraft.available);
-          maxButton.innerText = '** CONFIRM **';
-          maxButton.classList.add('crafting-panel-actions__max-craft-button--confirm');
-        } else {
-          maxButton.innerText = '-- Crafting --';
-          doCraft();
-        }
-      });
-
-      return craftingActions;
+      return (
+        <div className="crafting-panel-actions">
+          <select className="crafting-panel-actions__craft-number">
+            {Array(currentCraft.available)
+              .fill(undefined)
+              .map((_, i) => (
+                <option key={i} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+          </select>
+          <Button
+            variant="click"
+            classNameBase="crafting-panel-actions__craft-button"
+            clickCallback={doCraft}
+            text="Craft"
+          />
+          <MaxCraftButton
+            executeCraft={doCraft}
+            setMaxCraft={() =>
+              (document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value = String(
+                currentCraft.available,
+              ))
+            }
+          />
+        </div>
+      );
     };
 
     close_crafting_submenu();
@@ -170,6 +168,7 @@ Please disable this userscript until you have one as this prompt will continue t
 
       return (
         <IngredientLine
+          key={ingredient.id}
           click={togglePurchasable}
           ingredient={ingredient}
           maxCraftableWithPurchase={maxWithPurchase}
@@ -194,55 +193,39 @@ Please disable this userscript until you have one as this prompt will continue t
     craftingSubmenu.classList.add('crafting-panel');
     craftingSubmenu.id = 'crafting-submenu';
 
-    const heading = document.createElement('div');
-    craftingSubmenu.append(heading);
-    heading.classList.add('crafting-panel__title');
-    heading.innerText = ingredients[recipe.itemId].name;
-    if (INVENTORY.itemCount(String(recipe.itemId)) > 0) {
-      heading.innerText = heading.innerText + ` (${INVENTORY.itemCount(String(recipe.itemId))} in inventory)`;
-    }
-
-    const ingredientHeader = document.createElement('div');
-    craftingSubmenu.append(ingredientHeader);
-    ingredientHeader.classList.add('crafting-panel-info__ingredients-header');
-    ingredientHeader.innerText = 'Ingredients:';
-
-    const ingredientsDiv = document.createElement('div');
-    craftingSubmenu.append(ingredientsDiv);
-    ingredientsDiv.classList.add('crafting-panel-info__ingredients-column');
-    const root = createRoot(ingredientsDiv);
+    const root = createRoot(craftingSubmenu);
     root.render(
       <React.Fragment>
-        {currentCraft.ingredients.map((ingredient) => createIngredientLine(ingredient, maxWithPurchase))}
+        <div className="crafting-panel__title">
+          {ingredients[recipe.itemId].name}
+          {INVENTORY.itemCount(String(recipe.itemId)) > 0
+            ? ` (${INVENTORY.itemCount(String(recipe.itemId))} in inventory)`
+            : ''}
+        </div>
+        <div className="crafting-panel-info__ingredients-header">Ingredients:</div>
+        <div className="crafting-panel-info__ingredients-column">
+          {currentCraft.ingredients.map((ingredient) => createIngredientLine(ingredient, maxWithPurchase))}
+        </div>
+        <span className="crafting-panel-info__ingredients-max">
+          Max available craft(s): {currentCraft.available}
+          {currentCraft.available !== maxWithPurchase ? (
+            <span title="Max possible if additional ingredients are purchased">({maxWithPurchase})</span>
+          ) : (
+            ''
+          )}
+          <sup>
+            <a title="Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.">
+              ?
+            </a>
+          </sup>
+        </span>
+        {createCraftingActions(currentCraft.available)}
       </React.Fragment>,
     );
-
-    const max = document.createElement('span');
-    craftingSubmenu.append(max);
-    max.innerText = `Max available craft(s): ${currentCraft.available}`;
-    max.classList.add('crafting-panel-info__ingredients-max');
-
-    if (currentCraft.available !== maxWithPurchase) {
-      const maxInfo = document.createElement('span');
-      max.append(maxInfo);
-      maxInfo.innerText = `(${maxWithPurchase})`;
-      maxInfo.title = 'Max possible if additional ingredients are purchased';
-    }
-
-    const info = document.createElement('sup');
-    max.append(info);
-    const infoA = document.createElement('a');
-    info.append(infoA);
-    infoA.innerText = '?';
-    infoA.title = 'Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.';
-
-    craftingSubmenu.append(createCraftingActions(currentCraft.available));
   }
   //
   // #region Create Recipe Book and Recipe buttons
   //
-
-  let saveDebounce: number;
 
   //
   // Creates a Recipe button.
@@ -250,21 +233,19 @@ Please disable this userscript until you have one as this prompt will continue t
   const createRecipeButton = (recipe: GeneratedRecipe) => {
     const name = recipe.name || ingredients[recipe.itemId].name;
 
-    const button = document.createElement('button');
-    button.classList.add(
-      'recipes__recipe',
-      `recipes__recipe--book-${recipe.book.toLocaleLowerCase().replace(/ /g, '-')}`,
+    return (
+      <RecipeButton
+        key={name}
+        book={recipe.book}
+        clickCallback={() => {
+          STORE.currentCraft = name;
+          document.querySelector('.recipes__recipe--selected')?.classList.remove('recipes__recipe--selected');
+          open_crafting_submenu(recipe, []);
+        }}
+        name={name}
+        store={STORE}
+      />
     );
-    button.id = `recipe_button-${name.replace(/ /g, '_')}`;
-    button.innerText = name;
-
-    button.addEventListener('click', () => {
-      document.querySelector('.recipes__recipe--selected')?.classList.remove('recipes__recipe--selected');
-      button.classList.add('recipes__recipe--selected');
-      open_crafting_submenu(recipe, []);
-    });
-
-    return button;
   };
 
   const clearDiv = document.createElement('div');
@@ -274,169 +255,165 @@ Please disable this userscript until you have one as this prompt will continue t
   const quickCrafter = document.createElement('div');
   document.getElementById('crafting_recipes').before(quickCrafter);
   quickCrafter.id = 'quick-crafter';
+  const root = createRoot(quickCrafter);
 
-  const currentCraft = document.createElement('div');
-  quickCrafter.append(currentCraft);
-  currentCraft.id = 'current_craft_box';
-
-  const help = document.createElement('p');
-  quickCrafter.append(help);
-  help.innerText =
-    'Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better experience.';
-
-  const clear = document.createElement('button');
-  quickCrafter.append(clear);
-  clear.classList.add('crafting-panel-actions__clear-craft-button');
-  clear.innerText = 'Clear';
-  clear.addEventListener('click', close_crafting_submenu);
-
-  const row = document.createElement('div');
-  quickCrafter.append(row);
-  row.classList.add('crafting-panel-actions__craft-row');
-
-  const rowHelp = document.createElement('span');
-  row.append(rowHelp);
-  rowHelp.innerText = 'Click on the buttons below to show or hide crafting categories - ';
-
-  const hideAll = document.createElement('button');
-  row.append(hideAll);
-  hideAll.classList.add('crafting-panel-filters__books-hide');
-  hideAll.innerText = 'Hide all';
-  hideAll.addEventListener('click', function () {
-    BOOKS.forEach((book) => {
-      if (STORE.selectedBooks.includes(book))
-        document.getElementById(book.replace(/ /g, '_')).dispatchEvent(new MouseEvent('click'));
-    });
-  });
-
-  const showAll = document.createElement('button');
-  row.append(showAll);
-  showAll.classList.add('crafting-panel-filters__books-show');
-  showAll.innerText = 'Show all';
-  showAll.addEventListener('click', function () {
-    BOOKS.forEach((book) => {
-      if (!STORE.selectedBooks.includes(book))
-        document.getElementById(book.replace(/ /g, '_')).dispatchEvent(new MouseEvent('click'));
-    });
-  });
-
-  const betweenBooksLabel = document.createElement('label');
-  row.append(betweenBooksLabel);
-  const betweenBooks = document.createElement('input');
-  betweenBooksLabel.append(betweenBooks, 'Blank line between books');
-  betweenBooks.type = 'checkbox';
-  betweenBooks.classList.add('quick_craft_button');
-  betweenBooks.checked = await GM.getValue('SEG', false);
-  betweenBooks.addEventListener('change', function () {
-    const checked = betweenBooks.checked;
-    if (checked) {
-      document.querySelector<HTMLDivElement>('.recipe-buttons').classList.add('recipe-buttons--extra-space');
-    } else {
-      document.querySelector<HTMLDivElement>('.recipe-buttons').classList.remove('recipe-buttons--extra-space');
-    }
-    GM.setValue('SEG', checked);
-  });
-
-  const nhSwitchLabel = document.createElement('label');
-  row.append(nhSwitchLabel);
-  const nhSwitch = document.createElement('input');
-  nhSwitchLabel.append(nhSwitch, 'NH switch');
-  nhSwitch.type = 'checkbox';
-  nhSwitch.title = 'Switches between needed/have and have/needed';
-  nhSwitch.checked = STORE.switchNeedHave;
-  nhSwitch.addEventListener('change', function () {
-    const checked = nhSwitch.checked;
-    Array.from(document.querySelectorAll<HTMLDivElement>('.crafting-panel-info__ingredient-row')).forEach((elem) => {
-      if (checked) {
-        elem.classList.add('crafting-panel-info__ingredient-quantity--swapped');
-      } else {
-        elem.classList.remove('crafting-panel-info__ingredient-quantity--swapped');
+  root.render(
+    <React.Fragment>
+      <div id="current_craft_box">
+        <p>
+          Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better
+          experience.
+        </p>
+        <Button
+          variant="click"
+          classNameBase="crafting-panel-actions__clear-craft-button"
+          clickCallback={close_crafting_submenu}
+          text="Clear"
+        />
+      </div>
+      <div className="crafting-panel-actions__craft-row">
+        <span>Click on the buttons below to show or hide crafting categories - </span>
+        <Button
+          variant="click"
+          classNameBase="crafting-panel-filters__books-hide"
+          clickCallback={() => {
+            BOOKS.forEach((book) => {
+              if (STORE.selectedBooks.includes(book)) {
+                ReactTestUtils.Simulate.click(
+                  document.querySelector<HTMLButtonElement>(
+                    '.crafting-panel-filters__books-button--book-' + book.toLocaleLowerCase().replace(/ /g, '-'),
+                  ),
+                );
+              }
+            });
+          }}
+          text="Hide all"
+        />
+        <Button
+          variant="click"
+          classNameBase="crafting-panel-filters__books-show"
+          clickCallback={() => {
+            BOOKS.forEach((book) => {
+              if (!STORE.selectedBooks.includes(book)) {
+                ReactTestUtils.Simulate.click(
+                  document.querySelector<HTMLButtonElement>(
+                    '.crafting-panel-filters__books-button--book-' + book.toLocaleLowerCase().replace(/ /g, '-'),
+                  ),
+                );
+              }
+            });
+          }}
+          text="Show all"
+        />
+        <Checkbox
+          className="quick_craft_button"
+          checked={await GM.getValue('SEG', false)}
+          onChange={async (event: ChangeEvent<HTMLInputElement>) => {
+            if (event.target.checked) {
+              document.querySelector<HTMLDivElement>('.recipe-buttons').classList.add('recipe-buttons--extra-space');
+            } else {
+              document.querySelector<HTMLDivElement>('.recipe-buttons').classList.remove('recipe-buttons--extra-space');
+            }
+            await GM.setValue('SEG', event.target.checked);
+          }}
+          suffix="Blank line between books"
+        />
+        <Checkbox
+          title="Switches between needed/have and have/needed"
+          checked={STORE.switchNeedHave}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            Array.from(document.querySelectorAll<HTMLDivElement>('.crafting-panel-info__ingredient-row')).forEach(
+              (elem) => {
+                if (event.target.checked) {
+                  elem.classList.add('crafting-panel-info__ingredient-quantity--swapped');
+                } else {
+                  elem.classList.remove('crafting-panel-info__ingredient-quantity--swapped');
+                }
+              },
+            );
+            STORE.switchNeedHave = event.target.checked;
+          }}
+          suffix="NH switch"
+        />
+      </div>
+      {
+        //
+        // #region Add "Recipe Book" on/off buttons to DOM
+        //
       }
-    });
-    STORE.switchNeedHave = checked;
-  });
-
-  //
-  // #region Add "Recipe Book" on/off buttons to DOM
-  //
-  const recipeButtons = document.createElement('div');
-  quickCrafter.append(recipeButtons);
-  recipeButtons.classList.add('crafting-panel-filters__books-row');
-
-  BOOKS.forEach((name) => {
-    const button = document.createElement('button');
-    recipeButtons.append(button);
-    button.classList.add(
-      'crafting-panel-filters__books-button',
-      `crafting-panel-filters__books-button--book-${name.toLocaleLowerCase().replace(/ /g, '-')}`,
-    );
-    if (STORE.selectedBooks.includes(name)) button.classList.add('crafting-panel-filters__books-button--selected');
-    button.id = `${name.replace(/ /g, '_')}`;
-    button.innerText = name;
-    button.addEventListener('click', function () {
-      if (saveDebounce) window.clearTimeout(saveDebounce);
-      const selected = STORE.selectedBooks;
-      const disabled = selected.includes(name);
-      if (disabled) {
-        document
-          .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
-          .classList.add('recipe-buttons__book-section--disabled');
-      } else {
-        document
-          .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
-          .classList.remove('recipe-buttons__book-section--disabled');
+      <div className="crafting-panel-filters__books-row">
+        {BOOKS.map((name) => (
+          <BookButton
+            key={name}
+            book={name}
+            clickCallback={(selected: boolean) => {
+              const selectedBooks = STORE.selectedBooks;
+              // Hide book sections
+              if (selected) {
+                document
+                  .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
+                  .classList.remove('recipe-buttons__book-section--disabled');
+                selectedBooks.push(name);
+              } else {
+                document
+                  .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
+                  .classList.add('recipe-buttons__book-section--disabled');
+                delete selectedBooks[selectedBooks.indexOf(name)];
+              }
+              STORE.selectedBooks = selectedBooks.flat();
+            }}
+            defaultSelected={STORE.selectedBooks.includes(name)}
+          />
+        ))}
+      </div>
+      {
+        //
+        // #endregion Add "Recipe Book" on/off buttons to DOM
+        //
+        //
+        // #region Add Recipe buttons to DOM
+        //
       }
-      Array.from(
-        document.querySelectorAll<HTMLButtonElement>(`.recipe_button-book_${name.replace(/ /g, '_')}`),
-      ).forEach((elem) => (elem.disabled = disabled));
-      if (disabled) {
-        button.classList.remove('crafting-panel-filters__books-button--selected');
-        delete selected[selected.indexOf(name)];
-      } else {
-        button.classList.add('crafting-panel-filters__books-button--selected');
-        selected.push(name);
+      <div
+        className={
+          'recipe-buttons recipe-buttons--book-sort' +
+          ((await GM.getValue('SEG', false)) ? ' recipe-buttons--extra-space' : '')
+        }
+      >
+        {BOOKS.map((bookName) => (
+          <div
+            key={bookName}
+            className={
+              'recipe-buttons__book-section' +
+              (STORE.selectedBooks.includes(bookName) ? '' : ' recipe-buttons__book-section--disabled')
+            }
+            id={`recipe-buttons__book-section-${bookName.replace(/ /g, '_')}`}
+          >
+            {recipes.filter(({book}) => book === bookName).map((recipe) => createRecipeButton(recipe))}
+          </div>
+        ))}
+      </div>
+      {
+        //
+        // #endregion Add Recipe buttons to DOM
+        //
       }
-      STORE.selectedBooks = selected.flat();
-    });
-  });
-  //
-  // #endregion Add "Recipe Book" on/off buttons to DOM
-  //
-
-  //
-  // #region Add Recipe buttons to DOM
-  //
-  const recipeButtonDiv = document.createElement('div');
-  quickCrafter.append(recipeButtonDiv);
-  recipeButtonDiv.classList.add('recipe-buttons', 'recipe-buttons--book-sort');
-  if (await GM.getValue('SEG', false)) recipeButtonDiv.classList.add('recipe-buttons--extra-space');
-
-  BOOKS.forEach((bookName) => {
-    const bookSection = document.createElement('div');
-    recipeButtonDiv.append(bookSection);
-    bookSection.classList.add('recipe-buttons__book-section');
-    if (!STORE.selectedBooks.includes(bookName)) {
-      bookSection.classList.add('recipe-buttons__book-section--disabled');
-    } else {
-      bookSection.classList.remove('recipe-buttons__book-section--disabled');
-    }
-    bookSection.id = `recipe-buttons__book-section-${bookName.replace(/ /g, '_')}`;
-
-    recipes.filter(({book}) => book === bookName).forEach((recipe) => bookSection.append(createRecipeButton(recipe)));
-  });
-  //
-  // #endregion Add Recipe buttons to DOM
-  //
-
-  const credit = document.createElement('p');
-  quickCrafter.append(credit);
-  credit.classList.add('credits');
-  credit.innerHTML = `Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v<a href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">${pkg.version}</a>`;
+      <p className="credits">
+        Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v
+        <a target="_blank" href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">
+          {pkg.version}
+        </a>
+      </p>
+    </React.Fragment>,
+  );
 
   // Persist selected recipe
-  if (STORE.currentCraft) {
-    document
-      .getElementById(`recipe_button-${STORE.currentCraft.replace(/ /g, '_')}`)
-      .dispatchEvent(new MouseEvent('click'));
-  }
+  window.requestIdleCallback(() => {
+    if (STORE.currentCraft) {
+      const selectedRecipe = recipes.find(
+        ({itemId, name}) => name === STORE.currentCraft || ingredients[itemId].name === STORE.currentCraft,
+      );
+      open_crafting_submenu(selectedRecipe, []);
+    }
+  });
 })();
