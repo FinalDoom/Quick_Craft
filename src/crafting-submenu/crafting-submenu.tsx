@@ -42,7 +42,7 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
 
     for (let i = 0; i < count; i++) {
       await new Promise<void>((resolve) =>
-        setTimeout(function () {
+        setTimeout(() => {
           take_craft(this.props.recipe);
           this.props.inventory.addOrSubtractItems({[this.props.recipe.itemId]: 1});
           resolve();
