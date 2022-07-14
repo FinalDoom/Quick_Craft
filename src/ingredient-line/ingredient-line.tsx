@@ -9,7 +9,7 @@ interface Props {
   ingredient: IngredientTemp;
   maxCraftableWithPurchase: number;
   purchasable: boolean;
-  store: Store;
+  switchNeedHave: boolean;
 }
 interface State {}
 
@@ -28,7 +28,7 @@ export default class IngredientLine extends React.Component<Props, State> {
     const {id: ingredId, name: ingredName, onHand: qtyOnHand, qty: qtyPerCraft} = this.props.ingredient;
 
     const classNames = ['crafting-panel-info__ingredient-row'];
-    if (this.props.store.switchNeedHave) {
+    if (this.props.switchNeedHave) {
       classNames.push('crafting-panel-info__ingredient-row-quantity-swapped');
     }
     if (this.props.purchasable) {

@@ -3,24 +3,19 @@
 import './style/main.scss';
 import pkg from '../package.json';
 
-import React, {ChangeEvent} from 'react';
+import React, {ChangeEvent, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import ReactTestUtils from 'react-dom/test-utils';
 import {GazelleApi} from './api/api';
 import {BOOKS, GeneratedRecipe, ingredients, recipes} from './generated/recipe_info';
-import {take_craft} from './helpers/crafter';
-import IngredientLine, {IngredientTemp} from './ingredient-line/ingredient-line';
 import {ConsoleLog} from './log/log';
 import {Inventory} from './models/inventory';
 import {QuickCraftStore} from './store/store';
-import CountingSet from './util/counting-set';
 import RecipeButton from './button/variants/recipe-button';
 import BookButton from './button/variants/book-button';
 import Button from './button/button';
-import MaxCraftButton from './button/variants/max-craft-button';
 import Checkbox from './checkbox/checkbox';
-
-const CRAFT_TIME = 1000;
+import CraftingSubmenu from './crafting-submenu/crafting-submenu';
 
 declare global {
   interface Window {
@@ -57,195 +52,14 @@ Please disable this userscript until you have one as this prompt will continue t
 
   // TODO rest of the script that was pulled from original userscript with minor changes
 
-  let craftingSubmenu: HTMLDivElement;
-  let isCrafting = false;
-
-  function close_crafting_submenu() {
-    if (craftingSubmenu) {
-      craftingSubmenu.remove();
-      STORE.currentCraft = craftingSubmenu = undefined;
-    }
-  }
-
-  async function open_crafting_submenu(recipe: GeneratedRecipe, purchasable: Array<string>) {
-    if (isCrafting) return;
-
-    const recipeName = recipe.name || ingredients[recipe.itemId].name;
-    const currentCraft = {available: Number.MAX_SAFE_INTEGER, ingredients: [] as Array<IngredientTemp>};
-    const recipeIngredients = recipe.recipe.match(/.{5}/g);
-    const ingredientCounts = new CountingSet<string>();
-    recipeIngredients.forEach((item) => ingredientCounts.add(item));
-    ingredientCounts.delete('EEEEE');
-    for (let [id, perCraft] of ingredientCounts.entries()) {
-      const onHand = INVENTORY.itemCount(String(parseInt(id))) || 0;
-      const avail = Math.floor(onHand / perCraft);
-      if (avail < currentCraft.available) {
-        currentCraft.available = avail;
-      }
-      currentCraft.ingredients.push({
-        name: ingredients[Number(id)].name,
-        id: Number(id),
-        qty: perCraft,
-        onHand: onHand,
-      });
-    }
-
-    const createCraftingActions = (available: number) => {
-      if (available <= 0) {
-        return '';
-      }
-
-      const doCraft = async () => {
-        // Disable crafting buttons and craft switching
-        isCrafting = true;
-        Array.from(
-          document.querySelectorAll<HTMLButtonElement | HTMLSelectElement>(
-            '#crafting-submenu button, #crafting-submenu select',
-          ),
-        ).forEach((elem) => {
-          elem.disabled = true;
-          elem.classList.add('disabled');
-        });
-
-        let count = Number(document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value);
-
-        await (async () => {
-          for (let i = 0; i < count; i++) {
-            await new Promise<void>((resolve) =>
-              setTimeout(function () {
-                take_craft(recipe);
-                INVENTORY.addOrSubtractItems({[recipe.itemId]: 1});
-                resolve();
-              }, CRAFT_TIME),
-            );
-          }
-          isCrafting = false;
-          await open_crafting_submenu(recipe, purchasable);
-        })();
-      };
-
-      return (
-        <div className="crafting-panel-actions">
-          <select className="crafting-panel-actions__craft-number">
-            {Array(currentCraft.available)
-              .fill(undefined)
-              .map((_, i) => (
-                <option key={i} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-          </select>
-          <Button
-            variant="click"
-            classNameBase="crafting-panel-actions__craft-button"
-            clickCallback={doCraft}
-            text="Craft"
-          />
-          <MaxCraftButton
-            executeCraft={doCraft}
-            setMaxCraft={() =>
-              (document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value = String(
-                currentCraft.available,
-              ))
-            }
-          />
-        </div>
-      );
-    };
-
-    close_crafting_submenu();
-    STORE.currentCraft = recipeName;
-
-    const createIngredientLine = (ingredient: IngredientTemp, maxWithPurchase: number) => {
-      const togglePurchasable = () => {
-        if (purchasable.includes(ingredient.name)) {
-          delete purchasable[purchasable.indexOf(ingredient.name)];
-          purchasable = purchasable.flat();
-        } else if (purchasable.length < currentCraft.ingredients.length - 1) purchasable.push(ingredient.name);
-        close_crafting_submenu();
-        open_crafting_submenu(recipe, purchasable);
-      };
-
-      return (
-        <IngredientLine
-          key={ingredient.id}
-          click={togglePurchasable}
-          ingredient={ingredient}
-          maxCraftableWithPurchase={maxWithPurchase}
-          purchasable={purchasable.includes(ingredient.name)}
-          store={STORE}
-        />
-      );
-    };
-
-    const maxWithPurchase = purchasable.length
-      ? Math.min(
-          ...currentCraft.ingredients.map((ingredient) =>
-            purchasable.includes(ingredient.name)
-              ? Number.MAX_SAFE_INTEGER
-              : Math.floor(ingredient.onHand / ingredient.qty),
-          ),
-        )
-      : currentCraft.available;
-
-    craftingSubmenu = document.createElement('div');
-    document.getElementById('current_craft_box').append(craftingSubmenu);
-    craftingSubmenu.classList.add('crafting-panel');
-    craftingSubmenu.id = 'crafting-submenu';
-
-    const root = createRoot(craftingSubmenu);
-    root.render(
-      <React.Fragment>
-        <div className="crafting-panel__title">
-          {ingredients[recipe.itemId].name}
-          {INVENTORY.itemCount(String(recipe.itemId)) > 0
-            ? ` (${INVENTORY.itemCount(String(recipe.itemId))} in inventory)`
-            : ''}
-        </div>
-        <div className="crafting-panel-info__ingredients-header">Ingredients:</div>
-        <div className="crafting-panel-info__ingredients-column">
-          {currentCraft.ingredients.map((ingredient) => createIngredientLine(ingredient, maxWithPurchase))}
-        </div>
-        <span className="crafting-panel-info__ingredients-max">
-          Max available craft(s): {currentCraft.available}
-          {currentCraft.available !== maxWithPurchase ? (
-            <span title="Max possible if additional ingredients are purchased">({maxWithPurchase})</span>
-          ) : (
-            ''
-          )}
-          <sup>
-            <a title="Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.">
-              ?
-            </a>
-          </sup>
-        </span>
-        {createCraftingActions(currentCraft.available)}
-      </React.Fragment>,
-    );
-  }
   //
   // #region Create Recipe Book and Recipe buttons
   //
 
-  //
-  // Creates a Recipe button.
-  //
-  const createRecipeButton = (recipe: GeneratedRecipe) => {
-    const name = recipe.name || ingredients[recipe.itemId].name;
-
-    return (
-      <RecipeButton
-        key={name}
-        book={recipe.book}
-        clickCallback={() => {
-          STORE.currentCraft = name;
-          document.querySelector('.recipes__recipe--selected')?.classList.remove('recipes__recipe--selected');
-          open_crafting_submenu(recipe, []);
-        }}
-        name={name}
-        store={STORE}
-      />
-    );
+  const [currentCraft, setCurrentCraftState] = useState(STORE.currentCraft);
+  const setCurrentCraft = (name: string) => {
+    STORE.currentCraft = name;
+    setCurrentCraftState(name);
   };
 
   const clearDiv = document.createElement('div');
@@ -259,6 +73,11 @@ Please disable this userscript until you have one as this prompt will continue t
 
   root.render(
     <React.Fragment>
+      <CraftingSubmenu
+        inventory={INVENTORY}
+        recipe={recipes.find(({itemId, name}) => name === currentCraft || ingredients[itemId].name === currentCraft)}
+        switchNeedHave={STORE.switchNeedHave}
+      />
       <div id="current_craft_box">
         <p>
           Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better
@@ -267,7 +86,7 @@ Please disable this userscript until you have one as this prompt will continue t
         <Button
           variant="click"
           classNameBase="crafting-panel-actions__clear-craft-button"
-          clickCallback={close_crafting_submenu}
+          clickCallback={() => setCurrentCraft(undefined)}
           text="Clear"
         />
       </div>
@@ -389,7 +208,26 @@ Please disable this userscript until you have one as this prompt will continue t
             }
             id={`recipe-buttons__book-section-${bookName.replace(/ /g, '_')}`}
           >
-            {recipes.filter(({book}) => book === bookName).map((recipe) => createRecipeButton(recipe))}
+            {recipes
+              .filter(({book}) => book === bookName)
+              .map((recipe) => {
+                const name = recipe.name || ingredients[recipe.itemId].name;
+
+                return (
+                  <RecipeButton
+                    key={name}
+                    book={recipe.book}
+                    clickCallback={() => {
+                      setCurrentCraft(name);
+                      document
+                        .querySelector('.recipes__recipe--selected')
+                        ?.classList.remove('recipes__recipe--selected');
+                    }}
+                    name={name}
+                    store={STORE}
+                  />
+                );
+              })}
           </div>
         ))}
       </div>
@@ -402,18 +240,9 @@ Please disable this userscript until you have one as this prompt will continue t
         Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v
         <a target="_blank" href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">
           {pkg.version}
+          {/* <GoMarkGithub /> */}
         </a>
       </p>
     </React.Fragment>,
   );
-
-  // Persist selected recipe
-  window.requestIdleCallback(() => {
-    if (STORE.currentCraft) {
-      const selectedRecipe = recipes.find(
-        ({itemId, name}) => name === STORE.currentCraft || ingredients[itemId].name === STORE.currentCraft,
-      );
-      open_crafting_submenu(selectedRecipe, []);
-    }
-  });
 })();
