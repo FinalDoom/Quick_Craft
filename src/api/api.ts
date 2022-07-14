@@ -1,6 +1,6 @@
 import {RateLimiter} from 'limiter';
-import {ingredients} from './generated_data/recipe_info';
-import Log from './log';
+import {ingredients} from '../generated/recipe_info';
+import Log from '../log/log';
 
 const API_THROTTLE_WINDOW_MILLLIS = 10000;
 const MAX_QUERIES_PER_WINDOW = 5;
@@ -9,22 +9,22 @@ const BACKOFF_TIME_MILLIS = 2000;
 /**
  * Top-level structure of a success response from the API.
  */
-interface SuccessfulApiResponse<T> {
+export interface SuccessfulApiResponse<T> {
   status: 'success';
   response: T;
 }
 /**
  * Top-level structure of a failure response from the API.
  */
-interface FailureApiResponse {
+export interface FailureApiResponse {
   status: 'failure';
   error: string;
 }
-type ApiResponse<T> = SuccessfulApiResponse<T> | FailureApiResponse;
+export type ApiResponse<T> = SuccessfulApiResponse<T> | FailureApiResponse;
 
 const isSuccessResponse = <T>(response: ApiResponse<T>): response is SuccessfulApiResponse<T> =>
   response.status === 'success';
-const isFailureResponse = <T>(response: ApiResponse<T>): response is FailureApiResponse =>
+export const isFailureResponse = <T>(response: ApiResponse<T>): response is FailureApiResponse =>
   response.status === 'failure';
 
 type ApiEquippedInfo = {

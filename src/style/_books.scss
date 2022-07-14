@@ -1,6 +1,10 @@
 @use 'types';
 
 @mixin books {
+  &--selected {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4) 0 0);
+  }
+
   &--repair {
     @include types.repair;
     border-width: 2px;

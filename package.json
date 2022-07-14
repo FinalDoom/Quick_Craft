@@ -1,6 +1,6 @@
 {
   "name": "gazelle_quick_craft",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Craft multiple items more easily including equipment repair",
   "main": "index.ts",
   "keywords": [
@@ -28,7 +28,7 @@
     "build:release:win32": "npx rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
     "version": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
     "prepublishOnly": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register test/**/*.ts",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register src/**/*.test.ts",
     "addRecipe": "yarn build && node dist/scripts/add-recipe.js"
   },
   "devDependencies": {
@@ -46,6 +46,8 @@
     "@types/chai": "^4.3.1",
     "@types/greasemonkey": "^4.0.3",
     "@types/mocha": "^9.1.1",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
     "chai": "^4.3.6",
     "colorette": "^2.0.19",
     "deep-object-diff": "^1.1.7",
@@ -55,6 +57,8 @@
     "limiter": "^2.1.0",
     "mocha": "^10.0.0",
     "prettier": "^2.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rollup": "^2.76.0",
     "rollup-plugin-scss": "^3",
     "rollup-plugin-userscript-metablock": "^0.3.1",

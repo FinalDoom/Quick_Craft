@@ -138,7 +138,7 @@
     @include inputs.hide-input;
     @include inputs.button-base;
 
-    &--selected {
+    &--on {
       opacity: 1;
     }
   }

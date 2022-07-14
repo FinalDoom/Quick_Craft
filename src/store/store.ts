@@ -1,4 +1,4 @@
-import {Book, Category, CATEGORIES, RecipeType, RECIPE_TYPES} from './generated_data/recipe_info';
+import {Book, Category, CATEGORIES, RecipeType, RECIPE_TYPES} from '../generated/recipe_info';
 
 enum Sort {
   alpha = 'Alphabetical',
@@ -23,7 +23,7 @@ interface StorableGM {
   switchNeedHave: boolean;
 }
 interface StorableLocalStorage {}
-interface Storable extends StorableGM, StorableLocalStorage {}
+export interface Storable extends StorableGM, StorableLocalStorage {}
 export default interface Store extends Storable {}
 
 type GMKeys = {[key in keyof StorableGM]: string};
