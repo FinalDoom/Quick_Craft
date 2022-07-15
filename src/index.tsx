@@ -51,7 +51,5 @@ Please disable this userscript until you have one as this prompt will continue t
 
   document.getElementById('crafting_recipes').before(clearDiv, quickCrafter);
 
-  createRoot(quickCrafter).render(
-    <QuickCrafter extraSpace={await GM.getValue('SEG', false)} inventory={INVENTORY} store={STORE} />,
-  );
+  createRoot(quickCrafter).render(<QuickCrafter inventory={INVENTORY} log={LOG} />);
 })();

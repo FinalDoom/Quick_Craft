@@ -1,7 +1,6 @@
 import React from 'react';
 import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
-import Store from '../store/store';
 
 export type IngredientTemp = {id: number; name: string; onHand: number; qty: number};
 interface Props {
@@ -29,7 +28,7 @@ export default class IngredientLine extends React.Component<Props, State> {
 
     const classNames = ['crafting-panel-info__ingredient-row'];
     if (this.props.switchNeedHave) {
-      classNames.push('crafting-panel-info__ingredient-row-quantity-swapped');
+      classNames.push('crafting-panel-info__ingredient-quantity--swapped');
     }
     if (this.props.purchasable) {
       classNames.push('crafting-panel-info__ingredient--purchasable');
@@ -38,8 +37,9 @@ export default class IngredientLine extends React.Component<Props, State> {
     if (this.props.maxCraftableWithPurchase > qtyOnHand / qtyPerCraft) {
       max = (
         <span title="Needed for max possible crafts">
-          {' '}
+          {' ('}
           {this.props.maxCraftableWithPurchase * qtyPerCraft - qtyOnHand}
+          {')'}
         </span>
       );
     }

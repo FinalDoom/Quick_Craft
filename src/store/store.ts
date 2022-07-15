@@ -11,6 +11,7 @@ enum Sort {
 interface StorableGM {
   apiKey: string;
   currentCraft: string;
+  extraSpace: boolean;
   repairEquipped: boolean;
   repairThreshold: number;
   selectedBooks: Array<Book>;
@@ -27,9 +28,10 @@ export interface Storable extends StorableGM, StorableLocalStorage {}
 export default interface Store extends Storable {}
 
 type GMKeys = {[key in keyof StorableGM]: string};
-const GM_KEYS: GMKeys = {
+export const GM_KEYS: GMKeys = {
   apiKey: 'forumgames_apikey',
   currentCraft: 'current-craft',
+  extraSpace: 'SEG',
   repairEquipped: 'repair-equipped',
   repairThreshold: 'repair-threshold',
   selectedBooks: 'selected-books',
@@ -45,6 +47,7 @@ const GM_KEYS: GMKeys = {
 export class QuickCraftStore implements Store {
   #apiKey: string;
   #currentCraft: string;
+  #extraSpace: boolean;
   #repairEquipped: boolean;
   #repairThreshold: number;
   #selectedBooks: Array<Book>;
@@ -118,6 +121,15 @@ export class QuickCraftStore implements Store {
     const oldValue = this.#currentCraft;
     this.#currentCraft = craft;
     this.#setGM('currentCraft', oldValue, craft);
+  }
+
+  get extraSpace() {
+    return this.#extraSpace;
+  }
+  set extraSpace(extraSpace) {
+    const oldValue = this.#extraSpace;
+    this.#extraSpace = extraSpace;
+    this.#setGM('extraSpace', oldValue, extraSpace);
   }
 
   get repairEquipped() {

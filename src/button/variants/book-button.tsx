@@ -4,8 +4,8 @@ import Button from '../button';
 
 interface Props {
   book: Book;
-  clickCallback: (selected: boolean) => void;
-  defaultSelected: boolean;
+  clickCallback: () => void;
+  selected: boolean;
 }
 interface State {}
 
@@ -22,9 +22,9 @@ export default class BookButton extends React.Component<Props, State> {
         additionalClassNames={this.base + '--book-' + this.props.book.toLocaleLowerCase().replace(/ /g, '-')}
         classNameBase={this.base}
         clickCallback={this.props.clickCallback}
-        defaultSelected={this.props.defaultSelected}
+        selected={this.props.selected}
         text={this.props.book}
-        variant="toggle"
+        variant="select"
       />
     );
   }
