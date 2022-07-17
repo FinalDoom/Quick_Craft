@@ -2,21 +2,17 @@ import React from 'react';
 import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
 
-export type IngredientTemp = {id: number; name: string; onHand: number; qty: number};
 interface Props {
   click: () => void;
-  ingredient: IngredientTemp;
+  id: number;
   maxCraftableWithPurchase: number;
+  name: string;
   purchasable: boolean;
+  quantityAvailable: number;
+  quantityPerCraft: number;
   switchNeedHave: boolean;
 }
 interface State {}
-
-function titleCaseFromUnderscored(str: string) {
-  return str.replace(/_/g, ' ').replace(/(?:^|\s)\w/g, function (match) {
-    return match.toUpperCase();
-  });
-}
 
 export default class IngredientLine extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -24,8 +20,6 @@ export default class IngredientLine extends React.Component<Props, State> {
   }
 
   render() {
-    const {id: ingredId, name: ingredName, onHand: qtyOnHand, qty: qtyPerCraft} = this.props.ingredient;
-
     const classNames = ['crafting-panel-info__ingredient-row'];
     if (this.props.switchNeedHave) {
       classNames.push('crafting-panel-info__ingredient-quantity--swapped');
@@ -34,11 +28,11 @@ export default class IngredientLine extends React.Component<Props, State> {
       classNames.push('crafting-panel-info__ingredient--purchasable');
     }
     let max: JSX.Element;
-    if (this.props.maxCraftableWithPurchase > qtyOnHand / qtyPerCraft) {
+    if (this.props.maxCraftableWithPurchase > this.props.quantityAvailable / this.props.quantityPerCraft) {
       max = (
         <span title="Needed for max possible crafts">
           {' ('}
-          {this.props.maxCraftableWithPurchase * qtyPerCraft - qtyOnHand}
+          {this.props.maxCraftableWithPurchase * this.props.quantityPerCraft - this.props.quantityAvailable}
           {')'}
         </span>
       );
@@ -46,10 +40,10 @@ export default class IngredientLine extends React.Component<Props, State> {
 
     return (
       <div className={classNames.join(' ')} onClick={this.props.click}>
-        <ShopLink ingredientId={ingredId} />
-        {titleCaseFromUnderscored(ingredName)}
+        <ShopLink ingredientId={this.props.id} />
+        {this.props.name}
         {':'}
-        <IngredientQuantity countOnHand={qtyOnHand} countPerCraft={qtyPerCraft} />
+        <IngredientQuantity countOnHand={this.props.quantityAvailable} countPerCraft={this.props.quantityPerCraft} />
         {max}
       </div>
     );

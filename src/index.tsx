@@ -6,7 +6,6 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
 import {ConsoleLog} from './log/log';
-import {Inventory} from './models/inventory';
 import {QuickCraftStore} from './store/store';
 import QuickCrafter from './quick-crafter/quick-crafter';
 
@@ -40,8 +39,6 @@ Please disable this userscript until you have one as this prompt will continue t
   }
 
   const API = new GazelleApi(LOG, STORE.apiKey || askForApiKey());
-  const INVENTORY = new Inventory(API);
-  await INVENTORY.refreshInventory();
 
   const clearDiv = document.createElement('div');
   clearDiv.classList.add('crafting-clear');
@@ -51,5 +48,5 @@ Please disable this userscript until you have one as this prompt will continue t
 
   document.getElementById('crafting_recipes').before(clearDiv, quickCrafter);
 
-  createRoot(quickCrafter).render(<QuickCrafter inventory={INVENTORY} log={LOG} />);
+  createRoot(quickCrafter).render(<QuickCrafter api={API} log={LOG} />);
 })();

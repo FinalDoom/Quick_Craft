@@ -26,6 +26,7 @@ export default class SearchBox extends React.Component<Props, State> {
         <span
           onClick={() => {
             this.input.value = '';
+            this.input.focus();
             this.props.changeSearch('');
           }}
         >

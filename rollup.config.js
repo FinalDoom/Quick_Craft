@@ -21,12 +21,13 @@ export default {
     name: 'rollupUserScript',
     banner: () =>
       fs.existsSync('./LICENSE')
-        ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '*/\n\n/* globals React, ReactDOM */'
+        ? '\n/*\n' + fs.readFileSync('./LICENSE', 'utf8') + '\n*/\n\n/* globals lunr, React, ReactDOM */'
         : '',
     sourcemap: true,
     globals: {
       react: 'React',
       'react-dom': 'ReactDOM',
+      lunr: 'lunr',
     },
   },
   plugins: [
@@ -58,5 +59,5 @@ export default {
       },
     }),
   ],
-  external: (id) => /^react(-dom)?$/.test(id),
+  external: (id) => /^(lunr|react(-dom)?)$/.test(id),
 };

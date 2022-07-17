@@ -1,17 +1,15 @@
 import React from 'react';
 import Button from '../button/button';
 import MaxCraftButton from '../button/variants/max-craft-button';
-import {GeneratedRecipe, ingredients} from '../generated/recipe_info';
+import {ingredients, RecipeInfo} from '../generated/recipe_info';
 import {take_craft} from '../helpers/crafter';
-import IngredientLine, {IngredientTemp} from '../ingredient-line/ingredient-line';
-import {Inventory} from '../models/inventory';
-import CountingSet from '../util/counting-set';
+import IngredientLine from '../ingredient-line/ingredient-line';
 
 const CRAFT_TIME = 1000;
 
 interface Props {
-  inventory: Inventory;
-  recipe: GeneratedRecipe;
+  inventory: Map<number, number>;
+  recipe: RecipeInfo;
   switchNeedHave: boolean;
 }
 interface State {
@@ -40,11 +38,15 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
 
     let count = Number(document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value);
 
+    const resultId = this.props.recipe.itemId;
     for (let i = 0; i < count; i++) {
       await new Promise<void>((resolve) =>
         setTimeout(() => {
           take_craft(this.props.recipe);
-          this.props.inventory.addOrSubtractItems({[this.props.recipe.itemId]: 1});
+          this.props.inventory.set(resultId, (this.props.inventory.get(resultId) || 0) + 1);
+          [...this.props.recipe.ingredientCounts.entries()].forEach(([id, count]) =>
+            this.props.inventory.set(id, this.props.inventory.get(id) - count),
+          );
           resolve();
         }, CRAFT_TIME),
       );
@@ -56,67 +58,63 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
   }
 
   render() {
-    const currentCraft = {available: Number.MAX_SAFE_INTEGER, ingredients: [] as Array<IngredientTemp>};
-    const recipeIngredients = this.props.recipe.recipe.match(/.{5}/g);
-    const ingredientCounts = new CountingSet<string>();
-    recipeIngredients.forEach((item) => ingredientCounts.add(item));
-    ingredientCounts.delete('EEEEE');
-    for (let [id, perCraft] of ingredientCounts.entries()) {
-      const onHand = this.props.inventory.itemCount(String(parseInt(id))) || 0;
+    let available = Number.MAX_SAFE_INTEGER;
+    for (let [id, perCraft] of this.props.recipe.ingredientCounts.entries()) {
+      const onHand = this.props.inventory.get(id) || 0;
       const avail = Math.floor(onHand / perCraft);
-      if (avail < currentCraft.available) {
-        currentCraft.available = avail;
+      if (avail < available) {
+        available = avail;
       }
-      currentCraft.ingredients.push({
-        name: ingredients[Number(id)].name,
-        id: Number(id),
-        qty: perCraft,
-        onHand: onHand,
-      });
     }
 
     const maxWithPurchase = this.state.purchasable.length
       ? Math.min(
-          ...currentCraft.ingredients.map((ingredient) =>
+          ...this.props.recipe.ingredients.map((ingredient) =>
             this.state.purchasable.includes(ingredient.name)
               ? Number.MAX_SAFE_INTEGER
-              : Math.floor(ingredient.onHand / ingredient.qty),
+              : Math.floor(
+                  this.props.inventory.get(ingredient.id) / this.props.recipe.ingredientCounts.get(ingredient.id),
+                ),
           ),
         )
-      : currentCraft.available;
+      : available;
 
     return (
       <div className="crafting-panel" id="crafting-submenu">
         <div className="crafting-panel__title">
           {ingredients[this.props.recipe.itemId].name}
-          {this.props.inventory.itemCount(String(this.props.recipe.itemId)) > 0
-            ? ` (${this.props.inventory.itemCount(String(this.props.recipe.itemId))} in inventory)`
+          {this.props.inventory.get(this.props.recipe.itemId) > 0
+            ? ` (${this.props.inventory.get(this.props.recipe.itemId)} in inventory)`
             : ''}
         </div>
         <div className="crafting-panel-info__ingredients-header">Ingredients:</div>
         <div className="crafting-panel-info__ingredients-column">
-          {currentCraft.ingredients.map((ingredient) => (
-            <IngredientLine
-              key={ingredient.id}
-              click={() => {
-                if (this.state.purchasable.includes(ingredient.name)) {
-                  this.setState({purchasable: this.state.purchasable.filter((p) => p !== ingredient.name)});
-                } else if (this.state.purchasable.length < currentCraft.ingredients.length - 1) {
-                  const purchasable = this.state.purchasable;
-                  purchasable.push(ingredient.name);
-                  this.setState({purchasable: purchasable});
-                }
-              }}
-              ingredient={ingredient}
-              maxCraftableWithPurchase={maxWithPurchase}
-              purchasable={this.state.purchasable.includes(ingredient.name)}
-              switchNeedHave={this.props.switchNeedHave}
-            />
-          ))}
+          {[...this.props.recipe.ingredientCounts.entries()].map(([id, count], index) => {
+            const name = this.props.recipe.ingredients[index].name;
+            return (
+              <IngredientLine
+                key={id}
+                click={() => {
+                  if (this.state.purchasable.includes(name)) {
+                    this.setState({purchasable: this.state.purchasable.filter((p) => p !== name)});
+                  } else if (this.state.purchasable.length < this.state.purchasable.length - 1) {
+                    this.setState({purchasable: [...this.state.purchasable, name]});
+                  }
+                }}
+                id={id}
+                maxCraftableWithPurchase={maxWithPurchase}
+                name={name}
+                purchasable={this.state.purchasable.includes(ingredients[id].name)}
+                quantityAvailable={this.props.inventory.get(id) || 0}
+                quantityPerCraft={count}
+                switchNeedHave={this.props.switchNeedHave}
+              />
+            );
+          })}
         </div>
         <span className="crafting-panel-info__ingredients-max">
-          Max available craft(s): {currentCraft.available}
-          {currentCraft.available !== maxWithPurchase ? (
+          Max available craft(s): {available}
+          {available !== maxWithPurchase ? (
             <span title="Max possible if additional ingredients are purchased">({maxWithPurchase})</span>
           ) : (
             ''
@@ -127,10 +125,10 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
             </a>
           </sup>
         </span>
-        {currentCraft.available > 0 && (
+        {available > 0 && (
           <div className="crafting-panel-actions">
             <select className="crafting-panel-actions__craft-number">
-              {Array(currentCraft.available)
+              {Array(available)
                 .fill(undefined)
                 .map((_, i) => (
                   <option key={i} value={i + 1}>
@@ -147,9 +145,8 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
             <MaxCraftButton
               executeCraft={this.doCraft.bind(this)}
               setMaxCraft={() =>
-                (document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value = String(
-                  currentCraft.available,
-                ))
+                (document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value =
+                  String(available))
               }
             />
           </div>

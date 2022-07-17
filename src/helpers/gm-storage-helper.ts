@@ -24,7 +24,6 @@ export async function getGMStorageValue<T = any>(key: string, defaultValue: T) {
 }
 
 export async function setGMStorageValue<T = any>(key: string, value: T) {
-  console.log('setting', key, '=', value);
   if (value === undefined) {
     await GM.deleteValue(key);
   } else {
