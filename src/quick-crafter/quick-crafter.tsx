@@ -1,65 +1,244 @@
 import pkg from '../../package.json';
 
 import React, {ChangeEvent} from 'react';
-import ReactTestUtils from 'react-dom/test-utils';
-import {BOOKS, ingredients, recipes} from '../generated/recipe_info';
-import Store, {Storable} from '../store/store';
+import lunr, {Token} from 'lunr';
+import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../generated/recipe_info';
+import {GM_KEYS} from '../store/store';
 import RecipeButton from '../button/variants/recipe-button';
 import BookButton from '../button/variants/book-button';
 import Button from '../button/button';
 import Checkbox from '../checkbox/checkbox';
 import CraftingSubmenu from '../crafting-submenu/crafting-submenu';
-import {Inventory} from '../models/inventory';
+import SearchBox from '../search-box/search-box';
+import Log from '../log/log';
+import {getGMStorageValue, setGMStorageValue} from '../helpers/gm-storage-helper';
+import Api from '../api/api';
 
 interface Props {
-  extraSpace: boolean;
-  inventory: Inventory;
-  store: Store;
+  api: Api;
+  log: Log;
 }
-interface State extends Partial<Storable> {
-  currentCraft: string;
+interface State {
+  currentCraft?: number;
   extraSpace: boolean;
+  filteredRecipes: ReadonlyArray<number> | ReadonlyArray<ReadonlyArray<number>>;
+  inventory: Map<number, number>;
   loadingStore?: boolean;
   loadingApi?: boolean;
   loadingInventory?: boolean;
   loadingEquipment?: boolean;
+  search: string;
+  searchIngredients: boolean;
+  switchNeedHave: boolean;
+  selectedBooks: ReadonlySet<Book>;
 }
 
+const bookIndexName: keyof RecipeInfo = 'book';
+const categoryIndexName: keyof RecipeInfo = 'category';
+const ingredientsIndexName = 'ingredients';
+const nameIndexName: keyof RecipeInfo = 'name';
+const resultIndexName = 'result';
+const typeIndexName: keyof RecipeInfo = 'type';
+
+const normalizer = (token: Token): null | Token | Token[] =>
+  token.update((str) => str.normalize('NFD').replace(/\p{Diacritic}/gu, ''));
+lunr.Pipeline.registerFunction(normalizer, 'normalizer');
+
+const recipeIndex = lunr(function () {
+  this.ref('id');
+
+  this.field(nameIndexName);
+  this.field(resultIndexName, {
+    extractor: (doc: RecipeInfo) => String(doc.itemId) + ' ' + ingredients[doc.itemId].name,
+  });
+  this.field(bookIndexName);
+  this.field(categoryIndexName);
+  this.field(typeIndexName);
+  this.field(ingredientsIndexName, {
+    extractor: (doc: RecipeInfo) =>
+      doc.ingredients.map((ingredient: IdentifiedIngredient) => ingredient.name + ' ' + ingredient.id).join(' '),
+  });
+
+  this.pipeline.remove(lunr.stopWordFilter);
+  this.pipeline.before(lunr.stemmer, normalizer);
+
+  recipeInfo.forEach((recipe) => this.add(recipe));
+});
+
 export default class QuickCrafter extends React.Component<Props, State> {
+  recipeButtons: Array<JSX.Element>;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      currentCraft: this.props.store.currentCraft,
-      extraSpace: this.props.extraSpace,
-      loadingStore: false,
+      currentCraft: undefined,
+      extraSpace: false,
+      filteredRecipes: this.getSortedRecipes(recipeInfo.map(({id}) => id)),
+      inventory: new Map<number, number>(),
       loadingApi: false,
-      loadingInventory: false,
       loadingEquipment: false,
+      loadingInventory: true,
+      loadingStore: true,
+      search: '',
+      searchIngredients: true,
+      selectedBooks: new Set(BOOKS),
+      switchNeedHave: false,
     };
+
+    this.recipeButtons = recipeInfo.map((recipe) => (
+      <RecipeButton
+        key={recipe.id}
+        book={recipe.book}
+        clickCallback={() => this.setCurrentCraft(recipe.id)}
+        name={recipe.name}
+        selected={this.state.currentCraft === recipe.id}
+      />
+    ));
+
+    // Fetch async state
+    Promise.all([this.props.api.getInventoryCounts()]).then(([inventory]) => {
+      this.setState({inventory: inventory, loadingInventory: false});
+    });
+    Promise.all([
+      getGMStorageValue(GM_KEYS.currentCraft, this.state.currentCraft),
+      getGMStorageValue(GM_KEYS.extraSpace, this.state.extraSpace),
+      getGMStorageValue(GM_KEYS.search, this.state.search),
+      getGMStorageValue(GM_KEYS.searchIngredients, this.state.searchIngredients),
+      getGMStorageValue(GM_KEYS.selectedBooks, ['Potions', 'Food', 'Material Bars']),
+      getGMStorageValue(GM_KEYS.switchNeedHave, this.state.switchNeedHave),
+    ]).then(([currentCraft, extraSpace, search, searchIngredients, selectedBooks, switchNeedHave]) => {
+      this.setState({
+        currentCraft: currentCraft,
+        extraSpace: extraSpace,
+        loadingStore: false,
+        search: search,
+        searchIngredients: searchIngredients,
+        selectedBooks: new Set(selectedBooks),
+        switchNeedHave: switchNeedHave,
+      });
+    });
   }
 
-  setCurrentCraft(craft?: string) {
-    this.props.store.currentCraft = craft;
-    this.setState({currentCraft: craft});
+  // TODO how to skip copying these types?
+  setState<K extends keyof State>(
+    state:
+      | ((prevState: Readonly<State>, props: Readonly<Props>) => Pick<State, K> | State | null)
+      | (Pick<State, K> | State | null),
+    callback?: () => void,
+  ) {
+    if (typeof state === 'function') {
+      state = state(this.state, this.props);
+    }
+    if (this.recipeFiltersChanged(state)) {
+      try {
+        const filteredRecipes = this.getFilteredRecipes(state);
+        state = {...state, filteredRecipes: filteredRecipes};
+      } catch (err) {
+        if (!('name' in err && err.name === 'QueryParseError')) throw err;
+      }
+    }
+    super.setState(state, callback);
   }
 
-  async setExtraSpace(extraSpace: boolean) {
-    this.setState({extraSpace: extraSpace});
-    await GM.setValue('SEG', extraSpace);
+  recipeFiltersChanged<K extends keyof State>(state: Pick<State, K> | State | null) {
+    return (
+      ('search' in state && state.search !== this.state.search) ||
+      ('searchIngredients' in state &&
+        state.searchIngredients !== this.state.searchIngredients &&
+        (state.search || this.state.search)) ||
+      ('selectedBooks' in state &&
+        (state.selectedBooks.size !== this.state.selectedBooks.size ||
+          !Array.prototype.every.call(state.selectedBooks, (book: Book) => this.state.selectedBooks.has(book))))
+    );
+  }
+
+  getFilteredRecipes<K extends keyof State>(state: Pick<State, K> | State | null) {
+    const selectedBooks = 'selectedBooks' in state ? state.selectedBooks : this.state.selectedBooks;
+    const search = 'search' in state ? state.search : this.state.search;
+    const searchIngredients = 'searchIngredients' in state ? state.searchIngredients : this.state.searchIngredients;
+
+    const bookMatches = recipeIndex
+      .search([...selectedBooks].map((book) => bookIndexName + ':' + book.split(/\s+/)[0]).join(' '))
+      .map((result) => Number(result.ref));
+
+    let filteredRecipes: number[];
+    if (search.length === 0) filteredRecipes = Array.from(bookMatches);
+    else {
+      const searchString = search
+        .split(/\s+/)
+        .map((token) => {
+          if (/:/.test(token)) return token;
+          return token.replace(
+            /^([-+]?)(.*)$/,
+            `$1${nameIndexName}:$2 $1${resultIndexName}:$2` +
+              (searchIngredients ? ` $1${ingredientsIndexName}:$2` : ''),
+          );
+        })
+        .join(' ');
+      const results = new Set(recipeIndex.search(searchString).map((result) => Number(result.ref)));
+
+      filteredRecipes = bookMatches.filter((id: number) => results.has(id));
+    }
+    return this.getSortedRecipes(filteredRecipes);
+  }
+
+  getSortedRecipes(filteredRecipes: number[]) {
+    // Sort however
+    filteredRecipes.sort((a, b) => {
+      const recipeA = recipeInfo[a];
+      const recipeB = recipeInfo[b];
+      return recipeA.book === recipeB.book
+        ? recipeA.id - recipeB.id
+        : BOOKS.indexOf(recipeA.book) - BOOKS.indexOf(recipeB.book);
+    });
+    // if book sort
+    let currentBook: Book;
+    const reduced = filteredRecipes.reduce((arr, id) => {
+      if (currentBook !== recipeInfo[id].book) {
+        arr.push([]);
+        currentBook = recipeInfo[id].book;
+      }
+      arr[arr.length - 1].push(id);
+      return arr;
+    }, [] as number[][]);
+    return reduced;
+  }
+
+  setCurrentCraft(id?: number) {
+    this.setState({currentCraft: id}, () => setGMStorageValue(GM_KEYS.currentCraft, id));
+  }
+
+  setExtraSpace(extraSpace: boolean) {
+    this.setState({extraSpace: extraSpace}, () => setGMStorageValue(GM_KEYS.extraSpace, extraSpace));
+  }
+
+  setSearch(search: string) {
+    this.setState({search: search}, () => setGMStorageValue(GM_KEYS.search, search));
+  }
+
+  setSearchIngredients(include: boolean) {
+    this.setState({searchIngredients: include}, () => setGMStorageValue(GM_KEYS.searchIngredients, include));
+  }
+
+  setSelectedBooks(books: Set<Book>) {
+    this.setState({selectedBooks: books}, () => setGMStorageValue(GM_KEYS.selectedBooks, Array.from(books)));
+  }
+
+  setSwitchNeedHave(switchNeedHave: boolean) {
+    this.setState({switchNeedHave: switchNeedHave}, () => setGMStorageValue(GM_KEYS.switchNeedHave, switchNeedHave));
   }
 
   render() {
     return (
       <React.StrictMode>
-        <CraftingSubmenu
-          inventory={this.props.inventory}
-          recipe={recipes.find(
-            ({itemId, name}) =>
-              name === this.state.currentCraft || ingredients[itemId].name === this.state.currentCraft,
-          )}
-          switchNeedHave={this.props.store.switchNeedHave}
-        />
+        {this.state.currentCraft !== undefined && (
+          <CraftingSubmenu
+            inventory={this.state.inventory}
+            recipe={recipeInfo[this.state.currentCraft]}
+            switchNeedHave={this.state.switchNeedHave}
+          />
+        )}
         <div id="current_craft_box">
           <p>
             Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better
@@ -77,65 +256,25 @@ export default class QuickCrafter extends React.Component<Props, State> {
           <Button
             variant="click"
             classNameBase="crafting-panel-filters__books-hide"
-            clickCallback={() => {
-              BOOKS.forEach((book) => {
-                if (this.props.store.selectedBooks.includes(book)) {
-                  ReactTestUtils.Simulate.click(
-                    document.querySelector<HTMLButtonElement>(
-                      '.crafting-panel-filters__books-button--book-' + book.toLocaleLowerCase().replace(/ /g, '-'),
-                    ),
-                  );
-                }
-              });
-            }}
+            clickCallback={() => this.setSelectedBooks(new Set())}
             text="Hide all"
           />
           <Button
             variant="click"
             classNameBase="crafting-panel-filters__books-show"
-            clickCallback={() => {
-              BOOKS.forEach((book) => {
-                if (!this.props.store.selectedBooks.includes(book)) {
-                  ReactTestUtils.Simulate.click(
-                    document.querySelector<HTMLButtonElement>(
-                      '.crafting-panel-filters__books-button--book-' + book.toLocaleLowerCase().replace(/ /g, '-'),
-                    ),
-                  );
-                }
-              });
-            }}
+            clickCallback={() => this.setSelectedBooks(new Set(BOOKS))}
             text="Show all"
           />
           <Checkbox
             className="quick_craft_button"
             checked={this.state.extraSpace}
-            onChange={async (event: ChangeEvent<HTMLInputElement>) => {
-              if (event.target.checked) {
-                document.querySelector<HTMLDivElement>('.recipe-buttons').classList.add('recipe-buttons--extra-space');
-              } else {
-                document
-                  .querySelector<HTMLDivElement>('.recipe-buttons')
-                  .classList.remove('recipe-buttons--extra-space');
-              }
-              await this.setExtraSpace(event.target.checked);
-            }}
+            onChange={async (event: ChangeEvent<HTMLInputElement>) => this.setExtraSpace(event.target.checked)}
             suffix="Blank line between books"
           />
           <Checkbox
             title="Switches between needed/have and have/needed"
-            checked={this.props.store.switchNeedHave}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              Array.from(document.querySelectorAll<HTMLDivElement>('.crafting-panel-info__ingredient-row')).forEach(
-                (elem) => {
-                  if (event.target.checked) {
-                    elem.classList.add('crafting-panel-info__ingredient-quantity--swapped');
-                  } else {
-                    elem.classList.remove('crafting-panel-info__ingredient-quantity--swapped');
-                  }
-                },
-              );
-              this.props.store.switchNeedHave = event.target.checked;
-            }}
+            checked={this.state.switchNeedHave}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => this.setSwitchNeedHave(event.target.checked)}
             suffix="NH switch"
           />
         </div>
@@ -149,23 +288,17 @@ export default class QuickCrafter extends React.Component<Props, State> {
             <BookButton
               key={name}
               book={name}
-              clickCallback={(selected: boolean) => {
-                const selectedBooks = this.props.store.selectedBooks;
+              clickCallback={() => {
+                const selectedBooks = new Set(this.state.selectedBooks);
                 // Hide book sections
-                if (selected) {
-                  document
-                    .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
-                    .classList.remove('recipe-buttons__book-section--disabled');
-                  selectedBooks.push(name);
+                if (selectedBooks.has(name)) {
+                  selectedBooks.delete(name);
                 } else {
-                  document
-                    .getElementById(`recipe-buttons__book-section-${name.replace(/ /g, '_')}`)
-                    .classList.add('recipe-buttons__book-section--disabled');
-                  delete selectedBooks[selectedBooks.indexOf(name)];
+                  selectedBooks.add(name);
                 }
-                this.props.store.selectedBooks = selectedBooks.flat();
+                this.setSelectedBooks(selectedBooks);
               }}
-              defaultSelected={this.props.store.selectedBooks.includes(name)}
+              selected={this.state.selectedBooks.has(name)}
             />
           ))}
         </div>
@@ -173,6 +306,17 @@ export default class QuickCrafter extends React.Component<Props, State> {
           //
           // #endregion Add "Recipe Book" on/off buttons to DOM
           //
+        }
+        <div className="crafting-panel-search">
+          <SearchBox changeSearch={(search: string) => this.setSearch(search)} initialSearch={this.state.search} />
+          <Checkbox
+            checked={this.state.searchIngredients}
+            className="crafating-panel-search__include-ingredients"
+            prefix="Include ingredients"
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setSearchIngredients(event.target.checked)}
+          />
+        </div>
+        {
           //
           // #region Add Recipe buttons to DOM
           //
@@ -182,32 +326,17 @@ export default class QuickCrafter extends React.Component<Props, State> {
             'recipe-buttons recipe-buttons--book-sort' + (this.state.extraSpace ? ' recipe-buttons--extra-space' : '')
           }
         >
-          {BOOKS.map((bookName) => (
-            <div
-              key={bookName}
-              className={
-                'recipe-buttons__book-section' +
-                (this.props.store.selectedBooks.includes(bookName) ? '' : ' recipe-buttons__book-section--disabled')
-              }
-              id={`recipe-buttons__book-section-${bookName.replace(/ /g, '_')}`}
-            >
-              {recipes
-                .filter(({book}) => book === bookName)
-                .map((recipe) => {
-                  const name = recipe.name || ingredients[recipe.itemId].name;
-
-                  return (
-                    <RecipeButton
-                      key={name}
-                      book={recipe.book}
-                      clickCallback={() => this.setCurrentCraft(name)}
-                      name={name}
-                      selected={this.state.currentCraft === name}
-                    />
-                  );
-                })}
-            </div>
-          ))}
+          {this.state.filteredRecipes.map((idOrArray: number | readonly number[]) => {
+            if (Array.isArray(idOrArray)) {
+              return (
+                <div key={recipeInfo[idOrArray[0]].book} className={'recipe-buttons__book-section'}>
+                  {idOrArray.map((id) => this.recipeButtons[id])}
+                </div>
+              );
+            } else {
+              return this.recipeButtons[idOrArray as number];
+            }
+          })}
         </div>
         {
           //

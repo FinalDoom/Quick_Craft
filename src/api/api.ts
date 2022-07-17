@@ -89,7 +89,7 @@ export default interface Api {
    * Calls the API to get inventory item counts, excluding equipment.
    * @returns Map from item ID to count in user's inventory.
    */
-  getInventoryCounts(): Promise<Record<number, number>>;
+  getInventoryCounts(): Promise<Map<number, number>>;
   /**
    * Calls the API to get all currently equipped equip IDs.
    * @returns Array of all currently equipped equipment IDs.
@@ -99,7 +99,7 @@ export default interface Api {
    * Calls the API to get detailed information on equipment.
    * @returns Map from item ID to array of {@link EquipmentInfo} about equipment with that ID.
    */
-  getEquipmentInfo(): Promise<Record<number, Array<EquipmentInfo>>>;
+  getEquipmentInfo(): Promise<Map<number, Array<EquipmentInfo>>>;
 }
 
 export class GazelleApi implements Api {
@@ -182,7 +182,7 @@ export class GazelleApi implements Api {
 
   // Caller needs:
   // window.noty({type: 'error', text: 'Quick Crafting loading inventory failed. Please check logs and reload.'});
-  async getInventoryCounts(): Promise<Record<number, number>> {
+  async getInventoryCounts(): Promise<Map<number, number>> {
     return await this.call({request: 'items', type: 'inventory'})
       .then((response) => response.json())
       .then((response: ApiResponse<Array<ApiInventoryInfo>>) => {
@@ -191,8 +191,8 @@ export class GazelleApi implements Api {
           this.#log.error(fail);
           throw fail;
         }
-        return Object.fromEntries(
-          Object.values(response.response)
+        return new Map(
+          response.response
             .filter(({equipid}) => !(equipid && Number(equipid)))
             .map(({itemid, amount}) => [Number(itemid), Number(amount)]),
         );
@@ -212,7 +212,7 @@ export class GazelleApi implements Api {
       });
   }
 
-  async getEquipmentInfo(): Promise<Record<number, Array<EquipmentInfo>>> {
+  async getEquipmentInfo(): Promise<Map<number, Array<EquipmentInfo>>> {
     const equippedIds = (await this.getEquippedIds()) || [];
     return await this.call({request: 'items', type: 'users_equippable'})
       .then((response) => response.json())
@@ -236,10 +236,10 @@ export class GazelleApi implements Api {
           )
           .sort(({id: idA}, {id: idB}) => idA - idB)
           .reduce((grouped, equip) => {
-            if (!(equip.itemId in grouped)) grouped[equip.itemId] = [];
-            grouped[equip.itemId].push(equip);
+            if (!grouped.has(equip.itemId)) grouped.set(equip.itemId, []);
+            grouped.get(equip.itemId).push(equip);
             return grouped;
-          }, {} as Record<number, Array<EquipmentInfo>>);
+          }, new Map<number, Array<EquipmentInfo>>());
       });
   }
 }

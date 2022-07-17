@@ -1,6 +1,6 @@
 {
   "name": "gazelle_quick_craft",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Craft multiple items more easily including equipment repair",
   "main": "index.ts",
   "keywords": [
@@ -45,6 +45,7 @@
     "@rollup/plugin-typescript": "^8.3.2",
     "@types/chai": "^4.3.1",
     "@types/greasemonkey": "^4.0.3",
+    "@types/lunr": "^2.3.4",
     "@types/mocha": "^9.1.1",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
@@ -53,8 +54,8 @@
     "deep-object-diff": "^1.1.7",
     "esm": "^3.2.25",
     "html-entities": "^2.3.3",
-    "json5": "^2.2.1",
     "limiter": "^2.1.0",
+    "lunr": "^2.3.9",
     "mocha": "^10.0.0",
     "prettier": "^2.7.1",
     "react": "^18.2.0",

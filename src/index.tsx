@@ -6,9 +6,9 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
 import {ConsoleLog} from './log/log';
-import {Inventory} from './models/inventory';
-import {QuickCraftStore} from './store/store';
 import QuickCrafter from './quick-crafter/quick-crafter';
+import {getGMStorageValue, setGMStorageValue} from './helpers/gm-storage-helper';
+import {GM_KEYS} from './store/store';
 
 declare global {
   interface Window {
@@ -18,30 +18,27 @@ declare global {
 
 (async function () {
   const LOG = new ConsoleLog('[Quick Crafter]');
-  const STORE = new QuickCraftStore();
-  await STORE.init();
 
-  function askForApiKey() {
-    if (!STORE.apiKey) {
-      const input = window.prompt(`Please input your GGn API key.
+  async function getApiKey() {
+    const apiKey = await getGMStorageValue(GM_KEYS.apiKey, undefined);
+    if (apiKey) return apiKey;
+
+    const input = window.prompt(`Please input your GGn API key.
 If you don't have one, please generate one from your Edit Profile page: https://gazellegames.net/user.php?action=edit.
 The API key must have "Items" permission
 
 Please disable this userscript until you have one as this prompt will continue to show until you enter one in.`);
-      const trimmed = input.trim();
+    const trimmed = input.trim();
 
-      if (/[a-f0-9]{64}/.test(trimmed)) {
-        STORE.apiKey = trimmed;
-        return STORE.apiKey;
-      } else {
-        throw 'No API key found.';
-      }
+    if (/[a-f0-9]{64}/.test(trimmed)) {
+      setGMStorageValue(GM_KEYS.apiKey, trimmed);
+      return trimmed;
+    } else {
+      throw 'No API key found.';
     }
   }
 
-  const API = new GazelleApi(LOG, STORE.apiKey || askForApiKey());
-  const INVENTORY = new Inventory(API);
-  await INVENTORY.refreshInventory();
+  const API = new GazelleApi(LOG, await getApiKey());
 
   const clearDiv = document.createElement('div');
   clearDiv.classList.add('crafting-clear');
@@ -51,7 +48,5 @@ Please disable this userscript until you have one as this prompt will continue t
 
   document.getElementById('crafting_recipes').before(clearDiv, quickCrafter);
 
-  createRoot(quickCrafter).render(
-    <QuickCrafter extraSpace={await GM.getValue('SEG', false)} inventory={INVENTORY} store={STORE} />,
-  );
+  createRoot(quickCrafter).render(<QuickCrafter api={API} log={LOG} />);
 })();
