@@ -16,9 +16,11 @@ The script will ask for an API key the first time it runs. You can generate thes
 ## Purchasable ingredients
 
 By clicking an ingredient, it will be marked "purchasable."
+
 If more than the currently displayed maximum number of crafts can be made by purchasing marked ingredients,
 the possible maximum will be displayed in parentheses next to the current maximum,
 and the number necessary to purchase will be displayed next to each ingredient in parentheses:
+
 ![Purchasable information displayed in parentheses](https://user-images.githubusercontent.com/677609/179422671-ca9e14c6-28c8-4fd3-b655-fb57b7bbe133.png)
 
 ## Search
@@ -27,27 +29,30 @@ Displayed recipes can be refined by using the search box. You can search by reci
 
 If the `Include ingredients` checkbox is checked, the search will also search the ingredient names and ids of each recipe.
 
-Search terms are combined as "or" by default.
+> **Note**
+> Search terms are combined as "or" by default.
 
 ### Advanced searching
 
-The search is backed by [lunr.js](https://lunrjs.com/), so there are additional options for search queries:
+The search is backed by [lunr.js](https://lunrjs.com/). See [the lunr search documentation](https://lunrjs.com/guides/searching.html) for more information.
 
-* Prefixes:
-  add the following to the start of a query to alter how that word is applied to results
-** `-` (a minus sign) to exclude that word from results
-** `+` (a plus sign) to require that term in the results (similar to "and")
-* Field searches:
+> **Note**
+> Term boosting will have no effect as results are not ranked.
+
+Specific supplementary search terms:
+
+* Field searching:
   add the following to the start of a query (after a prefix) to search a specific recipe field
-** `book:` to search recipes that belong to the book named after the colon
-   *Note:* This is used internally by the book selection buttons, and will not show additional books that are not selected
-** `ingredients:` to search recipes by ingredient names and ids.
-   This will work whether or not the `Include ingredients` checkbox is checked.
-** `name:` to search recipe name and result item id, but not ingredients or result name (where it differs from recipe name)
-** `result:` to search recipe result item name and id, but not recipe name or ingredients.
-** *Note:* The following values are not currently exposed to the user, but can be used for searches 
-** `category:` Searches the category of the resulting item, as defined by the site. Values include `equipment`, `potions`, etc.
-** `type:` Searches the type of recipe, as defined by the script. Values are `standard`, `repair`, `upgrade`, and `downgrade`.
+  * `book:` to search recipes that belong to the book named after the colon
+    *Note:* This is used internally by the book selection buttons, and will not show additional books that are not selected
+  * `ingredients:` to search recipes by ingredient names and ids.
+    This will work whether or not the `Include ingredients` checkbox is checked.
+  * `name:` to search recipe name and result item id, but not ingredients or result name (where it differs from recipe name)
+  * `result:` to search recipe result item name and id, but not recipe name or ingredients.
+  > **Note**
+  > The following values are not currently exposed to the user, but can be used for searches 
+  * `category:` Searches the category of the resulting item, as defined by the site. Values include `equipment`, `potions`, etc.
+  * `type:` Searches the type of recipe, as defined by the script. Values are `standard`, `repair`, `upgrade`, and `downgrade`.
 
 ## Resetting API Key
 
