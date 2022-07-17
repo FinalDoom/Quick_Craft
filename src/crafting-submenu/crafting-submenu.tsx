@@ -73,7 +73,8 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
             this.state.purchasable.includes(ingredient.name)
               ? Number.MAX_SAFE_INTEGER
               : Math.floor(
-                  this.props.inventory.get(ingredient.id) / this.props.recipe.ingredientCounts.get(ingredient.id),
+                  (this.props.inventory.get(ingredient.id) || 0) /
+                    this.props.recipe.ingredientCounts.get(ingredient.id),
                 ),
           ),
         )
@@ -97,7 +98,7 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
                 click={() => {
                   if (this.state.purchasable.includes(name)) {
                     this.setState({purchasable: this.state.purchasable.filter((p) => p !== name)});
-                  } else if (this.state.purchasable.length < this.state.purchasable.length - 1) {
+                  } else if (this.state.purchasable.length < this.props.recipe.ingredients.length - 1) {
                     this.setState({purchasable: [...this.state.purchasable, name]});
                   }
                 }}
