@@ -1,0 +1,12 @@
+.crafting-panel-info {
+  &__ingredient-shop-link {
+    // border-radius: 50%;
+    color: #2196f3;
+    // color: black;
+    // padding: 0 0.25rem;
+
+    &--purchasable {
+      color: gold;
+    }
+  }
+}
