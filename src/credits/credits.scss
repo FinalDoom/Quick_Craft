@@ -1,0 +1,11 @@
+@use '../style/layouts';
+
+.credits {
+  @include layouts.flex-row;
+  gap: 0.25rem;
+  align-items: center;
+
+  float: right;
+  margin-top: -1rem;
+  margin-right: 0.25rem;
+}

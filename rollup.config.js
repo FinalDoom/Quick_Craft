@@ -32,6 +32,8 @@ export default {
   },
   plugins: [
     replace({
+      __buildDate__: new Date().toUTCString(),
+      __buildVersion__: pkg.version,
       'process.env.NODE_ENV': JSON.stringify('production'),
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,

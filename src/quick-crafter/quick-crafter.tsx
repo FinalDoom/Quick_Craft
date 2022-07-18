@@ -1,5 +1,3 @@
-import pkg from '../../package.json';
-
 import React, {ChangeEvent} from 'react';
 import lunr, {Token} from 'lunr';
 import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../generated/recipe_info';
@@ -13,6 +11,7 @@ import SearchBox from '../search-box/search-box';
 import Log from '../log/log';
 import {getGMStorageValue, setGMStorageValue} from '../helpers/gm-storage-helper';
 import Api from '../api/api';
+import Credits from '../credits/credits';
 
 interface Props {
   api: Api;
@@ -343,12 +342,7 @@ export default class QuickCrafter extends React.Component<Props, State> {
           // #endregion Add Recipe buttons to DOM
           //
         }
-        <p className="credits">
-          Quick Crafter by <a href="/user.php?id=58819">KingKrab23</a> v
-          <a target="_blank" href="https://github.com/KingKrab23/Quick_Craft/raw/master/GGn%20Quick%20Crafting.user.js">
-            {pkg.version}
-          </a>
-        </p>
+        <Credits />
       </React.StrictMode>
     );
   }
