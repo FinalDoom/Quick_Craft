@@ -3,6 +3,7 @@ import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
 
 interface Props {
+  availableInStore: boolean;
   click: () => void;
   id: number;
   maxCraftableWithPurchase: number;
@@ -40,7 +41,7 @@ export default class IngredientLine extends React.Component<Props, State> {
 
     return (
       <div className={classNames.join(' ')} onClick={this.props.click}>
-        <ShopLink ingredientId={this.props.id} />
+        <ShopLink ingredientId={this.props.id} availableInStore={this.props.availableInStore} />
         {this.props.name}
         {':'}
         <IngredientQuantity countOnHand={this.props.quantityAvailable} countPerCraft={this.props.quantityPerCraft} />

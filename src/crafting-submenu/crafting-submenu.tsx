@@ -95,6 +95,7 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
             return (
               <IngredientLine
                 key={id}
+                availableInStore={this.props.recipe.ingredients[index].infStock}
                 click={() => {
                   if (this.state.purchasable.includes(name)) {
                     this.setState({purchasable: this.state.purchasable.filter((p) => p !== name)});
