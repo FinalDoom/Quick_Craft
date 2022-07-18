@@ -7,13 +7,13 @@ export default function Credits() {
     <div className="credits">
       <a
         target="_blank"
-        href={'https://github.com/FinalDoom/Quick_Craft/releases/tag/v' + '__buildVersion__'}
+        href={'__repositoryUrl__' + 'releases/tag/v' + '__buildVersion__'}
         className="credits__version-link"
         title={'Built on __buildDate__'}
       >
         {'v' + '__buildVersion__'}
       </a>
-      <a target="_blank" href="https://github.com/FinalDoom/Quick_Craft/" className="credits__github-link">
+      <a target="_blank" href="__repositoryUrl__" className="credits__github-link">
         <FaGithub />
       </a>
     </div>
