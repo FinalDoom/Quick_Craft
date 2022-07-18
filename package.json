@@ -29,7 +29,9 @@
     "version": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
     "prepublishOnly": "npm run build:release && git add -f dist/release-$npm_package_version.user.js",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register src/**/*.test.ts",
-    "addRecipe": "yarn build && node dist/scripts/add-recipe.js"
+    "addRecipe": "yarn build && node dist/scripts/add-recipe.js",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.6",
@@ -43,6 +45,14 @@
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@rollup/plugin-typescript": "^8.3.3",
+    "@storybook/addon-actions": "^6.5.9",
+    "@storybook/addon-essentials": "^6.5.9",
+    "@storybook/addon-interactions": "^6.5.9",
+    "@storybook/addon-links": "^6.5.9",
+    "@storybook/builder-webpack4": "^6.5.9",
+    "@storybook/manager-webpack4": "^6.5.9",
+    "@storybook/react": "^6.5.9",
+    "@storybook/testing-library": "^0.0.13",
     "@types/chai": "^4.3.1",
     "@types/greasemonkey": "^4.0.3",
     "@types/lunr": "^2.3.4",
@@ -50,6 +60,7 @@
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "@types/react-icons": "^3.0.0",
+    "babel-loader": "^8.2.5",
     "chai": "^4.3.6",
     "colorette": "^2.0.19",
     "deep-object-diff": "^1.1.7",
@@ -75,5 +86,6 @@
   },
   "config": {
     "port": "8124"
-  }
+  },
+  "dependencies": {}
 }
