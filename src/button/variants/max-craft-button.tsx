@@ -56,4 +56,8 @@ export default class MaxCraftButton extends React.Component<Props, State> {
       />
     );
   }
+
+  reset() {
+    this.setState({state: ConfirmState.DEFAULT});
+  }
 }

@@ -65,6 +65,7 @@ const recipeIndex = lunr(function () {
 });
 
 export default class QuickCrafter extends React.Component<Props, State> {
+  craftingSubmenu = React.createRef<CraftingSubmenu>();
   recipeButtons: Array<JSX.Element>;
 
   constructor(props: Props) {
@@ -205,7 +206,9 @@ export default class QuickCrafter extends React.Component<Props, State> {
   }
 
   setCurrentCraft(id?: number) {
-    this.setState({currentCraft: id}, () => setGMStorageValue(GM_KEYS.currentCraft, id));
+    if (!(this.craftingSubmenu.current && this.craftingSubmenu.current.state.isCrafting)) {
+      this.setState({currentCraft: id}, () => setGMStorageValue(GM_KEYS.currentCraft, id));
+    }
   }
 
   setExtraSpace(extraSpace: boolean) {
@@ -233,6 +236,7 @@ export default class QuickCrafter extends React.Component<Props, State> {
       <React.StrictMode>
         {this.state.currentCraft !== undefined && (
           <CraftingSubmenu
+            ref={this.craftingSubmenu}
             inventory={this.state.inventory}
             recipe={recipeInfo[this.state.currentCraft]}
             switchNeedHave={this.state.switchNeedHave}

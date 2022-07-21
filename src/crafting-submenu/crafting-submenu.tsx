@@ -13,48 +13,42 @@ interface Props {
   switchNeedHave: boolean;
 }
 interface State {
+  isCrafting: boolean;
   purchasable: Array<string>;
 }
 
 export default class CraftingSubmenu extends React.Component<Props, State> {
+  craftNumberSelect = React.createRef<HTMLSelectElement>();
+  maxCraftButton = React.createRef<MaxCraftButton>();
+
   constructor(props: Props) {
     super(props);
 
-    this.state = {purchasable: []};
+    this.state = {isCrafting: false, purchasable: []};
   }
 
   async doCraft() {
-    // Disable crafting buttons and craft switching
-    const craftButtons = Array.from(
-      document.querySelectorAll<HTMLButtonElement | HTMLSelectElement>(
-        '#crafting-submenu button, #crafting-submenu select',
-      ),
-    );
+    this.setState({isCrafting: true});
+    try {
+      let count = Number(this.craftNumberSelect.current.value);
 
-    craftButtons.forEach((elem) => {
-      elem.disabled = true;
-      elem.classList.add('disabled');
-    });
-
-    let count = Number(document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value);
-
-    const resultId = this.props.recipe.itemId;
-    for (let i = 0; i < count; i++) {
-      await new Promise<void>((resolve) =>
-        setTimeout(() => {
-          take_craft(this.props.recipe);
-          this.props.inventory.set(resultId, (this.props.inventory.get(resultId) || 0) + 1);
-          [...this.props.recipe.ingredientCounts.entries()].forEach(([id, count]) =>
-            this.props.inventory.set(id, this.props.inventory.get(id) - count),
-          );
-          resolve();
-        }, CRAFT_TIME),
-      );
+      const resultId = this.props.recipe.itemId;
+      for (let i = 0; i < count; i++) {
+        await new Promise<void>((resolve) =>
+          setTimeout(() => {
+            take_craft(this.props.recipe);
+            this.props.inventory.set(resultId, (this.props.inventory.get(resultId) || 0) + 1);
+            [...this.props.recipe.ingredientCounts.entries()].forEach(([id, count]) =>
+              this.props.inventory.set(id, this.props.inventory.get(id) - count),
+            );
+            resolve();
+          }, CRAFT_TIME),
+        );
+      }
+    } finally {
+      this.setState({isCrafting: false});
+      if (this.maxCraftButton.current) this.maxCraftButton.current.reset();
     }
-    craftButtons.forEach((elem) => {
-      elem.disabled = false;
-      elem.classList.remove('disabled');
-    });
   }
 
   render() {
@@ -129,7 +123,10 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
         </span>
         {available > 0 && (
           <div className="crafting-panel-actions">
-            <select className="crafting-panel-actions__craft-number">
+            <select
+              ref={this.craftNumberSelect}
+              className={'crafting-panel-actions__craft-number' + (this.state.isCrafting ? ' disabled' : '')}
+            >
               {Array(available)
                 .fill(undefined)
                 .map((_, i) => (
@@ -140,15 +137,16 @@ export default class CraftingSubmenu extends React.Component<Props, State> {
             </select>
             <Button
               variant="click"
+              additionalClassNames={this.state.isCrafting ? 'disabled' : ''}
               classNameBase="crafting-panel-actions__craft-button"
               clickCallback={this.doCraft.bind(this)}
               text="Craft"
             />
             <MaxCraftButton
+              ref={this.maxCraftButton}
               executeCraft={this.doCraft.bind(this)}
               setMaxCraft={() =>
-                (document.querySelector<HTMLSelectElement>('.crafting-panel-actions__craft-number').value =
-                  String(available))
+                this.craftNumberSelect.current && (this.craftNumberSelect.current.value = String(available))
               }
             />
           </div>
