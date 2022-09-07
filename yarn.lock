@@ -1135,10 +1135,10 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
   integrity sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
 
-"@types/greasemonkey@^4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@types/greasemonkey/-/greasemonkey-4.0.3.tgz#6d9f9bd455f5f09bfab9f8be1fa0abb9c81b42dc"
-  integrity sha512-ryPWLtjXJJJrHBiimtYcpgonOXf5YtsDYgGme1XP8H0U6oon6b7oYEHLSLyr/57epDdy4PyGpZgZcdvEhK2w0w==
+"@types/greasemonkey@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@types/greasemonkey/-/greasemonkey-4.0.4.tgz#fc6e9cd15c8fe8ee36fdbcfd85e5a0fa4a241377"
+  integrity sha512-OA+sbH6cPgVMpAM2wAABY7D1ASiJ4vVD+uSmvQSwTatriWtTekDa7p1A5VUSSjBlrskCdOiKnLBjv5jU5E/8cg==
 
 "@types/lunr@^2.3.4":
   version "2.3.4"
@@ -1174,10 +1174,10 @@
   dependencies:
     react-icons "*"
 
-"@types/react@*", "@types/react@^18.0.15":
-  version "18.0.15"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.15.tgz#d355644c26832dc27f3e6cbf0c4f4603fc4ab7fe"
-  integrity sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==
+"@types/react@*", "@types/react@^18.0.18":
+  version "18.0.18"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.18.tgz#9f16f33d57bc5d9dca848d12c3572110ff9429ac"
+  integrity sha512-6hI08umYs6NaiHFEEGioXnxJ+oEhY3eRz8VCUaudZmGdtvPviCJB8mgaMxaDWAdPSYd4eFavrPk2QIolwbLYrg==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
