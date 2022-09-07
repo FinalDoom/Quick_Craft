@@ -1063,10 +1063,10 @@
   dependencies:
     "@rollup/pluginutils" "^3.0.8"
 
-"@rollup/plugin-node-resolve@^13.3.0":
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-13.3.0.tgz#da1c5c5ce8316cef96a2f823d111c1e4e498801c"
-  integrity sha512-Lus8rbUo1eEcnS4yTFKLZrVumLPY+YayBdWXgFSHYhTT2iJbMhoaaBL3xl5NCdeRytErGr8tZ0L71BMRmnlwSw==
+"@rollup/plugin-node-resolve@^14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-node-resolve/-/plugin-node-resolve-14.0.0.tgz#373c1a00e7fb3e2a7d2ee109c5b03a5e608f3b8f"
+  integrity sha512-XkWfpgp/zGiFu8LS+JAiQeZN4oYYA4/ViFJiZhwQegTg5ZbzKTvM9YyKXVBNnmZ8Et76WnlVgwRUu1rhKF4ayw==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     "@types/resolve" "1.17.1"
@@ -1135,10 +1135,10 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
   integrity sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
 
-"@types/greasemonkey@^4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@types/greasemonkey/-/greasemonkey-4.0.3.tgz#6d9f9bd455f5f09bfab9f8be1fa0abb9c81b42dc"
-  integrity sha512-ryPWLtjXJJJrHBiimtYcpgonOXf5YtsDYgGme1XP8H0U6oon6b7oYEHLSLyr/57epDdy4PyGpZgZcdvEhK2w0w==
+"@types/greasemonkey@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@types/greasemonkey/-/greasemonkey-4.0.4.tgz#fc6e9cd15c8fe8ee36fdbcfd85e5a0fa4a241377"
+  integrity sha512-OA+sbH6cPgVMpAM2wAABY7D1ASiJ4vVD+uSmvQSwTatriWtTekDa7p1A5VUSSjBlrskCdOiKnLBjv5jU5E/8cg==
 
 "@types/lunr@^2.3.4":
   version "2.3.4"
