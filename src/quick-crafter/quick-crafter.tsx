@@ -158,9 +158,12 @@ export default class QuickCrafter extends React.Component<Props, State> {
     const search = 'search' in state ? state.search : this.state.search;
     const searchIngredients = 'searchIngredients' in state ? state.searchIngredients : this.state.searchIngredients;
 
-    const bookMatches = recipeIndex
-      .search([...selectedBooks].map((book) => bookIndexName + ':' + book.split(/\s+/)[0]).join(' '))
-      .map((result) => Number(result.ref));
+    const bookMatches =
+      selectedBooks.size === 0
+        ? []
+        : recipeIndex
+            .search([...selectedBooks].map((book) => bookIndexName + ':' + book.split(/\s+/)[0]).join(' '))
+            .map((result) => Number(result.ref));
 
     let filteredRecipes: number[];
     if (search.length === 0) filteredRecipes = Array.from(bookMatches);
