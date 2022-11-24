@@ -1,4 +1,4 @@
-@use '../style/layouts';
+@use '../../style/layouts';
 
 .credits {
   @include layouts.flex-row;
