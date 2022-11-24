@@ -1,5 +1,5 @@
 import React from 'react';
-import {Book} from '../../generated/recipe_info';
+import {Book} from '../../../generated/recipe_info';
 import Button from '../button';
 
 interface Props {

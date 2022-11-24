@@ -6,7 +6,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
 import {ConsoleLog} from './log/log';
-import QuickCrafter from './quick-crafter/quick-crafter';
+import QuickCrafter from './components/quick-crafter/quick-crafter';
 import {getGMStorageValue, setGMStorageValue} from './helpers/gm-storage-helper';
 import {GM_KEYS} from './store/store';
 

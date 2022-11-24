@@ -1,8 +1,8 @@
 import React from 'react';
 import Button from '../button/button';
 import MaxCraftButton from '../button/variants/max-craft-button';
-import {ingredients, RecipeInfo} from '../generated/recipe_info';
-import {take_craft} from '../helpers/crafter';
+import {ingredients, RecipeInfo} from '../../generated/recipe_info';
+import {take_craft} from '../../helpers/crafter';
 import IngredientLine from '../ingredient-line/ingredient-line';
 
 const CRAFT_TIME = 1000;
