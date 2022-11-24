@@ -2,7 +2,7 @@ import React from 'react';
 import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
 
-interface Props {
+export default function IngredientLine(props: {
   availableInStore: boolean;
   click: () => void;
   id: number;
@@ -12,41 +12,32 @@ interface Props {
   quantityAvailable: number;
   quantityPerCraft: number;
   switchNeedHave: boolean;
-}
-interface State {}
-
-export default class IngredientLine extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
+}) {
+  const classNames = ['crafting-panel-info__ingredient-row'];
+  if (props.switchNeedHave) {
+    classNames.push('crafting-panel-info__ingredient-quantity--swapped');
   }
-
-  render() {
-    const classNames = ['crafting-panel-info__ingredient-row'];
-    if (this.props.switchNeedHave) {
-      classNames.push('crafting-panel-info__ingredient-quantity--swapped');
-    }
-    if (this.props.purchasable) {
-      classNames.push('crafting-panel-info__ingredient--purchasable');
-    }
-    let max: JSX.Element;
-    if (this.props.maxCraftableWithPurchase > this.props.quantityAvailable / this.props.quantityPerCraft) {
-      max = (
-        <span title="Needed for max possible crafts">
-          {' ('}
-          {this.props.maxCraftableWithPurchase * this.props.quantityPerCraft - this.props.quantityAvailable}
-          {')'}
-        </span>
-      );
-    }
-
-    return (
-      <div className={classNames.join(' ')} onClick={this.props.click}>
-        <ShopLink ingredientId={this.props.id} availableInStore={this.props.availableInStore} />
-        {this.props.name}
-        {':'}
-        <IngredientQuantity countOnHand={this.props.quantityAvailable} countPerCraft={this.props.quantityPerCraft} />
-        {max}
-      </div>
+  if (props.purchasable) {
+    classNames.push('crafting-panel-info__ingredient--purchasable');
+  }
+  let max: JSX.Element;
+  if (props.maxCraftableWithPurchase > props.quantityAvailable / props.quantityPerCraft) {
+    max = (
+      <span title="Needed for max possible crafts">
+        {' ('}
+        {props.maxCraftableWithPurchase * props.quantityPerCraft - props.quantityAvailable}
+        {')'}
+      </span>
     );
   }
+
+  return (
+    <div className={classNames.join(' ')} onClick={props.click}>
+      <ShopLink ingredientId={props.id} availableInStore={props.availableInStore} />
+      {props.name}
+      {':'}
+      <IngredientQuantity countOnHand={props.quantityAvailable} countPerCraft={props.quantityPerCraft} />
+      {max}
+    </div>
+  );
 }

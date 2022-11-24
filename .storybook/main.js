@@ -6,6 +6,7 @@ module.exports = {
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
     '@storybook/preset-scss',
+    'storybook-dark-mode',
   ],
   framework: {
     name: '@storybook/react-webpack5',
