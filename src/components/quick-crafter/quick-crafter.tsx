@@ -2,16 +2,14 @@ import React, {ChangeEvent} from 'react';
 import lunr, {Token} from 'lunr';
 import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../../generated/recipe_info';
 import {GM_KEYS} from '../../store/store';
-import RecipeButton from '../button/variants/recipe-button';
-import BookButton from '../button/variants/book-button';
-import Button from '../button/button';
-import Checkbox from '../checkbox/checkbox';
+import {Button, BookButton, RecipeButton} from '../button';
+import {Checkbox} from '../checkbox';
 import CraftingSubmenu from '../crafting-submenu/crafting-submenu';
-import SearchBox from '../search-box/search-box';
+import {SearchBox} from '../search-box';
 import Log from '../../log/log';
 import {getGMStorageValue, setGMStorageValue} from '../../helpers/gm-storage-helper';
 import Api from '../../api/api';
-import Credits from '../credits/credits';
+import {Credits} from '../credits';
 
 interface Props {
   api: Api;
@@ -65,7 +63,7 @@ const recipeIndex = lunr(function () {
 });
 
 export default class QuickCrafter extends React.Component<Props, State> {
-  craftingSubmenu = React.createRef<CraftingSubmenu>();
+  craftingSubmenu = React.createRef<typeof CraftingSubmenu>();
   recipeButtons: Array<JSX.Element>;
 
   constructor(props: Props) {
@@ -260,19 +258,16 @@ export default class QuickCrafter extends React.Component<Props, State> {
         <div className="crafting-panel-actions__craft-row">
           <span>Click on the buttons below to show or hide crafting categories - </span>
           <Button
-            variant="click"
             classNameBase="crafting-panel-filters__books-hide"
             clickCallback={() => this.setSelectedBooks(new Set())}
             text="Hide all"
           />
           <Button
-            variant="click"
             classNameBase="crafting-panel-filters__books-show"
             clickCallback={() => this.setSelectedBooks(new Set(BOOKS))}
             text="Show all"
           />
           <Checkbox
-            className="quick_craft_button"
             checked={this.state.extraSpace}
             onChange={async (event: ChangeEvent<HTMLInputElement>) => this.setExtraSpace(event.target.checked)}
             suffix="Blank line between books"
@@ -317,7 +312,6 @@ export default class QuickCrafter extends React.Component<Props, State> {
           <SearchBox changeSearch={(search: string) => this.setSearch(search)} initialSearch={this.state.search} />
           <Checkbox
             checked={this.state.searchIngredients}
-            className="crafating-panel-search__include-ingredients"
             prefix="Include ingredients"
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setSearchIngredients(event.target.checked)}
           />

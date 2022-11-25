@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import IngredientLine from './ingredient-line';
 
 const meta: Meta<typeof IngredientLine> = {
-  title: 'Crafter/Ingredient-Line',
+  title: 'Crafter/Ingredient/Ingredient Line',
   component: IngredientLine,
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/7.0/react/writing-docs/docs-page
   tags: ['docsPage'],

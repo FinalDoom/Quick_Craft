@@ -1,25 +1,16 @@
-import React from 'react';
+import './checkbox.scss';
+import React, {useState} from 'react';
 
-interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
-  prefix?: string;
-  suffix?: string;
-  checked: boolean;
-}
-interface State {}
+export default function Checkbox(
+  props: {prefix?: string; suffix?: string; checked: boolean} & React.InputHTMLAttributes<HTMLInputElement>,
+) {
+  const [checked, setChecked] = useState(props.checked);
 
-export default class Checkbox extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {checked: this.props.checked};
-  }
-
-  render() {
-    return (
-      <label className={this.props.className}>
-        {this.props.prefix}
-        <input type="checkbox" checked={this.props.checked} onChange={this.props.onChange} title={this.props.title} />
-        {this.props.suffix}
-      </label>
-    );
-  }
+  return (
+    <label className={props.className}>
+      {props.prefix}
+      <input {...props} type="checkbox" />
+      {props.suffix}
+    </label>
+  );
 }

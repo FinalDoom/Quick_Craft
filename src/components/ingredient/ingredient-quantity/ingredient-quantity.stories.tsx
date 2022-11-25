@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import IngredientQuantity from './ingredient-quantity';
 
 const meta: Meta<typeof IngredientQuantity> = {
-  title: 'Crafter/Ingredient-Quantity',
+  title: 'Crafter/Ingredient/Ingredient Quantity',
   component: IngredientQuantity,
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/7.0/react/writing-docs/docs-page
   tags: ['docsPage'],
@@ -21,3 +21,4 @@ export const Count: Story = {
     countPerCraft: 1,
   },
 };
+export const CountSwapped: Story = {args: {...Count.args, switchNeedHave: true}};

@@ -1,63 +1,43 @@
-import React from 'react';
+import './max-craft-button.scss';
+import React, {forwardRef, useState, useImperativeHandle} from 'react';
 import Button from '../button';
 
 enum ConfirmState {
-  DEFAULT,
-  CONFIRM,
-  CRAFTING,
+  DEFAULT = 'Craft Maximum',
+  CONFIRM = '** CONFIRM **',
+  CRAFTING = '-- Crafting --',
 }
 
-interface Props {
-  executeCraft: () => void;
-  setMaxCraft: () => void;
-}
-interface State {
-  state: ConfirmState;
-}
+const MaxCraftButton = forwardRef((props: {executeCraft: () => void; setMaxCraft: () => void}, ref) => {
+  const base = 'crafting-panel-actions__max-craft-button';
+  const [state, setState] = useState(ConfirmState.DEFAULT);
 
-export default class MaxCraftButton extends React.Component<Props, State> {
-  base = 'crafting-panel-actions__max-craft-button';
+  useImperativeHandle(ref, () => {
+    reset: () => setState(ConfirmState.DEFAULT);
+  });
 
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {state: ConfirmState.DEFAULT};
-  }
-
-  click() {
-    this.props.setMaxCraft();
-    if (this.state.state === ConfirmState.DEFAULT) {
-      this.setState({state: ConfirmState.CONFIRM});
-    } else if (this.state.state === ConfirmState.CONFIRM) {
-      this.setState({state: ConfirmState.CRAFTING});
-      this.props.executeCraft();
+  function click() {
+    props.setMaxCraft();
+    if (state === ConfirmState.DEFAULT) {
+      setState(ConfirmState.CONFIRM);
+    } else if (state === ConfirmState.CONFIRM) {
+      setState(ConfirmState.CRAFTING);
+      props.executeCraft();
     }
   }
 
-  render() {
-    const additionalClassNames = [];
-    if (this.state.state === ConfirmState.CONFIRM) {
-      additionalClassNames.push(this.base + '--confirm');
-    }
-    const text =
-      this.state.state === ConfirmState.DEFAULT
-        ? 'Craft maximum'
-        : this.state.state === ConfirmState.CONFIRM
-        ? '** CONFIRM **'
-        : '-- Crafting --';
-
-    return (
-      <Button
-        additionalClassNames={additionalClassNames.join(' ')}
-        classNameBase={this.base}
-        clickCallback={this.click.bind(this)}
-        text={text}
-        variant="click"
-      />
-    );
+  const additionalClassNames = [];
+  if (state === ConfirmState.CONFIRM) {
+    additionalClassNames.push(base + '--confirm');
   }
 
-  reset() {
-    this.setState({state: ConfirmState.DEFAULT});
-  }
-}
+  return (
+    <Button
+      additionalClassNames={additionalClassNames.join(' ')}
+      classNameBase={base}
+      clickCallback={click}
+      text={state.toString()}
+    />
+  );
+});
+export default MaxCraftButton;

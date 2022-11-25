@@ -8,7 +8,7 @@ export default function ShopLink(props: {ingredientId: number; availableInStore:
     <a
       className={base + (props.availableInStore ? ' ' + base + '--purchasable' : '')}
       target="_blank"
-      href={`https://gazellegames.net/shop.php?ItemID=${props.ingredientId}`}
+      href={`/shop.php?ItemID=${props.ingredientId}`}
     >
       {props.availableInStore ? <HiCurrencyDollar size="1rem" /> : <HiInformationCircle size="1rem" />}
     </a>

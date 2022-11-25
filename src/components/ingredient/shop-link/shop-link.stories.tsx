@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import ShopLink from './shop-link';
 
 const meta: Meta<typeof ShopLink> = {
-  title: 'Crafter/Shop-Link',
+  title: 'Crafter/Ingredient/Shop Link',
   component: ShopLink,
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/7.0/react/writing-docs/docs-page
   tags: ['docsPage'],

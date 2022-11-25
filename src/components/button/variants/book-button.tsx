@@ -1,31 +1,18 @@
+import './book-button.scss';
 import React from 'react';
-import {Book} from '../../generated/recipe_info';
-import Button from '../button';
+import {Book} from '../../../generated/recipe_info';
+import SelectableButton from './selectable-button';
 
-interface Props {
-  book: Book;
-  clickCallback: () => void;
-  selected: boolean;
-}
-interface State {}
+export default function BookButton(props: {book: Book; clickCallback: () => void; selected: boolean}) {
+  const base = 'crafting-panel-filters__books-button';
 
-export default class BookButton extends React.Component<Props, State> {
-  base = 'crafting-panel-filters__books-button';
-
-  constructor(props: Props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <Button
-        additionalClassNames={this.base + '--book-' + this.props.book.toLocaleLowerCase().replace(/ /g, '-')}
-        classNameBase={this.base}
-        clickCallback={this.props.clickCallback}
-        selected={this.props.selected}
-        text={this.props.book}
-        variant="select"
-      />
-    );
-  }
+  return (
+    <SelectableButton
+      additionalClassNames={base + '--book-' + props.book.toLocaleLowerCase().replace(/ /g, '-')}
+      classNameBase={base}
+      clickCallback={props.clickCallback}
+      selected={props.selected}
+      text={props.book}
+    />
+  );
 }

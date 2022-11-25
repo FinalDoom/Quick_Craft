@@ -1,0 +1,10 @@
+.crafting-panel-info {
+  &__ingredient-quantity {
+    display: inline-flex;
+    flex-direction: row;
+
+    &.crafting-panel-info__ingredient-quantity--swapped {
+      flex-direction: row-reverse;
+    }
+  }
+}
