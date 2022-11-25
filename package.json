@@ -15,9 +15,13 @@
   "author": "FinalDoom",
   "license": "ISC",
   "private": true,
+  "homepage": "https://github.com/FinalDoom/Quick_Craft",
   "repository": {
     "type": "git",
-    "url": "https://github.com/FinalDoom/Quick_Craft/"
+    "url": "github:FinalDoom/Quick_Craft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FinalDoom/Quick_Craft/issues"
   },
   "scripts": {
     "build": "npx rollup --config rollup.config.js",
