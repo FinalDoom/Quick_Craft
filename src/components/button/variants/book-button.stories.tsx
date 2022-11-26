@@ -1,7 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react';
+import {userEvent, within} from '@storybook/testing-library';
 import {BOOKS} from '../../../generated/recipe_info';
 import BookButton from './book-button';
-import SelectableButtonMeta, {ClickSelected, ClickUnselected} from './selectable-button.stories';
+import SelectableButtonMeta from './selectable-button.stories';
 
 const meta: Meta<typeof BookButton> = {
   title: 'Components/Button/Book Button',
@@ -24,8 +25,13 @@ const meta: Meta<typeof BookButton> = {
 
 export default meta;
 type Story = StoryObj<typeof BookButton>;
+const testClick = (playArgs: Parameters<Story['play']>[0]) => {
+  const {args, canvasElement} = playArgs;
+  const canvas = within(canvasElement);
+  const button = canvas.getByRole('button');
+  userEvent.click(button);
+  expect(args.onClick).toHaveBeenCalled();
+};
 
-export const BookUnselected: Story = {args: {selected: false}};
-export const BookSelected: Story = {args: {selected: true}};
-export const BookClickUnselected: Story = {...BookUnselected, play: ClickUnselected.play};
-export const BookClickSelected: Story = {...BookSelected, play: ClickSelected.play};
+export const BookUnselected: Story = {args: {selected: false}, play: testClick};
+export const BookSelected: Story = {args: {selected: true}, play: testClick};

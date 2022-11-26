@@ -95,5 +95,8 @@
   },
   "config": {
     "port": "8124"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.1"
   }
 }
