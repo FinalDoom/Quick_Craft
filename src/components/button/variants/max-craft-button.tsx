@@ -25,10 +25,10 @@ const MaxCraftButton = forwardRef<
   }));
 
   function click(e: Parameters<Parameters<typeof Button>[0]['onClick']>[0]) {
-    props.onClick(e);
-    props.setMaxCraft();
+    props.onClick && props.onClick(e);
     if (state === ConfirmState.DEFAULT) {
       setState(ConfirmState.CONFIRM);
+      props.setMaxCraft();
     } else if (state === ConfirmState.CONFIRM) {
       setState(ConfirmState.CRAFTING);
       props.executeCraft();
