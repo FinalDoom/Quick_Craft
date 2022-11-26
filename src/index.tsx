@@ -5,10 +5,10 @@ import './style/main.scss';
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
-import {ConsoleLog} from './log/log';
 import QuickCrafter from './components/quick-crafter/quick-crafter';
-import {getGMStorageValue, setGMStorageValue} from './helpers/gm-storage-helper';
-import {GM_KEYS} from './store/store';
+import {getGMStorageValue, setGMStorageValue} from './helpers/gm-hook';
+import {GM_KEYS} from './helpers/gm-keys';
+import {ConsoleLog} from './log/log';
 
 declare global {
   interface Window {
