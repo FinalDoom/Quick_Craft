@@ -8,9 +8,10 @@ export default function Button(
     text: string;
   } & HTMLAttributes<HTMLButtonElement>,
 ) {
+  const {classNameBase, additionalClassNames, text, ...htmlProps} = props;
   return (
-    <button {...props} className={clsx(props.classNameBase, props.additionalClassNames)}>
-      {props.text}
+    <button {...htmlProps} className={clsx(classNameBase, additionalClassNames)}>
+      {text}
     </button>
   );
 }
