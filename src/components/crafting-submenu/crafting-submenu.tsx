@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, {useRef, useState} from 'react';
+import React, {ElementRef, forwardRef, useImperativeHandle, useRef, useState} from 'react';
 import {ingredients, RecipeInfo} from '../../generated/recipe_info';
 import {take_craft} from '../../helpers/crafter';
 import {Button, MaxCraftButton} from '../button';
@@ -8,15 +8,26 @@ import './crafting-submenu.scss';
 
 const CRAFT_TIME = 1000;
 
-export default function CraftingSubmenu(props: {
-  inventory: Map<number, number>;
-  recipe: RecipeInfo;
-  switchNeedHave: boolean;
-}) {
+type CraftingSubmenuHandle = {
+  isCrafting: boolean;
+};
+
+const CraftingSubmenu = forwardRef<
+  CraftingSubmenuHandle,
+  {
+    inventory: Map<number, number>;
+    recipe: RecipeInfo;
+    switchNeedHave: boolean;
+  }
+>((props, ref) => {
   const craftNumberSelect = useRef<HTMLSelectElement>(null);
-  const maxCraftButton = useRef<typeof MaxCraftButton & {reset: () => void}>(null);
+  const maxCraftButton = useRef<ElementRef<typeof MaxCraftButton>>(null);
   const [isCrafting, setIsCrafting] = useState(false);
   const [purchasable, setPurchasable] = useState([]);
+
+  useImperativeHandle(ref, () => ({
+    isCrafting: isCrafting,
+  }));
 
   async function doCraft() {
     setIsCrafting(true);
@@ -137,4 +148,5 @@ export default function CraftingSubmenu(props: {
       )}
     </div>
   );
-}
+});
+export default CraftingSubmenu;
