@@ -1,8 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react';
+import {userEvent, within} from '@storybook/testing-library';
 import {recipes} from '../../../generated/recipe_info';
 import BookButtonMeta from './book-button.stories';
 import RecipeButton from './recipe-button';
-import SelectableButtonMeta, {Selected, Unselected} from './selectable-button.stories';
+import SelectableButtonMeta from './selectable-button.stories';
 
 const meta: Meta<typeof RecipeButton> = {
   title: 'Components/Button/Recipe Button',
@@ -23,13 +24,20 @@ const meta: Meta<typeof RecipeButton> = {
 
 export default meta;
 type Story = StoryObj<typeof RecipeButton>;
+const testClick = (playArgs: Parameters<Story['play']>[0]) => {
+  const {args, canvasElement} = playArgs;
+  const canvas = within(canvasElement);
+  const button = canvas.getByRole('button');
+  userEvent.click(button);
+  expect(args.onClick).toHaveBeenCalled();
+};
 
 export const RecipeUnselected: Story = {
   args: {selected: false},
-  play: Selected.play,
+  play: testClick,
 };
 
 export const RecipeSelected: Story = {
   args: {...RecipeUnselected.args, selected: true},
-  play: Unselected.play,
+  play: testClick,
 };
