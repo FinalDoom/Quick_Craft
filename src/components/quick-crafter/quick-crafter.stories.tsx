@@ -17,7 +17,7 @@ window.GM = {getValue: GMMock.getValue, deleteValue: GMMock.deleteValue, setValu
 const inventoryMap = new Map(recipeInfo.map(({id}) => [id, 99]));
 
 const meta: Meta<typeof QuickCrafter> = {
-  title: 'Crafter',
+  title: 'Crafter/Quick Crafter',
   component: QuickCrafter,
   // This component will have an automatically generated docsPage entry: https://storybook.js.org/docs/7.0/react/writing-docs/docs-page
   tags: ['docsPage'],

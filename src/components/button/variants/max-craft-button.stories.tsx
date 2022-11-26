@@ -1,7 +1,7 @@
-import {action} from '@storybook/addon-actions';
-import {expect, jest} from '@storybook/jest';
+import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
-import ButtonStoryMeta, {Clickable} from '../button.stories';
+import {userEvent, within} from '@storybook/testing-library';
+import ButtonStoryMeta from '../button.stories';
 import MaxCraftButton from './max-craft-button';
 
 const meta: Meta<typeof MaxCraftButton> = {
@@ -15,27 +15,36 @@ const meta: Meta<typeof MaxCraftButton> = {
   },
   argTypes: {
     ...ButtonStoryMeta.argTypes,
+    executeCraft: {action: 'executed craft'},
+    setMaxCraft: {action: 'set max craft value'},
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof MaxCraftButton>;
-const executeCraft = jest.fn(action('executed craft'));
-const setMaxCraft = jest.fn(action('set max craft value'));
+const testClick = (playArgs: Parameters<Story['play']>[0]) => {
+  const {args, canvasElement} = playArgs;
+  const canvas = within(canvasElement);
+  const button = canvas.getByRole('button');
+  userEvent.click(button);
+  expect(args.onClick).toHaveBeenCalled();
+};
 
-export const CraftMax: Story = {args: {executeCraft: executeCraft, setMaxCraft: setMaxCraft}};
+export const CraftMax: Story = {};
 export const Confirm: Story = {
   args: {...CraftMax.args},
-  play: async (args) => {
-    await Clickable.play(args);
-    expect(setMaxCraft).toBeCalled();
+  play: async (playArgs) => {
+    testClick(playArgs);
+    const {args} = playArgs;
+    expect(args.setMaxCraft).toHaveBeenCalled();
   },
 };
 export const Crafting: Story = {
   args: {...Confirm.args},
-  play: async (args) => {
-    await Confirm.play(args);
-    await Clickable.play(args);
-    expect(executeCraft).toBeCalled();
+  play: async (playArgs) => {
+    await Confirm.play(playArgs);
+    testClick(playArgs);
+    const {args} = playArgs;
+    expect(args.executeCraft).toBeCalled();
   },
 };

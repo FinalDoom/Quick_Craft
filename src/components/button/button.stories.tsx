@@ -1,5 +1,4 @@
-import {action} from '@storybook/addon-actions';
-import {expect, jest} from '@storybook/jest';
+import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
 import {userEvent, within} from '@storybook/testing-library';
 import Button from './button';
@@ -18,15 +17,15 @@ const meta: Meta<typeof Button> = {
 
 export default meta;
 type Story = StoryObj<typeof Button>;
-const clicked = jest.fn(action('clicked'));
 
 export const Clickable: Story = {
-  args: {onClick: clicked, text: 'Click Me'},
-  play: async ({canvasElement}: {canvasElement: HTMLElement}) => {
+  args: {text: 'Click Me'},
+  play: async (playArgs) => {
+    const {args, canvasElement} = playArgs;
     const canvas = within(canvasElement);
     const button = canvas.getByRole('button');
-    await userEvent.click(button);
-    expect(clicked).toBeCalled();
+    userEvent.click(button);
+    expect(args.onClick).toHaveBeenCalled();
   },
 };
 

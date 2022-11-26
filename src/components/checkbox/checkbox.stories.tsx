@@ -1,6 +1,6 @@
+import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
-import {within, userEvent} from '@storybook/testing-library';
-import {expect, jest} from '@storybook/jest';
+import {userEvent, within} from '@storybook/testing-library';
 import Checkbox from './checkbox';
 
 const meta: Meta<typeof Checkbox> = {
@@ -17,32 +17,39 @@ const meta: Meta<typeof Checkbox> = {
 
 export default meta;
 type Story = StoryObj<typeof Checkbox>;
-const onChange = jest.fn();
-const testClick = async ({canvasElement}) => {
+const testClick = async (playArgs: Parameters<Story['play']>[0]) => {
+  const {args, canvasElement} = playArgs;
   const canvas = within(canvasElement);
-  const checkbox = canvas.getByRole('checkbox');
-  await userEvent.click(checkbox);
-  expect(onChange).toBeCalled();
+  const checkbox = canvas.getByRole<HTMLInputElement>('checkbox');
+  userEvent.click(checkbox);
+  expect(args.onChange).toBeCalled();
+  expect(checkbox.checked).toBe(!args.checked);
+  userEvent.click(checkbox);
+  expect(args.onChange).toBeCalled();
+  expect(checkbox.checked).toBe(args.checked);
 };
 
 export const Prefixed: Story = {
-  args: {prefix: 'Prefix', checked: false, onChange: onChange},
+  args: {prefix: 'Prefix', checked: false},
   play: testClick,
 };
 export const PrefixedChecked: Story = {
-  args: {prefix: 'Prefix Checked', checked: true, onChange: onChange},
+  args: {prefix: 'Prefix Checked', checked: true},
   play: testClick,
 };
-export const Suffixed: Story = {args: {suffix: 'Suffix', checked: false, onChange: onChange}, play: testClick};
+export const Suffixed: Story = {
+  args: {suffix: 'Suffix', checked: false},
+  play: testClick,
+};
 export const SuffixedChecked: Story = {
-  args: {suffix: 'Suffix Checked', checked: true, onChange: onChange},
+  args: {suffix: 'Suffix Checked', checked: true},
   play: testClick,
 };
 export const PrefixAndSuffix: Story = {
-  args: {prefix: 'Prefix', suffix: 'Suffix', checked: false, onChange: onChange},
+  args: {prefix: 'Prefix', suffix: 'Suffix', checked: false},
   play: testClick,
 };
 export const PrefixAndSuffixChecked: Story = {
-  args: {prefix: 'Prefix Che', suffix: 'cked Suffix', checked: true, onChange: onChange},
+  args: {prefix: 'Prefix Che', suffix: 'cked Suffix', checked: true},
   play: testClick,
 };
