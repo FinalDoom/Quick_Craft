@@ -1,15 +1,16 @@
-import React, {ChangeEvent} from 'react';
+import clsx from 'clsx';
 import lunr, {Token} from 'lunr';
+import React, {ChangeEvent} from 'react';
+import Api from '../../api/api';
 import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../../generated/recipe_info';
+import {getGMStorageValue, setGMStorageValue} from '../../helpers/gm-storage-helper';
+import Log from '../../log/log';
 import {GM_KEYS} from '../../store/store';
-import {Button, BookButton, RecipeButton} from '../button';
+import {BookButton, Button, RecipeButton} from '../button';
 import {Checkbox} from '../checkbox';
 import CraftingSubmenu from '../crafting-submenu/crafting-submenu';
-import {SearchBox} from '../search-box';
-import Log from '../../log/log';
-import {getGMStorageValue, setGMStorageValue} from '../../helpers/gm-storage-helper';
-import Api from '../../api/api';
 import {Credits} from '../credits';
+import {SearchBox} from '../search-box';
 
 interface Props {
   api: Api;
@@ -88,7 +89,7 @@ export default class QuickCrafter extends React.Component<Props, State> {
       <RecipeButton
         key={recipe.id}
         book={recipe.book}
-        clickCallback={() => this.setCurrentCraft(recipe.id)}
+        onClick={() => this.setCurrentCraft(recipe.id)}
         name={recipe.name}
         selected={this.state.currentCraft === recipe.id}
       />
@@ -249,9 +250,8 @@ export default class QuickCrafter extends React.Component<Props, State> {
             experience.
           </p>
           <Button
-            variant="click"
             classNameBase="crafting-panel-actions__clear-craft-button"
-            clickCallback={() => this.setCurrentCraft(undefined)}
+            onClick={() => this.setCurrentCraft(undefined)}
             text="Clear"
           />
         </div>
@@ -259,12 +259,12 @@ export default class QuickCrafter extends React.Component<Props, State> {
           <span>Click on the buttons below to show or hide crafting categories - </span>
           <Button
             classNameBase="crafting-panel-filters__books-hide"
-            clickCallback={() => this.setSelectedBooks(new Set())}
+            onClick={() => this.setSelectedBooks(new Set())}
             text="Hide all"
           />
           <Button
             classNameBase="crafting-panel-filters__books-show"
-            clickCallback={() => this.setSelectedBooks(new Set(BOOKS))}
+            onClick={() => this.setSelectedBooks(new Set(BOOKS))}
             text="Show all"
           />
           <Checkbox
@@ -289,7 +289,7 @@ export default class QuickCrafter extends React.Component<Props, State> {
             <BookButton
               key={name}
               book={name}
-              clickCallback={() => {
+              onClick={() => {
                 const selectedBooks = new Set(this.state.selectedBooks);
                 // Hide book sections
                 if (selectedBooks.has(name)) {
@@ -322,14 +322,15 @@ export default class QuickCrafter extends React.Component<Props, State> {
           //
         }
         <div
-          className={
-            'recipe-buttons recipe-buttons--book-sort' + (this.state.extraSpace ? ' recipe-buttons--extra-space' : '')
-          }
+          className={clsx(
+            'recipe-buttons recipe-buttons--book-sort',
+            this.state.extraSpace && 'recipe-buttons--extra-space',
+          )}
         >
           {this.state.filteredRecipes.map((idOrArray: number | readonly number[]) => {
             if (Array.isArray(idOrArray)) {
               return (
-                <div key={recipeInfo[idOrArray[0]].book} className={'recipe-buttons__book-section'}>
+                <div key={recipeInfo[idOrArray[0]].book} className="recipe-buttons__book-section">
                   {idOrArray.map((id) => this.recipeButtons[id])}
                 </div>
               );

@@ -1,7 +1,7 @@
+import clsx from 'clsx';
 import React from 'react';
 import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
-import {clsx} from 'clsx';
 
 export default function IngredientLine(props: {
   availableInStore: boolean;

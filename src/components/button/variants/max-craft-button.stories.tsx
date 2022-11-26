@@ -1,6 +1,7 @@
-import type {Meta, StoryObj} from '@storybook/react';
-import {within, userEvent} from '@storybook/testing-library';
+import {action} from '@storybook/addon-actions';
 import {expect, jest} from '@storybook/jest';
+import type {Meta, StoryObj} from '@storybook/react';
+import ButtonStoryMeta, {Clickable} from '../button.stories';
 import MaxCraftButton from './max-craft-button';
 
 const meta: Meta<typeof MaxCraftButton> = {
@@ -12,35 +13,29 @@ const meta: Meta<typeof MaxCraftButton> = {
     // More on how to position stories at: https://storybook.js.org/docs/7.0/react/configure/story-layout
     layout: 'centered',
   },
+  argTypes: {
+    ...ButtonStoryMeta.argTypes,
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof MaxCraftButton>;
-
-const executeCraft = jest.fn();
-const setMaxCraft = jest.fn();
-const doClick = async ({canvasElement}: {canvasElement: HTMLElement}) => {
-  const canvas = within(canvasElement);
-  const button = canvas.getByRole('button');
-  await userEvent.click(button);
-};
+const executeCraft = jest.fn(action('executed craft'));
+const setMaxCraft = jest.fn(action('set max craft value'));
 
 export const CraftMax: Story = {args: {executeCraft: executeCraft, setMaxCraft: setMaxCraft}};
-
-const confirmPlay = async ({canvasElement}: {canvasElement: HTMLElement}) => {
-  await doClick({canvasElement});
-  expect(setMaxCraft).toBeCalled();
-};
 export const Confirm: Story = {
   args: {...CraftMax.args},
-  play: confirmPlay,
+  play: async (args) => {
+    await Clickable.play(args);
+    expect(setMaxCraft).toBeCalled();
+  },
 };
-
 export const Crafting: Story = {
   args: {...Confirm.args},
-  play: async ({canvasElement}) => {
-    await confirmPlay({canvasElement});
-    await doClick({canvasElement});
+  play: async (args) => {
+    await Confirm.play(args);
+    await Clickable.play(args);
     expect(executeCraft).toBeCalled();
   },
 };

@@ -1,6 +1,6 @@
-import './ingredient-quantity.scss';
+import clsx from 'clsx';
 import React from 'react';
-import {clsx} from 'clsx';
+import './ingredient-quantity.scss';
 
 const defaultProps = {switchNeedHave: false};
 

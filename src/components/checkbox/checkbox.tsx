@@ -9,7 +9,7 @@ export default function Checkbox(
   return (
     <label className={props.className}>
       {props.prefix}
-      <input {...props} type="checkbox" />
+      <input {...props} className="" type="checkbox" />
       {props.suffix}
     </label>
   );

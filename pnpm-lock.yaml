@@ -12,6 +12,7 @@ specifiers:
   '@rollup/plugin-node-resolve': ^14.0.0
   '@rollup/plugin-replace': ^4.0.0
   '@rollup/plugin-typescript': ^8.5.0
+  '@storybook/addon-actions': ^7.0.0-alpha.52
   '@storybook/addon-essentials': ^7.0.0-alpha.52
   '@storybook/addon-interactions': ^7.0.0-alpha.52
   '@storybook/addon-links': ^7.0.0-alpha.52
@@ -68,6 +69,7 @@ devDependencies:
   '@rollup/plugin-node-resolve': 14.1.0_rollup@2.79.1
   '@rollup/plugin-replace': 4.0.0_rollup@2.79.1
   '@rollup/plugin-typescript': 8.5.0_aalyefftcnrin63wtgzqkmrdqa
+  '@storybook/addon-actions': 7.0.0-alpha.52_biqbaboplfbrettd7655fr4n2y
   '@storybook/addon-essentials': 7.0.0-alpha.52_wf3vkn74tbeiauqgwtkjdgsucu
   '@storybook/addon-interactions': 7.0.0-alpha.52_uaynfpijkwfvob6bagkw2ikc3m
   '@storybook/addon-links': 7.0.0-alpha.52_biqbaboplfbrettd7655fr4n2y

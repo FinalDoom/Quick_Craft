@@ -1,7 +1,8 @@
+import clsx from 'clsx';
 import React, {useRef, useState} from 'react';
-import {Button, MaxCraftButton} from '../button';
 import {ingredients, RecipeInfo} from '../../generated/recipe_info';
 import {take_craft} from '../../helpers/crafter';
+import {Button, MaxCraftButton} from '../button';
 import IngredientLine from '../ingredient/ingredient-line/ingredient-line';
 
 const CRAFT_TIME = 1000;
@@ -110,7 +111,7 @@ export default function CraftingSubmenu(props: {
         <div className="crafting-panel-actions">
           <select
             ref={craftNumberSelect}
-            className={'crafting-panel-actions__craft-number' + (isCrafting ? ' disabled' : '')}
+            className={clsx('crafting-panel-actions__craft-number', isCrafting && 'disabled')}
           >
             {Array(available)
               .fill(undefined)
@@ -123,7 +124,7 @@ export default function CraftingSubmenu(props: {
           <Button
             additionalClassNames={isCrafting ? 'disabled' : ''}
             classNameBase="crafting-panel-actions__craft-button"
-            clickCallback={doCraft}
+            onClick={doCraft}
             text="Craft"
           />
           <MaxCraftButton

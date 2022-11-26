@@ -1,14 +1,14 @@
-import './search-box.scss';
 import React from 'react';
+import './search-box.scss';
 
 export default function SearchBox(props: {initialSearch: string; changeSearch: (search: string) => void}) {
-  const base = 'crafting-panel-search';
+  const base = 'crafting-panel-search__searchbox';
   let input: HTMLInputElement | undefined = null;
 
   return (
-    <span className={base + '__searchbox-wrapper'}>
+    <span className={base + '-wrapper'}>
       <input
-        className={base + '__searchbox'}
+        className={base}
         defaultValue={props.initialSearch}
         onChange={(event) => props.changeSearch(event.target.value)}
         placeholder="Search..."
