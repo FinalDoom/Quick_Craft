@@ -3,7 +3,8 @@ import React, {useRef, useState} from 'react';
 import {ingredients, RecipeInfo} from '../../generated/recipe_info';
 import {take_craft} from '../../helpers/crafter';
 import {Button, MaxCraftButton} from '../button';
-import IngredientLine from '../ingredient/ingredient-line/ingredient-line';
+import {IngredientLine} from '../ingredient/';
+import './crafting-submenu.scss';
 
 const CRAFT_TIME = 1000;
 

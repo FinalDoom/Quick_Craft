@@ -1,0 +1,14 @@
+@use '../../../style/layouts';
+
+.crafting-panel-info {
+  &__ingredient-row {
+    @include layouts.flex-row;
+    gap: 0.25rem;
+    align-items: center;
+    align-self: center;
+  }
+
+  &__ingredient--purchasable {
+    color: lightGreen;
+  }
+}

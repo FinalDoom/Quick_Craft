@@ -1,6 +1,6 @@
 import {ingredients, RecipeInfo} from '../generated/recipe_info';
 
-const authKey = new URLSearchParams(document.querySelector<HTMLLinkElement>('link[rel="alternate"]').href).get(
+const authKey = new URLSearchParams(document.querySelector<HTMLLinkElement>('link[rel="alternate"]')?.href).get(
   'authkey',
 );
 const urlBase = (customRecipe) =>
