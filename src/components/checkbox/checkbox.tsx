@@ -1,16 +1,16 @@
+import React from 'react';
 import './checkbox.scss';
-import React, {useState} from 'react';
 
 export default function Checkbox(
-  props: {prefix?: string; suffix?: string; checked: boolean} & React.InputHTMLAttributes<HTMLInputElement>,
+  props: {prefix?: string; suffix?: string} & React.InputHTMLAttributes<HTMLInputElement>,
 ) {
-  const [checked, setChecked] = useState(props.checked);
+  const {prefix, suffix, className, checked, ...htmlProps} = props;
 
   return (
-    <label className={props.className}>
-      {props.prefix}
-      <input {...props} className="" type="checkbox" />
-      {props.suffix}
+    <label className={className}>
+      {prefix}
+      <input {...htmlProps} defaultChecked={checked} className="" type="checkbox" />
+      {suffix}
     </label>
   );
 }
