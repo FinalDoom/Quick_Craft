@@ -1,17 +1,10 @@
-name: Tests
+name: testBuilding
 
 on:
-  push:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-  # schedule:
-  #   - cron: '0 6 * * 0'
+  - push
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -53,6 +46,3 @@ jobs:
       - name: Test pnpm run build-release
         run: |
           pnpm run build:release
-
-      - name: Run tests
-        run: pnpm run test

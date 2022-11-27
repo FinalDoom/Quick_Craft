@@ -1,6 +1,6 @@
 import {RateLimiter} from 'limiter';
 import {ingredients} from '../generated/recipe_info';
-import Log from '../log/log';
+import log, {Logger} from '../log/log';
 
 const API_THROTTLE_WINDOW_MILLLIS = 10000;
 const MAX_QUERIES_PER_WINDOW = 5;
@@ -105,16 +105,21 @@ export default interface Api {
 export class GazelleApi implements Api {
   #key: string;
   #limiter: RateLimiter;
-  #log: Log;
+  #log: Logger;
 
-  constructor(log: Log, apiKey: string) {
+  constructor(apiKey: string) {
     this.#key = apiKey;
-    this.#log = log;
+    this.#log = log.getLogger('API');
 
     this.#limiter = new RateLimiter({
       tokensPerInterval: MAX_QUERIES_PER_WINDOW,
       interval: API_THROTTLE_WINDOW_MILLLIS,
     });
+    this.#log.debug(
+      'Built API with throttle %d queries per %d milliseconds.',
+      MAX_QUERIES_PER_WINDOW,
+      API_THROTTLE_WINDOW_MILLLIS,
+    );
   }
 
   async #sleep(millisToSleep: number) {
@@ -140,9 +145,10 @@ export class GazelleApi implements Api {
   }
 
   async call(data: Record<string, string>): Promise<Response> {
+    this.#log.debug('Call attempt', data);
     return this.#fetchAndRetryIfNecessary(() =>
       this.#acquireToken(() => {
-        this.#log.debug('API call', data);
+        this.#log.debug('Call executing fetch', data);
         return fetch('/api.php?' + new URLSearchParams(data).toString(), {
           method: 'GET',
           headers: {
@@ -155,6 +161,7 @@ export class GazelleApi implements Api {
   }
 
   async unequip(equipid: number): Promise<true> {
+    this.#log.debug('Unequipping equipment id', equipid);
     return await this.call({request: 'items', type: 'unequip', equipid: String(equipid)})
       .then((response) => response.json())
       .then((response: ApiResponse<string>) => {
@@ -168,6 +175,7 @@ export class GazelleApi implements Api {
   }
 
   async equip(equipid: number): Promise<true> {
+    this.#log.debug('Equipping equipment id', equipid);
     return await this.call({request: 'items', type: 'equip', equipid: String(equipid)})
       .then((response) => response.json())
       .then((response: ApiResponse<string>) => {
@@ -183,6 +191,7 @@ export class GazelleApi implements Api {
   // Caller needs:
   // window.noty({type: 'error', text: 'Quick Crafting loading inventory failed. Please check logs and reload.'});
   async getInventoryCounts(): Promise<Map<number, number>> {
+    this.#log.debug('Getting inventory counts');
     return await this.call({request: 'items', type: 'inventory'})
       .then((response) => response.json())
       .then((response: ApiResponse<Array<ApiInventoryInfo>>) => {
@@ -191,6 +200,7 @@ export class GazelleApi implements Api {
           this.#log.error(fail);
           throw fail;
         }
+        this.#log.debug('Got inventory', response.response);
         return new Map(
           response.response
             .filter(({equipid}) => !(equipid && Number(equipid)))
@@ -200,6 +210,7 @@ export class GazelleApi implements Api {
   }
 
   async getEquippedIds(): Promise<Array<number>> {
+    this.#log.debug('Getting equipment IDs');
     return await this.call({request: 'items', type: 'users_equipped'})
       .then((response) => response.json())
       .then((response: ApiResponse<Array<ApiEquippedInfo>>) => {
@@ -208,11 +219,13 @@ export class GazelleApi implements Api {
           this.#log.error(fail);
           throw fail;
         }
+        this.#log.debug('Got equipment IDs', response.response);
         return response.response.map(({equipid}) => Number(equipid));
       });
   }
 
   async getEquipmentInfo(): Promise<Map<number, Array<EquipmentInfo>>> {
+    this.#log.debug('Getting equipment info');
     const equippedIds = (await this.getEquippedIds()) || [];
     return await this.call({request: 'items', type: 'users_equippable'})
       .then((response) => response.json())
@@ -222,6 +235,7 @@ export class GazelleApi implements Api {
           this.#log.error(fail);
           throw fail;
         }
+        this.#log.debug('Got equipment info', response.response);
         return response.response
           .filter(({itemid}) => itemid in ingredients)
           .map(

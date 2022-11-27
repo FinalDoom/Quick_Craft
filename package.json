@@ -1,6 +1,6 @@
 {
   "name": "gazelle_quick_craft",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Craft multiple items more easily including equipment repair",
   "main": "index.ts",
   "keywords": [
@@ -24,6 +24,7 @@
     "url": "https://github.com/FinalDoom/Quick_Craft/issues"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "npx rollup --config rollup.config.js",
     "watch": "npx rollup --config rollup.config.js --watch",
     "serve": "node -r esm server.js",
@@ -72,6 +73,8 @@
     "esm": "^3.2.25",
     "html-entities": "^2.3.3",
     "limiter": "^2.1.0",
+    "loglevel": "^1.8.1",
+    "loglevel-plugin-prefix": "^0.8.4",
     "lunr": "^2.3.9",
     "mocha": "^10.1.0",
     "prettier": "^2.8.0",

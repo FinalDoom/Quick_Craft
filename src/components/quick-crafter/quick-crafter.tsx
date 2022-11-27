@@ -5,7 +5,6 @@ import {Book, BOOKS, recipeInfo} from '../../generated/recipe_info';
 import {useAsyncGMStorage} from '../../helpers/gm-hook';
 import {GM_KEYS} from '../../helpers/gm-keys';
 import {recipeSearchHelper} from '../../helpers/search';
-import Log from '../../log/log';
 import {BookButton, Button, RecipeButton} from '../button';
 import {Checkbox} from '../checkbox';
 import CraftingSubmenu from '../crafting-submenu/crafting-submenu';
@@ -35,7 +34,7 @@ function getSortedRecipes(filteredRecipes: number[]) {
   return sortedRecipes;
 }
 
-export default function QuickCrafter(props: {api: Api; log: Log}) {
+export default function QuickCrafter(props: {api: Api}) {
   const [currentCraft, setCurrentCraft] = useAsyncGMStorage<number | undefined>(GM_KEYS.currentCraft, undefined);
   const [extraSpace, setExtraSpace] = useAsyncGMStorage(GM_KEYS.extraSpace, false);
   const [filteredRecipes, setFilteredRecipes] = useState<ReadonlyArray<number> | ReadonlyArray<ReadonlyArray<number>>>(
