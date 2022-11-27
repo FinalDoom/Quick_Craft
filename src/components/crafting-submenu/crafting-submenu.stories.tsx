@@ -41,8 +41,6 @@ missingSecondInventory.delete(recipeInfo[9].ingredients[1].id);
 const missingThirdInventory = new Map(multiItemInventory);
 missingThirdInventory.delete(recipeInfo[9].ingredients[2].id);
 
-console.log(multiItemInventory, missingFirstInventory, missingSecondInventory, missingThirdInventory);
-
 export const SingleItemRecipeReadyToMake: Story = {
   args: {switchNeedHave: false, recipe: singleItemRecipe, inventory: singleItemInventory},
 };

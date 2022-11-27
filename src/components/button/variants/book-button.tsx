@@ -7,10 +7,11 @@ export default function BookButton(
   props: {book: Book} & Omit<Parameters<typeof SelectableButton>[0], 'classNameBase' | 'text'>,
 ) {
   const base = 'crafting-panel-filters__books-button';
+  const {book, ...otherProps} = props;
 
   return (
     <SelectableButton
-      {...props}
+      {...otherProps}
       additionalClassNames={base + '--book-' + props.book.toLocaleLowerCase().replace(/ /g, '-')}
       classNameBase={base}
       text={props.book}

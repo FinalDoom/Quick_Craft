@@ -1,7 +1,7 @@
-import './toggleable-button.scss';
+import clsx from 'clsx';
 import React, {useState} from 'react';
 import Button from '../button';
-import clsx from 'clsx';
+import './toggleable-button.scss';
 
 export default function ToggleableButton(
   props: {
@@ -12,19 +12,20 @@ export default function ToggleableButton(
     defaultSelected: boolean;
   } & Parameters<typeof Button>[0],
 ) {
-  const [selected, setSelected] = useState(props.defaultSelected);
+  const {additionalClassNames, selectedChanged, defaultSelected, ...otherProps} = props;
+  const [selected, setSelected] = useState(defaultSelected);
 
   function click(e: Parameters<Parameters<typeof Button>[0]['onClick']>[0]) {
     const nowSelected = !selected;
     setSelected(!nowSelected);
-    props.selectedChanged(nowSelected);
-    props.onClick(e);
+    selectedChanged(nowSelected);
+    otherProps.onClick && otherProps.onClick(e);
   }
 
   return (
     <Button
-      {...props}
-      additionalClassNames={clsx(props.additionalClassNames, props.classNameBase + (selected ? '--on' : '--off'))}
+      {...otherProps}
+      additionalClassNames={clsx(additionalClassNames, props.classNameBase + (selected ? '--on' : '--off'))}
       onClick={click}
     />
   );

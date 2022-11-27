@@ -18,13 +18,16 @@ const meta: Meta<typeof SelectableButton> = {
 export default meta;
 type Story = StoryObj<typeof SelectableButton>;
 
-export const Unselected: Story = {args: {text: 'Not Selected', selected: false}};
-export const Selected: Story = {args: {text: 'Selected', selected: true}};
-export const ClickUnselected: Story = {
-  args: Unselected.args,
+export const Unselected: Story = {
+  args: {
+    text: 'Not Selected',
+    selected: false,
+    classNameBase: 'crafting-panel-filters__books-button',
+    additionalClassNames: '',
+  },
   play: Clickable.play,
 };
-export const ClickSelected: Story = {
-  args: Selected.args,
+export const Selected: Story = {
+  args: {...Unselected.args, text: 'Selected', selected: true},
   play: Clickable.play,
 };

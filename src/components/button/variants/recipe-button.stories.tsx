@@ -1,5 +1,8 @@
+import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
 import {userEvent, within} from '@storybook/testing-library';
+import React from 'react';
+import {IsCraftingContext} from '../../../context/is-crafting';
 import {recipes} from '../../../generated/recipe_info';
 import BookButtonMeta from './book-button.stories';
 import RecipeButton from './recipe-button';
@@ -24,20 +27,31 @@ const meta: Meta<typeof RecipeButton> = {
 
 export default meta;
 type Story = StoryObj<typeof RecipeButton>;
-const testClick = (playArgs: Parameters<Story['play']>[0]) => {
-  const {args, canvasElement} = playArgs;
-  const canvas = within(canvasElement);
-  const button = canvas.getByRole('button');
-  userEvent.click(button);
-  expect(args.onClick).toHaveBeenCalled();
-};
-
 export const RecipeUnselected: Story = {
   args: {selected: false},
-  play: testClick,
+  play: (playArgs) => {
+    const {args, canvasElement} = playArgs;
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button');
+    userEvent.click(button);
+    expect(args.onClick).toHaveBeenCalled();
+  },
 };
-
 export const RecipeSelected: Story = {
   args: {...RecipeUnselected.args, selected: true},
-  play: testClick,
+  play: RecipeUnselected.play,
+};
+export const RecipeUnselectedDisabled: Story = {
+  args: {...RecipeUnselected.args},
+  decorators: [
+    (Story) => (
+      <IsCraftingContext.Provider value={{isCrafting: true, setIsCrafting: () => {}}}>
+        <Story />
+      </IsCraftingContext.Provider>
+    ),
+  ],
+};
+export const RecipeSelectedDisabled: Story = {
+  args: {...RecipeSelected.args},
+  decorators: RecipeUnselectedDisabled.decorators,
 };

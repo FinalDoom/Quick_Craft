@@ -14,17 +14,16 @@ const meta: Meta<typeof ToggleableButton> = {
     layout: 'centered',
   },
   args: {style: {backgroundColor: 'green'}},
-  argTypes: {...ButtonStoryMeta.argTypes, selectedChanged: {action: 'selected changed'}},
+  argTypes: {...ButtonStoryMeta.argTypes},
 };
 
 export default meta;
 type Story = StoryObj<typeof ToggleableButton>;
 const doClick = async (playArgs: Parameters<Story['play']>[0], clsSuffix: string) => {
   Clickable.play(playArgs);
-  const {args, canvasElement} = playArgs;
+  const {canvasElement} = playArgs;
   const canvas = within(canvasElement);
   const button = await canvas.findByRole('button');
-  expect(args.selectedChanged).toBeCalled();
   expect(Array.from(button.classList).some((cls) => cls.endsWith(clsSuffix))).toBe(true);
 };
 

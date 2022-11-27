@@ -19,7 +19,7 @@ export default function MaxCraftButton(
   const base = 'crafting-panel-actions__max-craft-button';
   const [state, setState] = useState(ConfirmState.DEFAULT);
   const isCraftingContext = useContext(IsCraftingContext);
-  const {additionalClassNames, executeCraft, setMaxCraft, onClick, ...htmlProps} = props;
+  const {additionalClassNames, executeCraft, setMaxCraft, onClick, ...otherProps} = props;
 
   useEffect(() => {
     if (!isCraftingContext.isCrafting) setState(ConfirmState.DEFAULT);
@@ -38,7 +38,7 @@ export default function MaxCraftButton(
 
   return (
     <Button
-      {...htmlProps}
+      {...otherProps}
       additionalClassNames={clsx(additionalClassNames, state === ConfirmState.CONFIRM && base + '--confirm')}
       classNameBase={base}
       text={state.toString()}
