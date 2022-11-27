@@ -1,5 +1,5 @@
-import clsx from 'clsx';
-import React, {ElementRef, forwardRef, useImperativeHandle, useRef, useState} from 'react';
+import React, {ElementRef, useRef, useState} from 'react';
+import {IsCraftingContext} from '../../context/is-crafting';
 import {ingredients, RecipeInfo} from '../../generated/recipe_info';
 import {take_craft} from '../../helpers/crafter';
 import {Button, MaxCraftButton} from '../button';
@@ -8,29 +8,12 @@ import './crafting-submenu.scss';
 
 const CRAFT_TIME = 1000;
 
-type CraftingSubmenuHandle = {
-  isCrafting: boolean;
-};
-
-const CraftingSubmenu = forwardRef<
-  CraftingSubmenuHandle,
-  {
-    inventory: Map<number, number>;
-    recipe: RecipeInfo;
-    switchNeedHave: boolean;
-  }
->((props, ref) => {
+export default (props: {inventory: Map<number, number>; recipe: RecipeInfo; switchNeedHave: boolean}) => {
   const craftNumberSelect = useRef<HTMLSelectElement>(null);
   const maxCraftButton = useRef<ElementRef<typeof MaxCraftButton>>(null);
-  const [isCrafting, setIsCrafting] = useState(false);
   const [purchasable, setPurchasable] = useState([]);
 
-  useImperativeHandle(ref, () => ({
-    isCrafting: isCrafting,
-  }));
-
   async function doCraft() {
-    setIsCrafting(true);
     try {
       let count = Number(craftNumberSelect.current.value);
 
@@ -48,7 +31,6 @@ const CraftingSubmenu = forwardRef<
         );
       }
     } finally {
-      setIsCrafting(false);
       maxCraftButton.current?.reset();
     }
   }
@@ -73,80 +55,92 @@ const CraftingSubmenu = forwardRef<
     : available;
 
   return (
-    <div className="crafting-panel" id="crafting-submenu">
-      <div className="crafting-panel__title">
-        {ingredients[props.recipe.itemId].name}
-        {props.inventory.get(props.recipe.itemId) > 0
-          ? ` (${props.inventory.get(props.recipe.itemId)} in inventory)`
-          : ''}
-      </div>
-      <div className="crafting-panel-info__ingredients-header">Ingredients:</div>
-      <div className="crafting-panel-info__ingredients-column">
-        {[...props.recipe.ingredientCounts.entries()].map(([id, count], index) => {
-          const name = props.recipe.ingredients[index].name;
-          return (
-            <IngredientLine
-              key={id}
-              availableInStore={props.recipe.ingredients[index].infStock}
-              click={() => {
-                if (purchasable.includes(name)) {
-                  setPurchasable(purchasable.filter((p) => p !== name));
-                } else if (purchasable.length < props.recipe.ingredients.length - 1) {
-                  setPurchasable([...purchasable, name]);
-                }
-              }}
-              id={id}
-              maxCraftableWithPurchase={maxWithPurchase}
-              name={name}
-              purchasable={purchasable.includes(ingredients[id].name)}
-              quantityAvailable={props.inventory.get(id) || 0}
-              quantityPerCraft={count}
-              switchNeedHave={props.switchNeedHave}
-            />
-          );
-        })}
-      </div>
-      <span className="crafting-panel-info__ingredients-max">
-        Max available craft(s): {available}
-        {available !== maxWithPurchase ? (
-          <span title="Max possible if additional ingredients are purchased">({maxWithPurchase})</span>
-        ) : (
-          ''
-        )}
-        <sup>
-          <a title="Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.">
-            ?
-          </a>
-        </sup>
-      </span>
-      {available > 0 && (
-        <div className="crafting-panel-actions">
-          <select
-            ref={craftNumberSelect}
-            className={clsx('crafting-panel-actions__craft-number', isCrafting && 'disabled')}
-          >
-            {Array(available)
-              .fill(undefined)
-              .map((_, i) => (
-                <option key={i} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-          </select>
-          <Button
-            additionalClassNames={isCrafting ? 'disabled' : ''}
-            classNameBase="crafting-panel-actions__craft-button"
-            onClick={doCraft}
-            text="Craft"
-          />
-          <MaxCraftButton
-            ref={maxCraftButton}
-            executeCraft={doCraft}
-            setMaxCraft={() => craftNumberSelect.current && (craftNumberSelect.current.value = String(available))}
-          />
-        </div>
-      )}
-    </div>
+    <IsCraftingContext.Consumer>
+      {({isCrafting, setIsCrafting}) => {
+        const wrappedDoCraft = async () => {
+          setIsCrafting(true);
+          await doCraft();
+          setIsCrafting(false);
+        };
+        return (
+          <div className="crafting-panel" id="crafting-submenu">
+            <div className="crafting-panel__title">
+              {ingredients[props.recipe.itemId].name}
+              {props.inventory.get(props.recipe.itemId) > 0
+                ? ` (${props.inventory.get(props.recipe.itemId)} in inventory)`
+                : ''}
+            </div>
+            <div className="crafting-panel-info__ingredients-header">Ingredients:</div>
+            <div className="crafting-panel-info__ingredients-column">
+              {[...props.recipe.ingredientCounts.entries()].map(([id, count], index) => {
+                const name = props.recipe.ingredients[index].name;
+                return (
+                  <IngredientLine
+                    key={id}
+                    availableInStore={props.recipe.ingredients[index].infStock}
+                    click={() => {
+                      if (purchasable.includes(name)) {
+                        setPurchasable(purchasable.filter((p) => p !== name));
+                      } else if (purchasable.length < props.recipe.ingredients.length - 1) {
+                        setPurchasable([...purchasable, name]);
+                      }
+                    }}
+                    id={id}
+                    maxCraftableWithPurchase={maxWithPurchase}
+                    name={name}
+                    purchasable={purchasable.includes(ingredients[id].name)}
+                    quantityAvailable={props.inventory.get(id) || 0}
+                    quantityPerCraft={count}
+                    switchNeedHave={props.switchNeedHave}
+                  />
+                );
+              })}
+            </div>
+            <span className="crafting-panel-info__ingredients-max">
+              Max available craft(s): {available}
+              {available !== maxWithPurchase ? (
+                <span title="Max possible if additional ingredients are purchased">({maxWithPurchase})</span>
+              ) : (
+                ''
+              )}
+              <sup>
+                <a title="Click ingredients to mark as purchasable and calculate +purchase needed and max possible crafted.">
+                  ?
+                </a>
+              </sup>
+            </span>
+            {available > 0 && (
+              <div className="crafting-panel-actions">
+                <select
+                  ref={craftNumberSelect}
+                  disabled={isCrafting}
+                  className={'crafting-panel-actions__craft-number'}
+                >
+                  {Array(available)
+                    .fill(undefined)
+                    .map((_, i) => (
+                      <option key={i} value={i + 1}>
+                        {i + 1}
+                      </option>
+                    ))}
+                </select>
+                <Button
+                  disabled={isCrafting}
+                  classNameBase="crafting-panel-actions__craft-button"
+                  onClick={wrappedDoCraft}
+                  text="Craft"
+                />
+                <MaxCraftButton
+                  ref={maxCraftButton}
+                  disabled={isCrafting}
+                  executeCraft={wrappedDoCraft}
+                  setMaxCraft={() => craftNumberSelect.current && (craftNumberSelect.current.value = String(available))}
+                />
+              </div>
+            )}
+          </div>
+        );
+      }}
+    </IsCraftingContext.Consumer>
   );
-});
-export default CraftingSubmenu;
+};

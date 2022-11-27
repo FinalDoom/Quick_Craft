@@ -17,16 +17,27 @@ const meta: Meta<typeof Button> = {
 
 export default meta;
 type Story = StoryObj<typeof Button>;
+const testClick = (playArgs: Parameters<Story['play']>[0]) => {
+  const {canvasElement} = playArgs;
+  const canvas = within(canvasElement);
+  const button = canvas.getByRole('button');
+  userEvent.click(button);
+};
 
 export const Clickable: Story = {
   args: {text: 'Click Me'},
   play: async (playArgs) => {
-    const {args, canvasElement} = playArgs;
-    const canvas = within(canvasElement);
-    const button = canvas.getByRole('button');
-    userEvent.click(button);
+    testClick(playArgs);
+    const {args} = playArgs;
     expect(args.onClick).toHaveBeenCalled();
   },
 };
 
-// TODO might need a disabled test here for proper encapsulation
+export const Disabled: Story = {
+  args: {text: "Can't Click This", disabled: true},
+  play: async (playArgs) => {
+    testClick(playArgs);
+    const {args} = playArgs;
+    expect(args.onClick).not.toHaveBeenCalled();
+  },
+};
