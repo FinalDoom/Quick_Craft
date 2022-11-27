@@ -14,24 +14,20 @@ export default (props: {inventory: Map<number, number>; recipe: RecipeInfo; swit
   const [purchasable, setPurchasable] = useState([]);
 
   async function doCraft() {
-    try {
-      let count = Number(craftNumberSelect.current.value);
+    let count = Number(craftNumberSelect.current.value);
 
-      const resultId = props.recipe.itemId;
-      for (let i = 0; i < count; i++) {
-        await new Promise<void>((resolve) =>
-          setTimeout(() => {
-            take_craft(props.recipe);
-            props.inventory.set(resultId, (props.inventory.get(resultId) || 0) + 1);
-            [...props.recipe.ingredientCounts.entries()].forEach(([id, count]) =>
-              props.inventory.set(id, props.inventory.get(id) - count),
-            );
-            resolve();
-          }, CRAFT_TIME),
-        );
-      }
-    } finally {
-      maxCraftButton.current?.reset();
+    const resultId = props.recipe.itemId;
+    for (let i = 0; i < count; i++) {
+      await new Promise<void>((resolve) =>
+        setTimeout(() => {
+          take_craft(props.recipe);
+          props.inventory.set(resultId, (props.inventory.get(resultId) || 0) + 1);
+          [...props.recipe.ingredientCounts.entries()].forEach(([id, count]) =>
+            props.inventory.set(id, props.inventory.get(id) - count),
+          );
+          resolve();
+        }, CRAFT_TIME),
+      );
     }
   }
 

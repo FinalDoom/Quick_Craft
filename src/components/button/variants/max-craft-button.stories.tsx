@@ -1,8 +1,10 @@
 import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
-import {userEvent, within} from '@storybook/testing-library';
+import {userEvent, waitFor, within} from '@storybook/testing-library';
+import React, {useEffect, useState} from 'react';
+import {IsCraftingContext} from '../../../context/is-crafting';
 import ButtonStoryMeta from '../button.stories';
-import MaxCraftButton from './max-craft-button';
+import MaxCraftButton, {ConfirmState} from './max-craft-button';
 
 const meta: Meta<typeof MaxCraftButton> = {
   title: 'Components/Button/Max Craft Button',
@@ -18,6 +20,22 @@ const meta: Meta<typeof MaxCraftButton> = {
     executeCraft: {action: 'executed craft'},
     setMaxCraft: {action: 'set max craft value'},
   },
+
+  decorators: [
+    (Story, context) => {
+      const [isCrafting, setIsCrafting] = useState(true);
+      if (context.parameters.reset) {
+        useEffect(() => {
+          setTimeout(() => setIsCrafting(false), 50);
+        }, []);
+      }
+      return (
+        <IsCraftingContext.Provider value={{isCrafting, setIsCrafting}}>
+          <Story />
+        </IsCraftingContext.Provider>
+      );
+    },
+  ],
 };
 
 export default meta;
@@ -46,5 +64,18 @@ export const Crafting: Story = {
     testClick(playArgs);
     const {args} = playArgs;
     expect(args.executeCraft).toBeCalled();
+  },
+};
+export const ResetAfterCraft: Story = {
+  args: Crafting.args,
+  parameters: {
+    reset: true,
+  },
+  play: async (playArgs) => {
+    await Crafting.play(playArgs);
+    const {canvasElement} = playArgs;
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button');
+    await waitFor(() => expect(button.innerText).toBe(ConfirmState.DEFAULT.toString()));
   },
 };
