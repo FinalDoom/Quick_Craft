@@ -1,67 +1,106 @@
-export enum LogLevel {
-  None,
-  Error,
-  Warning,
-  Log,
-  Debug,
-  Timing,
+import log, {Logger} from 'loglevel';
+import prefix from 'loglevel-plugin-prefix';
+
+type LogPlaceholders = Omit<LogColors, 'message'> & {logLevel: string};
+const TEMPLATE_PLACEHOLDERS: LogPlaceholders = {
+  prefix: '%c%p%c',
+  timestamp: '%c[%t]%c',
+  logLevel: '%c%l%c',
+  name: '%c(%n)%c',
+};
+const SCRIPT_PREFIX = '[Quick Crafter]';
+const MESSAGE_TEMPLATE = `${TEMPLATE_PLACEHOLDERS.prefix}${TEMPLATE_PLACEHOLDERS.name} ${TEMPLATE_PLACEHOLDERS.logLevel}:%c`;
+
+type LogExtensionStringFunction = (
+  methodName: log.LogLevelNames,
+  logLevel: log.LogLevelNumbers,
+  loggerName: string | symbol,
+) => string;
+interface LogColors {
+  prefix: string;
+  timestamp: string;
+  logLevel: string | LogExtensionStringFunction;
+  name: string;
+  message: string | LogExtensionStringFunction;
 }
-type ConsoleLogFunc = ((...params: any[]) => void) | ((message: any, ...params: any[]) => void);
-type ConsoleLogArguments = any | (() => any);
+const colors: LogColors = {
+  prefix: 'background-color:darkolivegreen;color:white;border-radius:2px;padding:2px',
+  timestamp: 'color:gray',
+  logLevel: (methodName, _, __) => {
+    switch (methodName) {
+      case 'trace':
+        return 'color:magenta';
+      case 'debug':
+        return 'color:cyan';
+      case 'info':
+        return '';
+      case 'warn':
+        return 'color:yellow';
+      case 'error':
+        return 'color:red';
+    }
+  },
+  name: 'background-color:darkolivegreen;color:white;border-radius:2px;padding:2px',
+  message: (_, __, loggerName) => {
+    switch (loggerName) {
+      case 'critical':
+        return 'color:red;font-weight:bold';
+      default:
+        return '';
+    }
+  },
+};
 
-export default interface Log {
-  /** Log the given arguments with tining (from script start) */
-  timing: (...args: ConsoleLogArguments[]) => void;
-  /** Log the given arguments to debug out */
-  debug: (...args: ConsoleLogArguments[]) => void;
-  /** Log the given arguments to standard (log) out */
-  log: (...args: ConsoleLogArguments[]) => void;
-  /** Log the given arguments to warning out */
-  warn: (...args: ConsoleLogArguments[]) => void;
-  /** Log the given arguments to error out */
-  error: (...args: ConsoleLogArguments[]) => void;
+log.setDefaultLevel('INFO');
+prefix.reg(log);
+prefix.apply(log, {
+  template: MESSAGE_TEMPLATE.replace(/%p/, SCRIPT_PREFIX),
+  levelFormatter(level) {
+    return level.toLocaleUpperCase();
+  },
+  nameFormatter(name) {
+    return name || 'root';
+  },
+  timestampFormatter(date) {
+    return date.toISOString();
+  },
+});
 
-  /** Change the log level (which level is output) */
-  setLevel: (level: LogLevel) => void;
-}
+const placeholderIndex = (type: keyof LogPlaceholders): [keyof LogPlaceholders, number] => {
+  return [type, MESSAGE_TEMPLATE.indexOf(TEMPLATE_PLACEHOLDERS[type])];
+};
+const placeholderOrder = new Map(
+  [
+    placeholderIndex('prefix'),
+    placeholderIndex('timestamp'),
+    placeholderIndex('logLevel'),
+    placeholderIndex('name'),
+    ['message', MESSAGE_TEMPLATE.match(/(?<!%\w)%c$/) ? 999 : -1] as [keyof LogColors, number],
+  ].sort(([_, aIndex], [__, bIndex]) => aIndex - bIndex),
+);
 
-export class ConsoleLog implements Log {
-  #level: LogLevel;
-  #prefix: string;
-  #start = new Date();
+// Supplement above formatter with browser css color args
+const originalFactory = log.methodFactory;
+log.methodFactory = function addCssColors(methodName, logLevel, loggerName) {
+  const rawMethod = originalFactory(methodName, logLevel, loggerName);
 
-  constructor(prefix: string, level = LogLevel.Log) {
-    this.#prefix = prefix;
-    this.#level = level;
+  const colorArgs = [];
+  for (let [key, value] of placeholderOrder) {
+    if (!!~value) {
+      const colorVal = colors[key];
+      const colorArg = typeof colorVal === 'string' ? colorVal : colorVal(methodName, logLevel, loggerName);
+      if (key === 'message') {
+        colorArgs.push(colorArg);
+      } else {
+        colorArgs.push(colorArg, '');
+      }
+    }
   }
 
-  #logToConsole(logMethod: ConsoleLogFunc, ...args: ConsoleLogArguments[]) {
-    const resolvedArgs = args.map((arg) => (typeof arg === 'function' ? arg() : arg));
-    logMethod(this.#prefix, ...resolvedArgs);
-  }
+  return function colorTemplate(...messages) {
+    rawMethod(messages.shift(), ...colorArgs, ...messages);
+  };
+};
 
-  timing(...args: ConsoleLogArguments[]) {
-    if (this.#level >= LogLevel.Timing)
-      this.#logToConsole(console.debug, () => `(${new Date().valueOf() - this.#start.valueOf()})`, ...args);
-  }
-
-  debug(...args: ConsoleLogArguments[]) {
-    if (this.#level >= LogLevel.Debug) this.#logToConsole(console.debug, ...args);
-  }
-
-  log(...args: ConsoleLogArguments[]) {
-    if (this.#level >= LogLevel.Log) this.#logToConsole(console.log, ...args);
-  }
-
-  warn(...args: ConsoleLogArguments[]) {
-    if (this.#level >= LogLevel.Warning) this.#logToConsole(console.warn, ...args);
-  }
-
-  error(...args: ConsoleLogArguments[]) {
-    if (this.#level >= LogLevel.Error) this.#logToConsole(console.error, ...args);
-  }
-
-  setLevel(level: LogLevel) {
-    this.#level = level;
-  }
-}
+export default log;
+export {Logger};
