@@ -1,21 +1,19 @@
-import React, {ChangeEvent} from 'react';
 import lunr, {Token} from 'lunr';
-import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../generated/recipe_info';
-import {GM_KEYS} from '../store/store';
-import RecipeButton from '../button/variants/recipe-button';
-import BookButton from '../button/variants/book-button';
+import React, {ChangeEvent} from 'react';
+import Api from '../api/api';
 import Button from '../button/button';
+import BookButton from '../button/variants/book-button';
+import RecipeButton from '../button/variants/recipe-button';
 import Checkbox from '../checkbox/checkbox';
 import CraftingSubmenu from '../crafting-submenu/crafting-submenu';
-import SearchBox from '../search-box/search-box';
-import Log from '../log/log';
-import {getGMStorageValue, setGMStorageValue} from '../helpers/gm-storage-helper';
-import Api from '../api/api';
 import Credits from '../credits/credits';
+import {Book, BOOKS, IdentifiedIngredient, ingredients, RecipeInfo, recipeInfo} from '../generated/recipe_info';
+import {getGMStorageValue, setGMStorageValue} from '../helpers/gm-storage-helper';
+import SearchBox from '../search-box/search-box';
+import {GM_KEYS} from '../store/store';
 
 interface Props {
   api: Api;
-  log: Log;
 }
 interface State {
   currentCraft?: number;
