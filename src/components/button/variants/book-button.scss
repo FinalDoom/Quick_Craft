@@ -3,15 +3,13 @@
 
 .crafting-panel-filters {
   &__books-button {
-    opacity: 0.4;
-  }
-
-  &__books-button {
     @include inputs.hide-input;
     @include inputs.button-base;
     @include books.books;
 
-    &--selected {
+    opacity: 0.4;
+
+    &--on {
       opacity: 1;
     }
   }

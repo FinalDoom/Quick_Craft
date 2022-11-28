@@ -17,8 +17,8 @@ export default function ToggleableButton(
 
   function click(e: Parameters<Parameters<typeof Button>[0]['onClick']>[0]) {
     const nowSelected = !selected;
-    setSelected(!nowSelected);
-    selectedChanged(nowSelected);
+    setSelected(nowSelected);
+    selectedChanged && selectedChanged(nowSelected);
     otherProps.onClick && otherProps.onClick(e);
   }
 

@@ -3,7 +3,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import {userEvent, within} from '@storybook/testing-library';
 import {BOOKS} from '../../../generated/recipe_info';
 import BookButton from './book-button';
-import SelectableButtonMeta from './selectable-button.stories';
+import ToggleableButtonMeta from './toggleable-button.stories';
 
 const meta: Meta<typeof BookButton> = {
   title: 'Components/Button/Book Button',
@@ -16,7 +16,7 @@ const meta: Meta<typeof BookButton> = {
   },
   args: {book: BOOKS[0]},
   argTypes: {
-    ...SelectableButtonMeta.argTypes,
+    ...ToggleableButtonMeta.argTypes,
     book: {
       options: BOOKS,
       control: {type: 'inline-radio'},
@@ -34,5 +34,5 @@ const testClick = (playArgs: Parameters<Story['play']>[0]) => {
   expect(args.onClick).toHaveBeenCalled();
 };
 
-export const BookUnselected: Story = {args: {selected: false}, play: testClick};
-export const BookSelected: Story = {args: {selected: true}, play: testClick};
+export const BookSelected: Story = {args: {defaultSelected: false}, play: testClick};
+export const BookUnselected: Story = {args: {defaultSelected: true}, play: testClick};
