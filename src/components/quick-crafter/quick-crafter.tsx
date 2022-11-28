@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Api from '../../api/api';
 import {IsCraftingContext} from '../../context/is-crafting';
 import {Book, BOOKS, recipeInfo} from '../../generated/recipe_info';
@@ -116,13 +116,13 @@ export default function QuickCrafter(props: {api: Api}) {
           />
           <Checkbox
             checked={extraSpace}
-            onChange={async (event: ChangeEvent<HTMLInputElement>) => setExtraSpace(event.target.checked)}
+            onChange={(event) => setExtraSpace(event.target.checked)}
             suffix="Blank line between books"
           />
           <Checkbox
             title="Switches between needed/have and have/needed"
             checked={switchNeedHave}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => setSwitchNeedHave(event.target.checked)}
+            onChange={(event) => setSwitchNeedHave(event.target.checked)}
             suffix="NH switch"
           />
         </div>
@@ -160,7 +160,7 @@ export default function QuickCrafter(props: {api: Api}) {
           <Checkbox
             checked={searchIngredients}
             prefix="Include ingredients"
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchIngredients(event.target.checked)}
+            onChange={(event) => setSearchIngredients(event.target.checked)}
           />
         </div>
         {
