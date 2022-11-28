@@ -1,15 +1,17 @@
 import lunr, {Token} from 'lunr';
 import {
   Book,
+  BOOKS,
+  CATEGORIES,
   Category,
   IdentifiedIngredient,
   ingredients,
   recipeInfo,
   RecipeInfo,
   RecipeType,
+  RECIPE_TYPES,
 } from '../generated/recipe_info';
 
-const invalidMetadataSearch = 'INVALID_METADATA_FOR_ZERO_RESULTS';
 const bookIndexName: keyof RecipeInfo = 'book';
 const categoryIndexName: keyof RecipeInfo = 'category';
 const ingredientsIndexName = 'ingredients';
@@ -56,16 +58,20 @@ const recipeSearchIndex = lunr(function () {
 export const recipeSearchHelper: RecipeSearchHelper = {
   query: function getRecipeQueryBuilder(): RecipeQueryBuilder {
     let search = '';
-    const metadataSearch = (indexName: string, metadata: (Book | Category | RecipeType)[]) => {
-      if (metadata.length) {
-        search += metadata.map((data) => indexName + ':' + data.split(/\s+/)[0]).join(' ');
-      } else {
-        search += indexName + ':' + invalidMetadataSearch;
-      }
+    const metadataSearch = (
+      indexName: string,
+      metadata: (Book | Category | RecipeType)[],
+      allMetadata: (Book | Category | RecipeType)[],
+    ) => {
+      if (search.length) search += ' ';
+      const metadataSet = new Set(metadata);
+      const excludedMetadata = allMetadata.filter((data) => !metadataSet.has(data));
+      search += excludedMetadata.map((data) => '-' + indexName + ':' + data.split(/\s+/)[0]).join(' ');
     };
     return {
       forText: function (text: string, includeIngredients: boolean) {
-        if (text.length)
+        if (text.length) {
+          if (search.length) search += ' ';
           search += text
             .split(/\s+/)
             .map((token) => {
@@ -77,18 +83,19 @@ export const recipeSearchHelper: RecipeSearchHelper = {
               );
             })
             .join(' ');
+        }
         return this;
       },
       inBooks: function (books: Book[]) {
-        metadataSearch(bookIndexName, books);
+        metadataSearch(bookIndexName, books, BOOKS);
         return this;
       },
       inCategories: function (categories: Category[]) {
-        metadataSearch(categoryIndexName, categories);
+        metadataSearch(categoryIndexName, categories, CATEGORIES);
         return this;
       },
       ofTypes: function (types: RecipeType[]) {
-        metadataSearch(typeIndexName, types);
+        metadataSearch(typeIndexName, types, RECIPE_TYPES);
         return this;
       },
       get: function () {

@@ -1,0 +1,37 @@
+@use '../../style/layouts';
+
+#quick-crafter {
+  display: block;
+  margin: 0 auto 1rem;
+  background-color: rgba(19, 9, 0, 0.7);
+  padding: 5px;
+  width: 100%;
+  max-width: 1100px;
+  min-width: 200px;
+}
+
+.recipe-buttons {
+  $base: &;
+  @include layouts.flex-row;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+
+  &--book-sort {
+    @include layouts.flex-column;
+  }
+
+  &--book-sort#{$base}--extra-space {
+    gap: 1rem;
+  }
+
+  &__book-section {
+    @include layouts.flex-row;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+
+    &--disabled {
+      display: none;
+    }
+  }
+}

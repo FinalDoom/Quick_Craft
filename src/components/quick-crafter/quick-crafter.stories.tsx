@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react';
+import React from 'react';
 import Api from '../../api/api';
 import {recipeInfo} from '../../generated/recipe_info';
 import {GMMock} from '../../helpers/gm-mock';
@@ -26,6 +27,13 @@ const meta: Meta<typeof QuickCrafter> = {
     layout: 'centered',
   },
   args: {api: {getInventoryCounts: async () => inventoryMap} as Api},
+  decorators: [
+    (Story) => (
+      <div id="quick-crafter" style={{color: 'white'}}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;

@@ -2,11 +2,6 @@
 @use '../../../style/inputs';
 
 .crafting-panel-filters {
-  &__books-button {
-    opacity: 0.4;
-  }
-
-  &__books-button,
   &__books-show,
   &__books-hide {
     @include inputs.hide-input;
@@ -23,10 +18,6 @@
 
   &__books-hide {
     background-color: red;
-  }
-
-  &__books-button {
-    @include books.books;
   }
 }
 

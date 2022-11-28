@@ -86,7 +86,7 @@ export default function QuickCrafter(props: {api: Api}) {
   return (
     <React.StrictMode>
       <IsCraftingContext.Provider value={{isCrafting, setIsCrafting}}>
-        {currentCraft && (
+        {currentCraft !== undefined && ( // 0 is a valid currentCraft
           <CraftingSubmenu inventory={inventory} recipe={recipeInfo[currentCraft]} switchNeedHave={switchNeedHave} />
         )}
         <div id="current_craft_box">
@@ -135,10 +135,10 @@ export default function QuickCrafter(props: {api: Api}) {
             <BookButton
               key={name}
               book={name}
-              selectedChanged={(newSelected) => {
+              selectedChanged={(nowSelected) => {
                 const currentBooks = new Set(selectedBooks);
-                // Hide book sections
-                if (newSelected) {
+                // Hide/show book sections
+                if (nowSelected) {
                   currentBooks.add(name);
                 } else {
                   currentBooks.delete(name);
