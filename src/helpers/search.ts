@@ -21,15 +21,15 @@ const normalizer = (token: Token): null | Token | Token[] =>
   token.update((str) => str.normalize('NFD').replace(/\p{Diacritic}/gu, ''));
 lunr.Pipeline.registerFunction(normalizer, 'normalizer');
 
-type RecipeQuery = {
-  forText: (text: string, includeIngredients: boolean) => RecipeQuery;
-  inBooks: (book: Book[]) => RecipeQuery;
-  inCategories: (categories: Category[]) => RecipeQuery;
-  ofTypes: (types: RecipeType[]) => RecipeQuery;
+type RecipeQueryBuilder = {
+  forText: (text: string, includeIngredients: boolean) => RecipeQueryBuilder;
+  inBooks: (book: Book[]) => RecipeQueryBuilder;
+  inCategories: (categories: Category[]) => RecipeQueryBuilder;
+  ofTypes: (types: RecipeType[]) => RecipeQueryBuilder;
   get: () => number[];
 };
-type RecipeSearch = lunr.Index & {
-  query: () => RecipeQuery;
+type RecipeSearchHelper = {
+  query: () => RecipeQueryBuilder;
 };
 
 const recipeSearchIndex = lunr(function () {
@@ -53,41 +53,47 @@ const recipeSearchIndex = lunr(function () {
   recipeInfo.forEach((recipe) => this.add(recipe));
 });
 
-const getRecipeQuery: () => RecipeQuery = () => {
-  let search = '';
-  const metadataSearch = (indexName: string, metadata: (Book | Category | RecipeType)[]) => {
-    if (metadata.length) {
-      search += metadata.map((data) => indexName + ':' + data.split(/\s+/)[0]).join(' ');
-    } else {
-      search += indexName + ':' + invalidMetadataSearch;
-    }
-    return this;
-  };
-  const forText = (text: string, includeIngredients: boolean) => {
-    if (text.length)
-      search += text
-        .split(/\s+/)
-        .map((token) => {
-          if (/:/.test(token)) return token;
-          return token.replace(
-            /^([-+]?)(.*)$/,
-            `$1${nameIndexName}:$2 $1${resultIndexName}:$2` +
-              (includeIngredients ? ` $1${ingredientsIndexName}:$2` : ''),
-          );
-        })
-        .join(' ');
-    return this;
-  };
-  const inBooks = (books: Book[]) => metadataSearch(bookIndexName, books);
-  const inCategories = (categories: Category[]) => metadataSearch(categoryIndexName, categories);
-  const ofTypes = (types: RecipeType[]) => metadataSearch(typeIndexName, types);
-  const get = () => {
-    return recipeSearchIndex.search(search).map((result) => Number(result.ref));
-  };
-  return {forText, inBooks, inCategories, ofTypes, get};
+export const recipeSearchHelper: RecipeSearchHelper = {
+  query: function getRecipeQueryBuilder(): RecipeQueryBuilder {
+    let search = '';
+    const metadataSearch = (indexName: string, metadata: (Book | Category | RecipeType)[]) => {
+      if (metadata.length) {
+        search += metadata.map((data) => indexName + ':' + data.split(/\s+/)[0]).join(' ');
+      } else {
+        search += indexName + ':' + invalidMetadataSearch;
+      }
+    };
+    return {
+      forText: function (text: string, includeIngredients: boolean) {
+        if (text.length)
+          search += text
+            .split(/\s+/)
+            .map((token) => {
+              if (/:/.test(token)) return token;
+              return token.replace(
+                /^([-+]?)(.*)$/,
+                `$1${nameIndexName}:$2 $1${resultIndexName}:$2` +
+                  (includeIngredients ? ` $1${ingredientsIndexName}:$2` : ''),
+              );
+            })
+            .join(' ');
+        return this;
+      },
+      inBooks: function (books: Book[]) {
+        metadataSearch(bookIndexName, books);
+        return this;
+      },
+      inCategories: function (categories: Category[]) {
+        metadataSearch(categoryIndexName, categories);
+        return this;
+      },
+      ofTypes: function (types: RecipeType[]) {
+        metadataSearch(typeIndexName, types);
+        return this;
+      },
+      get: function () {
+        return recipeSearchIndex.search(search).map((result) => Number(result.ref));
+      },
+    };
+  },
 };
-const recipeSearchHelper: RecipeSearch = Object.assign(recipeSearchIndex, {
-  query: () => getRecipeQuery(),
-});
-
-export {recipeSearchHelper};

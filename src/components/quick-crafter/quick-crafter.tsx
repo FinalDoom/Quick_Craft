@@ -135,17 +135,17 @@ export default function QuickCrafter(props: {api: Api}) {
             <BookButton
               key={name}
               book={name}
-              onClick={() => {
+              selectedChanged={(newSelected) => {
                 const currentBooks = new Set(selectedBooks);
                 // Hide book sections
-                if (currentBooks.has(name)) {
-                  currentBooks.delete(name);
-                } else {
+                if (newSelected) {
                   currentBooks.add(name);
+                } else {
+                  currentBooks.delete(name);
                 }
                 setSelectedBooks(currentBooks);
               }}
-              selected={selectedBooks.has(name)}
+              defaultSelected={selectedBooks.has(name)}
             />
           ))}
         </div>
