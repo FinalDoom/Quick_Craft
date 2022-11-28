@@ -68,7 +68,14 @@ export type EquipmentInfo = {
   timeUntilBreak?: number;
 };
 
-export default interface Api {
+export interface RawApi {
+  unequip: ApiResponse<string>;
+  equip: ApiResponse<string>;
+  getInventoryCounts: ApiResponse<Array<ApiInventoryInfo>>;
+  getEquippedIds: ApiResponse<Array<ApiEquippedInfo>>;
+  getEquipmentInfo: ApiResponse<Array<ApiEquippableInfo>>;
+}
+export default interface Api extends Record<keyof RawApi, Function> {
   /**
    * Execute a call against an API endpoint with throttling.
    *
