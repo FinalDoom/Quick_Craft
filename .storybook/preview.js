@@ -1,4 +1,9 @@
 import {themes} from '@storybook/theming';
+import {initialize, mswDecorator} from 'msw-storybook-addon';
+
+// Initialize MSW
+initialize();
+export const decorators = [mswDecorator];
 
 // or global addParameters
 export const parameters = {

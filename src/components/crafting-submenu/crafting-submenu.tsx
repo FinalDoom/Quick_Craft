@@ -1,4 +1,4 @@
-import React, {ElementRef, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {IsCraftingContext} from '../../context/is-crafting';
 import {ingredients, RecipeInfo} from '../../generated/recipe_info';
 import {take_craft} from '../../helpers/crafter';
@@ -10,7 +10,6 @@ const CRAFT_TIME = 1000;
 
 export default (props: {inventory: Map<number, number>; recipe: RecipeInfo; switchNeedHave: boolean}) => {
   const craftNumberSelect = useRef<HTMLSelectElement>(null);
-  const maxCraftButton = useRef<ElementRef<typeof MaxCraftButton>>(null);
   const [purchasable, setPurchasable] = useState([]);
 
   async function doCraft() {
@@ -127,7 +126,6 @@ export default (props: {inventory: Map<number, number>; recipe: RecipeInfo; swit
                   text="Craft"
                 />
                 <MaxCraftButton
-                  ref={maxCraftButton}
                   disabled={isCrafting}
                   executeCraft={wrappedDoCraft}
                   setMaxCraft={() => craftNumberSelect.current && (craftNumberSelect.current.value = String(available))}

@@ -35,8 +35,8 @@
     "prepublishOnly": "pnpm run build:release && git add -f dist/release-$npm_package_version.user.js",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register src/**/*.test.ts",
     "addRecipe": "pnpm build && node dist/scripts/add-recipe.js",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "storybook dev -p 6006 -s msw",
+    "build-storybook": "storybook build -s msw"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
@@ -77,12 +77,13 @@
     "loglevel-plugin-prefix": "^0.8.4",
     "lunr": "^2.3.9",
     "mocha": "^10.0.0",
+    "msw-storybook-addon": "^1.6.3",
     "prettier": "^2.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "rollup": "^2.79.0",
-    "rollup-plugin-scss": "^3",
+    "rollup-plugin-scss": "^4",
     "rollup-plugin-userscript-metablock": "^0.3.1",
     "sass": "^1.54.8",
     "sass-loader": "^13.2.0",
@@ -101,5 +102,8 @@
   },
   "dependencies": {
     "ts-node": "^10.9.1"
+  },
+  "msw": {
+    "workerDirectory": "msw"
   }
 }
