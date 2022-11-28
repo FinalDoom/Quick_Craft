@@ -58,16 +58,15 @@ export default function QuickCrafter(props: {api: Api}) {
   // Update recipes when filters are updated
   useEffect(() => {
     try {
-      const bookMatches = selectedBooks.size === 0 ? [] : recipeSearchHelper.byBooks([...selectedBooks]);
-
-      let filteredRecipes: number[];
-      if (search.length === 0) filteredRecipes = Array.from(bookMatches);
-      else {
-        const results = new Set(recipeSearchHelper.bySearch(search, searchIngredients));
-        filteredRecipes = bookMatches.filter((id: number) => results.has(id));
-      }
-
-      setFilteredRecipes(getSortedRecipes(filteredRecipes));
+      setFilteredRecipes(
+        getSortedRecipes(
+          recipeSearchHelper
+            .query()
+            .inBooks([...selectedBooks])
+            .forText(search, searchIngredients)
+            .get(),
+        ),
+      );
     } catch (err) {
       if (!('name' in err && err.name === 'QueryParseError')) throw err;
     }
