@@ -10,9 +10,6 @@ export function take_craft(recipe: RecipeInfo) {
   fetch(urlBase(recipe.recipe))
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-      console.log(data.EquipID);
-
       if (data === '{}' || data.EquipId !== '') {
         unsafeWindow.noty({type: 'success', text: `${craftName} was crafted successfully.`});
       } else {
