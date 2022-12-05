@@ -124,8 +124,8 @@ export const ShowUncraftableRecipe: Story = {
     const {canvasElement} = playArgs;
     const canvas = within(canvasElement);
     userEvent.click(canvasElement.querySelector('.recipes__recipe'));
-    await waitFor(async () => expect(canvasElement.querySelector('.crafting-panel')).toBeInTheDocument());
-    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+    await waitFor(async () => (expect(canvasElement.querySelector('.crafting-panel')) as any).toBeInTheDocument());
+    (expect(canvasElement.querySelector('.crafting-panel-actions')).not as any).toBeInTheDocument();
   },
 };
 export const ShowCraftableRecipe: Story = {
@@ -133,8 +133,8 @@ export const ShowCraftableRecipe: Story = {
   play: async (playArgs) => {
     const {canvasElement} = playArgs;
     userEvent.click(canvasElement.querySelectorAll('.recipes__recipe')[1]);
-    await waitFor(async () => expect(canvasElement.querySelector('.crafting-panel')).toBeInTheDocument());
-    expect(canvasElement.querySelector('.crafting-panel-actions')).toBeInTheDocument();
+    await waitFor(async () => (expect(canvasElement.querySelector('.crafting-panel')) as any).toBeInTheDocument());
+    (expect(canvasElement.querySelector('.crafting-panel-actions')) as any).toBeInTheDocument();
   },
 };
 export const ShowBlankLineBetweenBooks: Story = {
@@ -143,6 +143,6 @@ export const ShowBlankLineBetweenBooks: Story = {
     const {canvasElement} = playArgs;
     const canvas = within(canvasElement);
     userEvent.click(await canvas.findByLabelText('Blank line between books'));
-    expect(canvasElement.querySelector('.recipe-buttons')).toHaveClass('recipe-buttons--extra-space');
+    (expect(canvasElement.querySelector('.recipe-buttons')) as any).toHaveClass('recipe-buttons--extra-space');
   },
 };

@@ -40,11 +40,15 @@ const clickTwoIngredients = async (playArgs: Parameters<Story['play']>[0], first
   const max = canvasElement.querySelector('.crafting-panel-info__ingredients-max');
   const ingredients = canvasElement.querySelectorAll('.crafting-panel-info__ingredient-row');
   userEvent.click(ingredients[first]);
-  await waitFor(async () => expect(ingredients[first]).toHaveClass('crafting-panel-info__ingredient--purchasable'));
-  expect(max.querySelector('span')).not.toBeInTheDocument();
+  await waitFor(async () =>
+    (expect(ingredients[first]) as any).toHaveClass('crafting-panel-info__ingredient--purchasable'),
+  );
+  (expect(max.querySelector('span')) as any).not.toBeInTheDocument();
   userEvent.click(ingredients[second]);
-  await waitFor(async () => expect(ingredients[second]).toHaveClass('crafting-panel-info__ingredient--purchasable'));
-  expect(max.querySelector('span')).toBeInTheDocument();
+  await waitFor(async () =>
+    (expect(ingredients[second]) as any).toHaveClass('crafting-panel-info__ingredient--purchasable'),
+  );
+  (expect(max.querySelector('span')) as any).toBeInTheDocument();
 };
 
 export const SingleItemRecipeReadyToMake: Story = {
@@ -53,8 +57,8 @@ export const SingleItemRecipeReadyToMake: Story = {
     const {canvasElement} = playArgs;
     const ingredient = canvasElement.querySelector('.crafting-panel-info__ingredient-row');
     userEvent.click(ingredient);
-    expect(ingredient).not.toHaveClass('crafting-panel-info__ingredient--purchasable');
-    expect(canvasElement.querySelector('.crafting-panel-actions')).toBeInTheDocument();
+    (expect(ingredient).not as any).toHaveClass('crafting-panel-info__ingredient--purchasable');
+    (expect(canvasElement.querySelector('.crafting-panel-actions')) as any).toBeInTheDocument();
   },
 };
 export const SingleItemRecipeMissingIngredients: Story = {
@@ -63,15 +67,15 @@ export const SingleItemRecipeMissingIngredients: Story = {
     const {canvasElement} = playArgs;
     const ingredient = canvasElement.querySelector('.crafting-panel-info__ingredient-row');
     userEvent.click(ingredient);
-    expect(ingredient).not.toHaveClass('crafting-panel-info__ingredient--purchasable');
-    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+    (expect(ingredient).not as any).toHaveClass('crafting-panel-info__ingredient--purchasable');
+    (expect(canvasElement.querySelector('.crafting-panel-actions')).not as any).toBeInTheDocument();
   },
 };
 export const MultiItemRecipeReadyToMake: Story = {
   args: {recipe: multiItemRecipe, inventory: multiItemInventory},
   play: (playArgs) => {
     const {canvasElement} = playArgs;
-    expect(canvasElement.querySelector('.crafting-panel-actions')).toBeInTheDocument();
+    (expect(canvasElement.querySelector('.crafting-panel-actions')) as any).toBeInTheDocument();
   },
 };
 export const MultiItemRecipeMissingFirstIngredient: Story = {
@@ -79,7 +83,7 @@ export const MultiItemRecipeMissingFirstIngredient: Story = {
   play: async (playArgs) => {
     await clickTwoIngredients(playArgs, 1, 0);
     const {canvasElement} = playArgs;
-    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+    (expect(canvasElement.querySelector('.crafting-panel-actions')).not as any).toBeInTheDocument();
   },
 };
 export const MultiItemRecipeMissingSecondIngredient: Story = {
@@ -87,7 +91,7 @@ export const MultiItemRecipeMissingSecondIngredient: Story = {
   play: async (playArgs) => {
     await clickTwoIngredients(playArgs, 2, 1);
     const {canvasElement} = playArgs;
-    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+    (expect(canvasElement.querySelector('.crafting-panel-actions')).not as any).toBeInTheDocument();
   },
 };
 export const MultiItemRecipeMissingThirdIngredient: Story = {
@@ -95,6 +99,6 @@ export const MultiItemRecipeMissingThirdIngredient: Story = {
   play: async (playArgs) => {
     await clickTwoIngredients(playArgs, 0, 2);
     const {canvasElement} = playArgs;
-    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+    (expect(canvasElement.querySelector('.crafting-panel-actions')).not as any).toBeInTheDocument();
   },
 };
