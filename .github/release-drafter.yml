@@ -18,6 +18,7 @@ template: |
 
   $CHANGES
 footer: |
+  
   **Full Changelog**: $REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION
 include-paths:
   - dist/gazelle-quick-craft.user.js
