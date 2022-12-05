@@ -1,3 +1,4 @@
+@use '../../style/inputs';
 @use '../../style/layouts';
 
 #quick-crafter {
@@ -34,4 +35,37 @@
       display: none;
     }
   }
+}
+
+.crafting-panel-filters {
+  @include layouts.flex-column;
+  flex: 1;
+  gap: 0.5rem;
+  margin-bottom: 0.125rem;
+
+  &__books {
+    @include layouts.flex-column;
+    gap: 0.25rem;
+  }
+
+  &__books-row {
+    @include layouts.flex-row;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    align-items: center;
+  }
+}
+
+.crafting-panel-actions {
+  &__craft-row {
+    @include layouts.flex-row;
+    gap: 0.25rem;
+    align-items: center;
+  }
+}
+
+.crafting-panel-search {
+  @include layouts.flex-row;
+  gap: 0.25rem;
 }

@@ -45,7 +45,7 @@ export default function QuickCrafter(props: {api: Api}) {
   const [inventory, setInventory] = useState(new Map<number, number>());
   const [search, setSearch] = useAsyncGMStorage(GM_KEYS.search, '');
   const [searchIngredients, setSearchIngredients] = useAsyncGMStorage(GM_KEYS.searchIngredients, true);
-  const [selectedBooks, setSelectedBooks] = useAsyncGMStorage(GM_KEYS.selectedBooks, new Set(BOOKS));
+  const [selectedBooks, setSelectedBooks] = useAsyncGMStorage(GM_KEYS.selectedBooks, BOOKS);
   const [switchNeedHave, setSwitchNeedHave] = useAsyncGMStorage(GM_KEYS.switchNeedHave, false);
 
   // Fetch async state
@@ -59,13 +59,7 @@ export default function QuickCrafter(props: {api: Api}) {
   useEffect(() => {
     try {
       setFilteredRecipes(
-        getSortedRecipes(
-          recipeSearchHelper
-            .query()
-            .inBooks([...selectedBooks])
-            .forText(search, searchIngredients)
-            .get(),
-        ),
+        getSortedRecipes(recipeSearchHelper.query().inBooks(selectedBooks).forText(search, searchIngredients).get()),
       );
     } catch (err) {
       if (!('name' in err && err.name === 'QueryParseError')) throw err;
@@ -101,12 +95,12 @@ export default function QuickCrafter(props: {api: Api}) {
           <span>Click on the buttons below to show or hide crafting categories - </span>
           <Button
             classNameBase="crafting-panel-filters__books-hide"
-            onClick={() => setSelectedBooks(new Set())}
+            onClick={() => setSelectedBooks([])}
             text="Hide all"
           />
           <Button
             classNameBase="crafting-panel-filters__books-show"
-            onClick={() => setSelectedBooks(new Set(BOOKS))}
+            onClick={() => setSelectedBooks(BOOKS)}
             text="Show all"
           />
           <Checkbox
@@ -139,9 +133,9 @@ export default function QuickCrafter(props: {api: Api}) {
                 } else {
                   currentBooks.delete(name);
                 }
-                setSelectedBooks(currentBooks);
+                setSelectedBooks([...currentBooks]);
               }}
-              selected={selectedBooks.has(name)}
+              selected={selectedBooks.includes(name)}
             />
           ))}
         </div>
