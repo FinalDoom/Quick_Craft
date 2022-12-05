@@ -1,6 +1,6 @@
 {
   "name": "gazelle_quick_craft",
-  "version": "3.5.0",
+  "version": "3.4.0",
   "description": "Craft multiple items more easily including equipment repair",
   "main": "index.ts",
   "keywords": [
@@ -31,8 +31,7 @@
     "start": "node -r esm server.js",
     "build:release": "pnpm rollup --config rollup.config.js --sourcemap 0 --file dist/release-$npm_package_version.user.js",
     "build:release:win32": "pnpm rollup --config rollup.config.js --sourcemap 0 --file dist\\release-%npm_package_version%.user.js",
-    "version": "pnpm build:release && git add -f dist/release-$npm_package_version.user.js",
-    "prepublishOnly": "pnpm build:release && git add -f dist/release-$npm_package_version.user.js",
+    "version": "pnpm build:release && pnpm dlx shx cp dist/release-$npm_package_version.user.js dist/gazelle-quick-craft.user.js && git add -f dist/release-$npm_package_version.user.js -f dist/gazelle-quick-craft.user.js",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter spec -r ts-node/register src/**/*.test.ts",
     "addRecipe": "pnpm build && node dist/scripts/add-recipe.js",
     "storybook": "storybook dev -p 6006 -s msw",
