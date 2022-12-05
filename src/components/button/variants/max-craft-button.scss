@@ -1,0 +1,14 @@
+@use '../../../style/inputs';
+
+.crafting-panel-actions {
+  &__max-craft-button {
+    @include inputs.button-base;
+    //width: 100%;
+    margin-left: 2rem; // was 0;
+    background-color: orange;
+  }
+
+  &__max-craft-button--confirm {
+    background-color: red;
+  }
+}

@@ -1,0 +1,14 @@
+button {
+  border-radius: 3px;
+  border: none;
+  height: 20px;
+  padding-bottom: 1px;
+  padding-left: 5px;
+  vertical-align: middle;
+}
+
+button:disabled {
+  background-color: #333 !important;
+  color: #666 !important;
+  pointer-events: none;
+}

@@ -1,0 +1,16 @@
+@use '../../../style/books';
+@use '../../../style/inputs';
+
+.crafting-panel-filters {
+  &__books-button {
+    @include inputs.hide-input;
+    @include inputs.button-base;
+    @include books.books;
+
+    opacity: 0.4;
+
+    &--on {
+      opacity: 1;
+    }
+  }
+}

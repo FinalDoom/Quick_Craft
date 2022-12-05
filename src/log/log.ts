@@ -10,6 +10,8 @@ const TEMPLATE_PLACEHOLDERS: LogPlaceholders = {
 };
 const SCRIPT_PREFIX = '[Quick Crafter]';
 const MESSAGE_TEMPLATE = `${TEMPLATE_PLACEHOLDERS.prefix}${TEMPLATE_PLACEHOLDERS.name} ${TEMPLATE_PLACEHOLDERS.logLevel}:%c`;
+const backgroundStyled = (backgroundColor: string, color: string) =>
+  `background-color:${backgroundColor};color:${color};border-radius:2px;padding:2px`;
 
 type LogExtensionStringFunction = (
   methodName: log.LogLevelNames,
@@ -24,7 +26,7 @@ interface LogColors {
   message: string | LogExtensionStringFunction;
 }
 const colors: LogColors = {
-  prefix: 'background-color:darkolivegreen;color:white;border-radius:2px;padding:2px',
+  prefix: backgroundStyled('darkolivegreen', 'white'),
   timestamp: 'color:gray',
   logLevel: (methodName, _, __) => {
     switch (methodName) {
@@ -40,11 +42,13 @@ const colors: LogColors = {
         return 'color:red';
     }
   },
-  name: 'background-color:darkolivegreen;color:white;border-radius:2px;padding:2px',
+  name: backgroundStyled('darkolivegreen', 'white'),
   message: (_, __, loggerName) => {
     switch (loggerName) {
       case 'critical':
         return 'color:red;font-weight:bold';
+      case 'GM Mock':
+        return backgroundStyled('chocolate', 'black');
       default:
         return '';
     }

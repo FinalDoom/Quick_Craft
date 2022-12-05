@@ -1,15 +1,14 @@
 'use strict';
 
-import './style/main.scss';
-
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {GazelleApi} from './api/api';
-import {getGMStorageValue, setGMStorageValue} from './helpers/gm-storage-helper';
+import QuickCrafter from './components/quick-crafter/quick-crafter';
+import {getGMStorageValue, setGMStorageValue} from './helpers/gm-hook';
+import {GM_KEYS} from './helpers/gm-keys';
 import {buildMenu} from './helpers/menu';
+import './index.scss';
 import Logger from './log/log';
-import QuickCrafter from './quick-crafter/quick-crafter';
-import {GM_KEYS} from './store/store';
 
 declare global {
   interface Window {

@@ -1,11 +1,11 @@
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import metablock from 'rollup-plugin-userscript-metablock';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import scss from 'rollup-plugin-scss';
 import typescriptPlugin from '@rollup/plugin-typescript';
+import scss from 'rollup-plugin-scss';
+import metablock from 'rollup-plugin-userscript-metablock';
 import typescript from 'typescript';
 
 const fs = require('fs');
@@ -60,6 +60,15 @@ export default {
         author: pkg.author,
         license: pkg.license,
       },
+    }),
+    replace({
+      delimiters: ['', '\\b(?!\\.)'],
+      values: {
+        // Sadly downloadUrl is not supported by the metablock plugin, but this hack works.
+        '// @author': `// @downloadUrl ${pkg.homepage}/releases/latest/download/eligibility-checker.user.js
+// @author`,
+      },
+      preventAssignment: true,
     }),
   ],
   external: (id) => /^(lunr|react(-dom)?)$/.test(id),
