@@ -3,8 +3,8 @@ name: Release Drafter
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
 
 permissions:
   contents: read
