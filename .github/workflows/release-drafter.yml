@@ -3,8 +3,8 @@ name: Release Drafter
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*.*.*'
 
 permissions:
   contents: read
@@ -19,3 +19,5 @@ jobs:
       - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: ${{github.ref_name}}
