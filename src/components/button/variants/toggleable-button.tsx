@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, {useState} from 'react';
+import React from 'react';
 import Button from '../button';
 import './toggleable-button.scss';
 
@@ -9,16 +9,13 @@ export default function ToggleableButton(
     classNameBase: string;
     text: string;
     selectedChanged: (selected: boolean) => void;
-    defaultSelected: boolean;
+    selected: boolean;
   } & Parameters<typeof Button>[0],
 ) {
-  const {additionalClassNames, selectedChanged, defaultSelected, ...otherProps} = props;
-  const [selected, setSelected] = useState(defaultSelected);
+  const {additionalClassNames, selectedChanged, selected, ...otherProps} = props;
 
   function click(e: Parameters<Parameters<typeof Button>[0]['onClick']>[0]) {
-    const nowSelected = !selected;
-    setSelected(nowSelected);
-    selectedChanged && selectedChanged(nowSelected);
+    selectedChanged && selectedChanged(!selected);
     otherProps.onClick && otherProps.onClick(e);
   }
 

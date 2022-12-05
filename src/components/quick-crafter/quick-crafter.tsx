@@ -87,20 +87,16 @@ export default function QuickCrafter(props: {api: Api}) {
     <React.StrictMode>
       <IsCraftingContext.Provider value={{isCrafting, setIsCrafting}}>
         {currentCraft !== undefined && ( // 0 is a valid currentCraft
-          <CraftingSubmenu inventory={inventory} recipe={recipeInfo[currentCraft]} switchNeedHave={switchNeedHave} />
+          <>
+            <CraftingSubmenu inventory={inventory} recipe={recipeInfo[currentCraft]} switchNeedHave={switchNeedHave} />
+            <Button
+              disabled={isCrafting}
+              classNameBase="crafting-panel-actions__clear-craft-button"
+              onClick={() => setCurrentCraft(undefined)}
+              text="Clear"
+            />
+          </>
         )}
-        <div id="current_craft_box">
-          <p>
-            Having trouble? Try refreshing if it seems stuck. Turn off this script before manual crafting for a better
-            experience.
-          </p>
-          <Button
-            disabled={isCrafting}
-            classNameBase="crafting-panel-actions__clear-craft-button"
-            onClick={() => setCurrentCraft(undefined)}
-            text="Clear"
-          />
-        </div>
         <div className="crafting-panel-actions__craft-row">
           <span>Click on the buttons below to show or hide crafting categories - </span>
           <Button
@@ -145,7 +141,7 @@ export default function QuickCrafter(props: {api: Api}) {
                 }
                 setSelectedBooks(currentBooks);
               }}
-              defaultSelected={selectedBooks.has(name)}
+              selected={selectedBooks.has(name)}
             />
           ))}
         </div>

@@ -18,7 +18,8 @@ export default function SearchBox(searchProps: {
         onChange={(event) => props.changeSearch(event.target.value)}
         placeholder={props.placeholder}
         ref={(el) => (input = el)}
-        type="text"
+        role="search"
+        type="search"
       />
       <span
         role="button"

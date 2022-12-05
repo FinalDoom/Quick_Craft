@@ -34,5 +34,5 @@ const testClick = (playArgs: Parameters<Story['play']>[0]) => {
   expect(args.onClick).toHaveBeenCalled();
 };
 
-export const BookSelected: Story = {args: {defaultSelected: false}, play: testClick};
-export const BookUnselected: Story = {args: {defaultSelected: true}, play: testClick};
+export const BookSelected: Story = {args: {selected: true}, play: testClick};
+export const BookUnselected: Story = {args: {selected: false}, play: testClick};

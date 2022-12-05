@@ -1,4 +1,6 @@
+import {expect} from '@storybook/jest';
 import type {Meta, StoryObj} from '@storybook/react';
+import {userEvent, waitFor} from '@storybook/testing-library';
 import {recipeInfo} from '../../generated/recipe_info';
 import CraftingSubmenu from './crafting-submenu';
 
@@ -17,13 +19,6 @@ const meta: Meta<typeof CraftingSubmenu> = {
 
 export default meta;
 type Story = StoryObj<typeof CraftingSubmenu>;
-// const onChange = jest.fn();
-// const testClick = async ({canvasElement}) => {
-//   const canvas = within(canvasElement);
-//   const checkbox = canvas.getByRole('checkbox');
-//   await userEvent.click(checkbox);
-//   expect(onChange).toBeCalled();
-// };
 
 const singleItemRecipe = recipeInfo[0];
 const multiItemRecipe = recipeInfo[9];
@@ -40,18 +35,66 @@ const missingSecondInventory = new Map(multiItemInventory);
 missingSecondInventory.delete(recipeInfo[9].ingredients[1].id);
 const missingThirdInventory = new Map(multiItemInventory);
 missingThirdInventory.delete(recipeInfo[9].ingredients[2].id);
+const clickTwoIngredients = async (playArgs: Parameters<Story['play']>[0], first: number, second: number) => {
+  const {canvasElement} = playArgs;
+  const max = canvasElement.querySelector('.crafting-panel-info__ingredients-max');
+  const ingredients = canvasElement.querySelectorAll('.crafting-panel-info__ingredient-row');
+  userEvent.click(ingredients[first]);
+  await waitFor(async () => expect(ingredients[first]).toHaveClass('crafting-panel-info__ingredient--purchasable'));
+  expect(max.querySelector('span')).not.toBeInTheDocument();
+  userEvent.click(ingredients[second]);
+  await waitFor(async () => expect(ingredients[second]).toHaveClass('crafting-panel-info__ingredient--purchasable'));
+  expect(max.querySelector('span')).toBeInTheDocument();
+};
 
 export const SingleItemRecipeReadyToMake: Story = {
   args: {switchNeedHave: false, recipe: singleItemRecipe, inventory: singleItemInventory},
+  play: async (playArgs) => {
+    const {canvasElement} = playArgs;
+    const ingredient = canvasElement.querySelector('.crafting-panel-info__ingredient-row');
+    userEvent.click(ingredient);
+    expect(ingredient).not.toHaveClass('crafting-panel-info__ingredient--purchasable');
+    expect(canvasElement.querySelector('.crafting-panel-actions')).toBeInTheDocument();
+  },
 };
-export const SingleItemRecipeMissingIngredients: Story = {args: {recipe: singleItemRecipe, inventory: emptyInventory}};
-export const MultiItemRecipeReadyToMake: Story = {args: {recipe: multiItemRecipe, inventory: multiItemInventory}};
+export const SingleItemRecipeMissingIngredients: Story = {
+  args: {recipe: singleItemRecipe, inventory: emptyInventory},
+  play: async (playArgs) => {
+    const {canvasElement} = playArgs;
+    const ingredient = canvasElement.querySelector('.crafting-panel-info__ingredient-row');
+    userEvent.click(ingredient);
+    expect(ingredient).not.toHaveClass('crafting-panel-info__ingredient--purchasable');
+    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+  },
+};
+export const MultiItemRecipeReadyToMake: Story = {
+  args: {recipe: multiItemRecipe, inventory: multiItemInventory},
+  play: (playArgs) => {
+    const {canvasElement} = playArgs;
+    expect(canvasElement.querySelector('.crafting-panel-actions')).toBeInTheDocument();
+  },
+};
 export const MultiItemRecipeMissingFirstIngredient: Story = {
   args: {recipe: multiItemRecipe, inventory: missingFirstInventory},
+  play: async (playArgs) => {
+    await clickTwoIngredients(playArgs, 1, 0);
+    const {canvasElement} = playArgs;
+    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+  },
 };
 export const MultiItemRecipeMissingSecondIngredient: Story = {
   args: {recipe: multiItemRecipe, inventory: missingSecondInventory},
+  play: async (playArgs) => {
+    await clickTwoIngredients(playArgs, 2, 1);
+    const {canvasElement} = playArgs;
+    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+  },
 };
 export const MultiItemRecipeMissingThirdIngredient: Story = {
   args: {recipe: multiItemRecipe, inventory: missingThirdInventory},
+  play: async (playArgs) => {
+    await clickTwoIngredients(playArgs, 0, 2);
+    const {canvasElement} = playArgs;
+    expect(canvasElement.querySelector('.crafting-panel-actions')).not.toBeInTheDocument();
+  },
 };

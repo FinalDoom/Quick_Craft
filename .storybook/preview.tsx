@@ -1,6 +1,8 @@
+import {Decorator} from '@storybook/react';
 import {themes} from '@storybook/theming';
 import {rest} from 'msw';
 import {initialize, mswDecorator} from 'msw-storybook-addon';
+import React from 'react';
 import {GazelleApi} from '../src/api/api';
 import {GMMock} from '../src/helpers/gm-mock';
 import apiMock from './api-mock';
@@ -21,9 +23,20 @@ window.GM = {getValue: GMMock.getValue, deleteValue: GMMock.deleteValue, setValu
 window.noty = () => {};
 window.unsafeWindow = window;
 
+export const args = {
+  api: new GazelleApi('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
+};
+
 // Initialize MSW
 initialize();
-export const decorators = [mswDecorator];
+export const decorators: Decorator<typeof args>[] = [
+  mswDecorator as unknown as Decorator<typeof args>,
+  (Story) => (
+    <div id="quick-crafter" style={{color: 'white'}}>
+      <Story />
+    </div>
+  ),
+];
 
 // or global addParameters
 export const parameters = {
@@ -64,8 +77,4 @@ export const parameters = {
       crafting: [rest.get('/user.php', (_, res, ctx) => res(ctx.json({})))],
     },
   },
-};
-
-export const args = {
-  api: new GazelleApi('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
 };

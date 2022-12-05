@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React from 'react';
 import IngredientQuantity from '../ingredient-quantity/ingredient-quantity';
 import ShopLink from '../shop-link/shop-link';
+import './ingredient-line.scss';
 
 export default function IngredientLine(props: {
   availableInStore: boolean;
@@ -15,14 +16,6 @@ export default function IngredientLine(props: {
   switchNeedHave: boolean;
 }) {
   const base = 'crafting-panel-info__ingredient';
-
-  const classNames = ['crafting-panel-info__ingredient-row'];
-  if (props.switchNeedHave) {
-    classNames.push('crafting-panel-info__ingredient-quantity--swapped');
-  }
-  if (props.purchasable) {
-    classNames.push('crafting-panel-info__ingredient--purchasable');
-  }
 
   return (
     <div className={clsx(base + '-row', props.purchasable && base + '--purchasable')} onClick={props.click}>
