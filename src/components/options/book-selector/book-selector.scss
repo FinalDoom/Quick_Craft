@@ -1,0 +1,17 @@
+@use '../../../style/inputs';
+
+.quick-crafter-book-selector {
+  &__books-show,
+  &__books-hide {
+    @include inputs.hide-input;
+    @include inputs.button-base;
+  }
+
+  &__books-show {
+    background-color: green;
+  }
+
+  &__books-hide {
+    background-color: red;
+  }
+}

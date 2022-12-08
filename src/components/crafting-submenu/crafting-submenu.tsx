@@ -123,7 +123,7 @@ export default (props: {inventory: Map<number, number>; recipe: RecipeInfo; swit
                   disabled={isCrafting}
                   classNameBase="crafting-panel-actions__craft-button"
                   onClick={wrappedDoCraft}
-                  text="Craft"
+                  children="Craft"
                 />
                 <MaxCraftButton
                   disabled={isCrafting}

@@ -7,7 +7,6 @@ export default function ToggleableButton(
   props: {
     additionalClassNames?: string;
     classNameBase: string;
-    text: string;
     selectedChanged: (selected: boolean) => void;
     selected: boolean;
   } & Parameters<typeof Button>[0],

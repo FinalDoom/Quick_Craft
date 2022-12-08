@@ -1,7 +1,8 @@
 @use '../../../style/books';
 @use '../../../style/inputs';
 
-.crafting-panel-filters {
+.crafting-panel-filters,
+.quick-crafter-book-selector {
   &__books-button {
     @include inputs.hide-input;
     @include inputs.button-base;

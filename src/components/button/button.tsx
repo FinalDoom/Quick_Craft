@@ -1,19 +1,19 @@
 import clsx from 'clsx';
-import React, {HTMLAttributes, HTMLProps} from 'react';
+import React, {HTMLAttributes, HTMLProps, ReactNode} from 'react';
 import './button.scss';
 
 export default function Button(
   props: {
     additionalClassNames?: string;
     classNameBase: string;
-    text: string;
+    children: ReactNode;
   } & HTMLAttributes<HTMLButtonElement> &
     Omit<HTMLProps<HTMLButtonElement>, 'type'>,
 ) {
-  const {classNameBase, additionalClassNames, text, ...htmlProps} = props;
+  const {classNameBase, additionalClassNames, children, ...htmlProps} = props;
   return (
     <button {...htmlProps} className={clsx(classNameBase, additionalClassNames)}>
-      {text}
+      {children}
     </button>
   );
 }

@@ -1,0 +1,46 @@
+@use '../../style/layouts';
+
+.quick-crafter__options {
+  @include layouts.flex-column;
+  background-color: rgb(65, 65, 65);
+  border: 1px inset black;
+  border-radius: 10px;
+  gap: 0.5rem;
+  padding: 1rem;
+  padding-top: 0;
+  width: 450px;
+  position: fixed;
+
+  &-button {
+    text-align: center;
+    vertical-align: middle; // Fix this
+    position: absolute;
+    margin-top: 0.25rem;
+    margin-right: 0.25rem;
+    top: 0;
+    right: 0;
+  }
+
+  &-header {
+    @include layouts.flex-row;
+    padding-top: 0.5rem;
+  }
+
+  &-title {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: larger;
+    font-weight: bold;
+    padding-left: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  &--close {
+    cursor: pointer;
+    text-align: center;
+    background-color: gray;
+    border-radius: 25%;
+    height: 25px;
+    width: 25px;
+  }
+}

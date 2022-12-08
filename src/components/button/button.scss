@@ -1,3 +1,25 @@
+@use '../../style/inputs';
+
+.crafting-panel-filters {
+  &__books-show,
+  &__books-hide {
+    @include inputs.hide-input;
+    @include inputs.button-base;
+
+    &--selected {
+      opacity: 1;
+    }
+  }
+
+  &__books-show {
+    background-color: green;
+  }
+
+  &__books-hide {
+    background-color: red;
+  }
+}
+
 button {
   border-radius: 3px;
   border: none;

@@ -4,17 +4,20 @@ import './book-button.scss';
 import ToggleableButton from './toggleable-button';
 
 export default function BookButton(
-  props: {book: Book} & Omit<Parameters<typeof ToggleableButton>[0], 'classNameBase' | 'text'>,
+  props: {
+    book: Book;
+    classNameBase?: string;
+  } & Omit<Parameters<typeof ToggleableButton>[0], 'classNameBase' | 'children'>,
 ) {
-  const base = 'crafting-panel-filters__books-button';
-  const {book, ...otherProps} = props;
+  const {book, classNameBase, ...otherProps} = props;
+  const base = classNameBase || 'crafting-panel-filters__books-button';
 
   return (
     <ToggleableButton
       {...otherProps}
       additionalClassNames={base + '--book-' + props.book.toLocaleLowerCase().replace(/ /g, '-')}
       classNameBase={base}
-      text={props.book}
+      children={props.book}
     />
   );
 }

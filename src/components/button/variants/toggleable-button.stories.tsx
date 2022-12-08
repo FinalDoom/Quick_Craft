@@ -20,11 +20,11 @@ export default meta;
 type Story = StoryObj<typeof ToggleableButton>;
 
 export const Unselected: Story = {
-  args: {text: 'Default Not Selected', selected: false},
+  args: {children: 'Default Not Selected', selected: false},
   play: async (playArgs) => {
     Clickable.play(playArgs);
     const {args} = playArgs;
     expect(args.selectedChanged).toHaveBeenCalled();
   },
 };
-export const Selected: Story = {args: {text: 'Default Selected', selected: true}, play: Unselected.play};
+export const Selected: Story = {args: {children: 'Default Selected', selected: true}, play: Unselected.play};

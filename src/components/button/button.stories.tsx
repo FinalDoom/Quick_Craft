@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 export const Clickable: Story = {
-  args: {text: 'Click Me'},
+  args: {children: 'Click Me'},
   play: async (playArgs) => {
     const {args, canvasElement} = playArgs;
     const canvas = within(canvasElement);
@@ -30,5 +30,5 @@ export const Clickable: Story = {
 };
 
 export const Disabled: Story = {
-  args: {text: "Can't Click This", disabled: true},
+  args: {children: "Can't Click This", disabled: true},
 };

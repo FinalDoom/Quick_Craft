@@ -20,7 +20,7 @@ type Story = StoryObj<typeof SelectableButton>;
 
 export const Unselected: Story = {
   args: {
-    text: 'Not Selected',
+    children: 'Not Selected',
     selected: false,
     classNameBase: 'crafting-panel-filters__books-button',
     additionalClassNames: '',
@@ -28,6 +28,6 @@ export const Unselected: Story = {
   play: Clickable.play,
 };
 export const Selected: Story = {
-  args: {...Unselected.args, text: 'Selected', selected: true},
+  args: {...Unselected.args, children: 'Selected', selected: true},
   play: Clickable.play,
 };

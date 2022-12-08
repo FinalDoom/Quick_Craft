@@ -13,7 +13,7 @@ export enum ConfirmState {
 export default function MaxCraftButton(
   props: {executeCraft: () => void; setMaxCraft: () => void} & Omit<
     Parameters<typeof Button>[0],
-    'classNameBase' | 'text'
+    'classNameBase' | 'children'
   >,
 ) {
   const base = 'crafting-panel-actions__max-craft-button';
@@ -41,7 +41,7 @@ export default function MaxCraftButton(
       {...otherProps}
       additionalClassNames={clsx(additionalClassNames, state === ConfirmState.CONFIRM && base + '--confirm')}
       classNameBase={base}
-      text={state.toString()}
+      children={state.toString()}
       onClick={click}
     />
   );

@@ -51,6 +51,7 @@ specifiers:
   prettier: ^2.7.1
   react: ^18.2.0
   react-dom: ^18.2.0
+  react-draggable: ^4.4.5
   react-icons: ^4.4.0
   require-from-string: ^2.0.2
   rollup: ^2.79.0
@@ -121,6 +122,7 @@ devDependencies:
   prettier: 2.8.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
+  react-draggable: 4.4.5_biqbaboplfbrettd7655fr4n2y
   react-icons: 4.7.1_react@18.2.0
   require-from-string: 2.0.2
   rollup: 2.79.1
@@ -2271,7 +2273,7 @@ packages:
       '@storybook/components': 7.0.0-alpha.57_biqbaboplfbrettd7655fr4n2y
       '@storybook/csf-plugin': 7.0.0-alpha.57
       '@storybook/csf-tools': 7.0.0-alpha.57
-      '@storybook/mdx2-csf': 0.1.0-next.7
+      '@storybook/mdx2-csf': 0.1.0-next.8
       '@storybook/node-logger': 7.0.0-alpha.57
       '@storybook/postinstall': 7.0.0-alpha.57
       '@storybook/preview-api': 7.0.0-alpha.57
@@ -3109,8 +3111,8 @@ packages:
     resolution: {integrity: sha512-AnMCik+0HX5Q49QNGdhPrBx5vJc+msyUsAqs74bL8/SpO+fMQ2WODTKL82LgmVSD3PUe8FjCwjgiGCRB+WTN0Q==}
     dev: true
 
-  /@storybook/mdx2-csf/0.1.0-next.7:
-    resolution: {integrity: sha512-ahwV2A4aS/D79WWum8fmrFhhbC28/f4XlEKtNG1s0EkCVwCSU17bthEBRY5/Y3IBR5jfeN/oApizNQMLh7mqAA==}
+  /@storybook/mdx2-csf/0.1.0-next.8:
+    resolution: {integrity: sha512-fl8BxHzkypAaFYjBkbYfiDUy/3bzPaSXsDTCuPTBIVu8CwkVntpFrjSujZH/pgJig8/9P4VdUJw0H+beMXpktg==}
     dependencies:
       loader-utils: 2.0.4
     dev: true
@@ -9169,6 +9171,18 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: true
+
+  /react-draggable/4.4.5_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-OMHzJdyJbYTZo4uQE393fHcqqPYsEtkjfMgvCHr6rejT+Ezn4OZbNyGH50vv+SunC1RMvwOTSWkEODQLzw1M9g==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+    dependencies:
+      clsx: 1.2.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: true
 
   /react-element-to-jsx-string/15.0.0_biqbaboplfbrettd7655fr4n2y:

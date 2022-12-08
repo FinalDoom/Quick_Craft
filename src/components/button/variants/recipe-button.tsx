@@ -5,7 +5,7 @@ import './recipe-button.scss';
 import SelectableButton from './selectable-button';
 
 export default function RecipeButton(
-  props: {book: Book; name: string} & Omit<Parameters<typeof SelectableButton>[0], 'classNameBase' | 'text'>,
+  props: {book: Book; name: string} & Omit<Parameters<typeof SelectableButton>[0], 'classNameBase' | 'children'>,
 ) {
   const base = 'recipes__recipe';
 
@@ -18,7 +18,7 @@ export default function RecipeButton(
           additionalClassNames={base + '--book-' + props.book.toLocaleLowerCase().replace(/ /g, '-')}
           classNameBase={base}
           selected={props.selected}
-          text={props.name}
+          children={props.name}
         />
       )}
     </IsCraftingContext.Consumer>
