@@ -34,7 +34,7 @@ export default {
     replace({
       __buildDate__: new Date().toUTCString(),
       __buildVersion__: pkg.version,
-      __repositoryUrl__: pkg.repository.url,
+      __repositoryUrl__: pkg.homepage,
       'process.env.NODE_ENV': JSON.stringify('production'),
       ENVIRONMENT: JSON.stringify('production'),
       preventAssignment: true,

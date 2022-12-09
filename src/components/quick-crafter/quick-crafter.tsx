@@ -82,6 +82,13 @@ export default function QuickCrafter(props: {api: Api}) {
   return (
     <React.StrictMode>
       <IsCraftingContext.Provider value={{isCrafting, setIsCrafting}}>
+        <NeedHaveSwitchContext.Provider value={{switchNeedHave, setSwitchNeedHave}}>
+          <ExtraSpaceContext.Provider value={{showExtraSpace: extraSpace, setShowExtraSpace: setExtraSpace}}>
+            <SelectedBooksContext.Provider value={{selectedBooks, setSelectedBooks}}>
+              <Options />
+            </SelectedBooksContext.Provider>
+          </ExtraSpaceContext.Provider>
+        </NeedHaveSwitchContext.Provider>
         {currentCraft !== undefined && ( // 0 is a valid currentCraft
           <>
             <CraftingSubmenu inventory={inventory} recipe={recipeInfo[currentCraft]} switchNeedHave={switchNeedHave} />
@@ -101,13 +108,6 @@ export default function QuickCrafter(props: {api: Api}) {
             onChange={(event) => setSearchIngredients(event.target.checked)}
           />
         </div>
-        <NeedHaveSwitchContext.Provider value={{switchNeedHave, setSwitchNeedHave}}>
-          <ExtraSpaceContext.Provider value={{showExtraSpace: extraSpace, setShowExtraSpace: setExtraSpace}}>
-            <SelectedBooksContext.Provider value={{selectedBooks, setSelectedBooks}}>
-              <Options />
-            </SelectedBooksContext.Provider>
-          </ExtraSpaceContext.Provider>
-        </NeedHaveSwitchContext.Provider>
         {
           //
           // #region Add Recipe buttons to DOM

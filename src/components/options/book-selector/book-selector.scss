@@ -1,6 +1,28 @@
 @use '../../../style/inputs';
+@use '../../../style/layouts';
 
 .quick-crafter-book-selector {
+  &__bulk-actions,
+  &__book-buttons {
+    gap: 0.25rem;
+    button {
+      flex-grow: 1;
+    }
+  }
+  &__bulk-actions {
+    @include layouts.flex-column;
+    button {
+      min-width: 50px;
+    }
+  }
+  &__book-buttons {
+    @include layouts.flex-row;
+    flex-wrap: wrap;
+    button {
+      width: 80px;
+    }
+  }
+
   &__books-show,
   &__books-hide {
     @include inputs.hide-input;

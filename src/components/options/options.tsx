@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import Draggable from 'react-draggable';
-import {FaCog} from 'react-icons/fa';
-import {Button} from '../button';
+import {FaCog, FaWindowClose} from 'react-icons/fa';
 import BookSelector from './book-selector/book-selector';
 import './options.scss';
 import Toggles from './toggles/toggles';
@@ -15,29 +14,20 @@ export default function Options() {
 
   return (
     <>
-      <Button classNameBase={base + '-button'} onClick={toggleOptions}>
-        <FaCog />
-      </Button>
-      {opened && (
-        <Draggable defaultPosition={{x: 600, y: 0}}>
-          {
-            // bounds="#quick-crafter" -- weird cuz of centering margin junk
-            // 1100px - width (450) - padding/fudge = 650 - 50 = 600
-            // positionOffset={{x: 'right', y: 'top'}}>
-            // offset not working, but try anyway on full page -- stick top right to the button or so
-          }
-          <div className={base}>
-            <div className={base + '-header'}>
-              <div className={base + '-title'}>Options</div>
-              <span className={base + '--close'} role="button" onClick={closeOptions}>
-                x
-              </span>
+      <div className={base + '-wrapper'}>
+        {opened && (
+          <Draggable>
+            <div className={base}>
+              <FaWindowClose className={base + '--close'} role="button" onClick={closeOptions} />
+              <h2 className={base + '-title'}>Options</h2>
+              <Toggles className={base + '-section'} />
+              <BookSelector className={base + '-section'} />
             </div>
-            <Toggles />
-            <BookSelector />
-          </div>
-        </Draggable>
-      )}
+          </Draggable>
+        )}
+        <FaCog className={base + '-button'} onClick={toggleOptions} />
+      </div>
+      <span style={{clear: 'both'}} />
     </>
   );
 }

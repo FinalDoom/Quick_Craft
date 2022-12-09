@@ -1,46 +1,56 @@
 @use '../../style/layouts';
 
+$options_width: 455px;
+$options_padding: 1rem;
+$options_border-radius: 10px;
+
+@mixin options-button {
+  cursor: pointer;
+  border-radius: $options_border-radius;
+  height: 15px;
+  width: 15px;
+  padding: 10px;
+}
+
 .quick-crafter__options {
   @include layouts.flex-column;
   background-color: rgb(65, 65, 65);
-  border: 1px inset black;
-  border-radius: 10px;
+  border: 1px outset black;
+  border-radius: $options_border-radius;
+  box-shadow: 5px 5px 5px black;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: $options_padding;
   padding-top: 0;
-  width: 450px;
-  position: fixed;
+  width: $options_width;
+  left: calc(-1 * #{$options_width} - 2 * #{$options_padding});
+  position: absolute;
+  z-index: 10000; // (11 is) +1 from books #crafting_recipes #items_list h3 z-index.. but actually +1 from .itemslot
 
-  &-button {
-    text-align: center;
-    vertical-align: middle; // Fix this
+  &-wrapper {
+    float: right;
+    position: relative;
+  }
+
+  &-button,
+  &--close {
+    @include options-button;
+    background-color: rgba(255, 255, 255, 0.1);
     position: absolute;
-    margin-top: 0.25rem;
-    margin-right: 0.25rem;
     top: 0;
     right: 0;
   }
 
-  &-header {
-    @include layouts.flex-row;
-    padding-top: 0.5rem;
-  }
-
   &-title {
     width: 100%;
-    margin-bottom: 0.5rem;
-    font-size: larger;
-    font-weight: bold;
     padding-left: 0.75rem;
-    padding-top: 0.5rem;
   }
 
-  &--close {
-    cursor: pointer;
-    text-align: center;
-    background-color: gray;
-    border-radius: 25%;
-    height: 25px;
-    width: 25px;
+  &-section {
+    @include layouts.flex-row;
+    gap: 0.25rem;
+  }
+
+  h3 {
+    border-bottom: 1px solid;
   }
 }
