@@ -1,5 +1,5 @@
 import React, {createContext} from 'react';
-import {Book, BOOKS} from '../generated/recipe_info';
+import {Book, BOOKS, CATEGORIES, Category, RecipeType, RECIPE_TYPES} from '../generated/recipe_info';
 
 export const ExtraSpaceContext = createContext<{
   showExtraSpace: boolean;
