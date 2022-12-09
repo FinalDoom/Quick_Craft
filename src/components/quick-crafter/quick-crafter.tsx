@@ -2,8 +2,14 @@ import clsx from 'clsx';
 import React, {useEffect, useState} from 'react';
 import Api from '../../api/api';
 import {IsCraftingContext} from '../../context/is-crafting';
-import {ExtraSpaceContext, NeedHaveSwitchContext, SelectedBooksContext} from '../../context/options';
-import {Book, BOOKS, recipeInfo} from '../../generated/recipe_info';
+import {
+  ExtraSpaceContext,
+  NeedHaveSwitchContext,
+  SelectedBooksContext,
+  SelectedCategoriesContext,
+  SelectedTypesContext,
+} from '../../context/options';
+import {Book, BOOKS, CATEGORIES, recipeInfo, RECIPE_TYPES} from '../../generated/recipe_info';
 import {useAsyncGMStorage} from '../../helpers/gm-hook';
 import {GM_KEYS} from '../../helpers/gm-keys';
 import {recipeSearchHelper} from '../../helpers/search';
@@ -40,15 +46,17 @@ function getSortedRecipes(filteredRecipes: number[]) {
 export default function QuickCrafter(props: {api: Api}) {
   const [currentCraft, setCurrentCraft] = useAsyncGMStorage<number | undefined>(GM_KEYS.currentCraft, undefined);
   const [isCrafting, setIsCrafting] = useState(false);
-  const [extraSpace, setExtraSpace] = useAsyncGMStorage(GM_KEYS.extraSpace, false);
   const [filteredRecipes, setFilteredRecipes] = useState<ReadonlyArray<number> | ReadonlyArray<ReadonlyArray<number>>>(
     getSortedRecipes(recipeInfo.map(({id}) => id)),
   );
   const [inventory, setInventory] = useState(new Map<number, number>());
   const [search, setSearch] = useAsyncGMStorage(GM_KEYS.search, '');
   const [searchIngredients, setSearchIngredients] = useAsyncGMStorage(GM_KEYS.searchIngredients, true);
-  const [selectedBooks, setSelectedBooks] = useAsyncGMStorage(GM_KEYS.selectedBooks, BOOKS);
   const [switchNeedHave, setSwitchNeedHave] = useAsyncGMStorage(GM_KEYS.switchNeedHave, false);
+  const [extraSpace, setExtraSpace] = useAsyncGMStorage(GM_KEYS.extraSpace, false);
+  const [selectedBooks, setSelectedBooks] = useAsyncGMStorage(GM_KEYS.selectedBooks, BOOKS);
+  const [selectedCategories, setSelectedCategories] = useAsyncGMStorage(GM_KEYS.selectedCategories, CATEGORIES);
+  const [selectedTypes, setSelectedTypes] = useAsyncGMStorage(GM_KEYS.selectedTypes, RECIPE_TYPES);
 
   // Fetch async state
   useEffect(() => {
@@ -61,12 +69,20 @@ export default function QuickCrafter(props: {api: Api}) {
   useEffect(() => {
     try {
       setFilteredRecipes(
-        getSortedRecipes(recipeSearchHelper.query().inBooks(selectedBooks).forText(search, searchIngredients).get()),
+        getSortedRecipes(
+          recipeSearchHelper
+            .query()
+            .inBooks(selectedBooks)
+            .inCategories(selectedCategories)
+            .ofTypes(selectedTypes)
+            .forText(search, searchIngredients)
+            .get(),
+        ),
       );
     } catch (err) {
       if (!('name' in err && err.name === 'QueryParseError')) throw err;
     }
-  }, [search, searchIngredients, selectedBooks]);
+  }, [search, searchIngredients, selectedBooks, selectedCategories, selectedTypes]);
 
   // Build all the recipe buttons
   const recipeButtons = recipeInfo.map((recipe) => (
@@ -85,7 +101,11 @@ export default function QuickCrafter(props: {api: Api}) {
         <NeedHaveSwitchContext.Provider value={{switchNeedHave, setSwitchNeedHave}}>
           <ExtraSpaceContext.Provider value={{showExtraSpace: extraSpace, setShowExtraSpace: setExtraSpace}}>
             <SelectedBooksContext.Provider value={{selectedBooks, setSelectedBooks}}>
-              <Options />
+              <SelectedCategoriesContext.Provider value={{selectedCategories, setSelectedCategories}}>
+                <SelectedTypesContext.Provider value={{selectedTypes, setSelectedTypes}}>
+                  <Options />
+                </SelectedTypesContext.Provider>
+              </SelectedCategoriesContext.Provider>
             </SelectedBooksContext.Provider>
           </ExtraSpaceContext.Provider>
         </NeedHaveSwitchContext.Provider>

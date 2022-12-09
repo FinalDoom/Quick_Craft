@@ -1,0 +1,17 @@
+@use '../../../style/inputs';
+@use '../../../style/layouts';
+
+$button-width: 80px;
+$button-gap: 0.25rem;
+
+.quick-crafter-type-selector {
+  &__book-buttons {
+    @include layouts.flex-row;
+    gap: $button-gap;
+    flex-wrap: wrap;
+  }
+  &__books-button {
+    width: $button-width;
+    flex-grow: 1;
+  }
+}

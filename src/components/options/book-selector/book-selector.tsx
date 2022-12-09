@@ -11,7 +11,7 @@ export default function BookSelector(props: {} & HTMLAttributes<HTMLDivElement> 
     <SelectedBooksContext.Consumer>
       {({selectedBooks, setSelectedBooks}) => (
         <>
-          <h3>Book Filters</h3>
+          <h4>Books</h4>
           <div {...props}>
             <div className={base + '__bulk-actions'}>
               <Button classNameBase={base + '__books-hide'} onClick={() => setSelectedBooks([])}>

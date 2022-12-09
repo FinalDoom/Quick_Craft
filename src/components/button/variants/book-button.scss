@@ -2,7 +2,9 @@
 @use '../../../style/inputs';
 
 .crafting-panel-filters,
-.quick-crafter-book-selector {
+.quick-crafter-book-selector,
+.quick-crafter-category-selector,
+.quick-crafter-type-selector {
   &__books-button {
     @include inputs.hide-input;
     @include inputs.button-base;

@@ -1,0 +1,43 @@
+@use '../../../style/inputs';
+@use '../../../style/layouts';
+
+$button-width: 80px;
+$button-gap: 0.25rem;
+
+.quick-crafter-category-selector {
+  &__bulk-actions,
+  &__book-buttons {
+    gap: $button-gap;
+  }
+  &__bulk-actions {
+    @include layouts.flex-column;
+  }
+  &__book-buttons {
+    @include layouts.flex-row;
+    flex-wrap: wrap;
+  }
+  &__books-button {
+    width: $button-width;
+    flex-grow: 1;
+    &--wide {
+      width: calc(2 * #{$button-width} + #{$button-gap});
+      flex-grow: 2;
+    }
+  }
+
+  &__books-show,
+  &__books-hide {
+    @include inputs.hide-input;
+    @include inputs.button-base;
+    min-width: 50px;
+    flex-grow: 1;
+  }
+
+  &__books-show {
+    background-color: green;
+  }
+
+  &__books-hide {
+    background-color: red;
+  }
+}
