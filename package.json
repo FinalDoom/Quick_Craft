@@ -64,7 +64,7 @@
     "@types/chai": "^4.3.3",
     "@types/greasemonkey": "^4.0.4",
     "@types/lunr": "^2.3.4",
-    "@types/mocha": "^9.1.1",
+    "@types/mocha": "^10.0.1",
     "@types/node": "*",
     "@types/react": "^18.0.18",
     "@types/react-dom": "^18.0.6",
