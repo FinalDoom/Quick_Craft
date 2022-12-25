@@ -1,5 +1,5 @@
 {
-  "name": "gazelle_quick_craft",
+  "name": "gazelle-quick-craft",
   "version": "3.5.0",
   "description": "Craft multiple items more easily including equipment repair",
   "main": "index.ts",

@@ -59,16 +59,8 @@ export default {
         homepage: pkg.homepage,
         author: pkg.author,
         license: pkg.license,
+        downloadURL: `${pkg.homepage}/releases/latest/download/${pkg.name}.user.js`,
       },
-    }),
-    replace({
-      delimiters: ['', '\\b(?!\\.)'],
-      values: {
-        // Sadly downloadUrl is not supported by the metablock plugin, but this hack works.
-        '// @author': `// @downloadUrl ${pkg.homepage}/releases/latest/download/eligibility-checker.user.js
-// @author`,
-      },
-      preventAssignment: true,
     }),
   ],
   external: (id) => /^(lunr|react(-dom)?)$/.test(id),
