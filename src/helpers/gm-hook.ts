@@ -44,17 +44,20 @@ export const useGMStorage = async <T = any>(key: string, defaultValue?: T) => {
 
 export const useAsyncGMStorage = <T = any>(key: string, defaultValue?: T) => {
   const [value, setValue] = React.useState<T>(defaultValue);
+  const fetched = React.useRef(false);
 
   // Fetch theh value once asynchronously
   React.useEffect(() => {
     getGMStorageValue(key, defaultValue).then((ret) => {
       if (ret !== value) setValue(ret);
+      // Prevent setting the value on initial render, until default has been fetched
+      fetched.current = true;
     });
   }, []);
 
   // Update GM store on any change
   React.useEffect(() => {
-    setGMStorageValue(key, value);
+    if (fetched.current) setGMStorageValue(key, value);
   }, [key, value]);
 
   return [value, setValue] as [T, typeof setValue];
