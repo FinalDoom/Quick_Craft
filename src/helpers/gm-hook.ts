@@ -9,7 +9,7 @@ export async function getGMStorageValue<T = any>(key: string, defaultValue: T) {
   // getting stored value
   const saved = await GM.getValue(key);
   let initial: any;
-  if (saved) {
+  if (saved !== undefined) {
     if (typeof saved === 'string') {
       try {
         initial = JSON.parse(saved);
@@ -20,7 +20,7 @@ export async function getGMStorageValue<T = any>(key: string, defaultValue: T) {
       initial = saved;
     }
   }
-  return initial || defaultValue;
+  return initial === undefined ? defaultValue : initial;
 }
 
 export async function setGMStorageValue<T = any>(key: string, value: T) {
