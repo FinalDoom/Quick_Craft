@@ -9,7 +9,7 @@ export async function getGMStorageValue<T = any>(key: string, defaultValue: T) {
   // getting stored value
   const saved = await GM.getValue(key);
   let initial: any;
-  if (saved) {
+  if (saved !== undefined) {
     if (typeof saved === 'string') {
       try {
         initial = JSON.parse(saved);
@@ -20,7 +20,7 @@ export async function getGMStorageValue<T = any>(key: string, defaultValue: T) {
       initial = saved;
     }
   }
-  return initial || defaultValue;
+  return initial === undefined ? defaultValue : initial;
 }
 
 export async function setGMStorageValue<T = any>(key: string, value: T) {
@@ -44,17 +44,20 @@ export const useGMStorage = async <T = any>(key: string, defaultValue?: T) => {
 
 export const useAsyncGMStorage = <T = any>(key: string, defaultValue?: T) => {
   const [value, setValue] = React.useState<T>(defaultValue);
+  const fetched = React.useRef(false);
 
   // Fetch theh value once asynchronously
   React.useEffect(() => {
     getGMStorageValue(key, defaultValue).then((ret) => {
       if (ret !== value) setValue(ret);
+      // Prevent setting the value on initial render, until default has been fetched
+      fetched.current = true;
     });
   }, []);
 
   // Update GM store on any change
   React.useEffect(() => {
-    setGMStorageValue(key, value);
+    if (fetched.current) setGMStorageValue(key, value);
   }, [key, value]);
 
   return [value, setValue] as [T, typeof setValue];
