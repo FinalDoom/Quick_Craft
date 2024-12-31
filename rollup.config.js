@@ -52,7 +52,6 @@ export default {
     }),
     babel({babelHelpers: 'bundled'}),
     metablock({
-      file: './meta.js',
       override: {
         version: pkg.version,
         description: pkg.description,
