@@ -1,0 +1,11 @@
+@mixin downgrade {
+  border: 1px solid red;
+}
+
+@mixin repair {
+  border: 1px solid green;
+}
+
+@mixin upgrade {
+  border: 1px solid purple;
+}
