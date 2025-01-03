@@ -13,7 +13,6 @@ export default class CountingSet<T> extends Map<T, number> {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   set(): this {
     throw new TypeError('CountingSet does not support directly setting values');
   }

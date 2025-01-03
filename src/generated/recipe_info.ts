@@ -5,9 +5,9 @@ export const CATEGORIES = Array.from(new Set(Object.values(INGREDIENTS).map(({ca
 export const BOOKS = Array.from(new Set(RECIPES.map(({book}) => book)));
 export const RECIPE_TYPES = Array.from(new Set(RECIPES.map(({type}) => type)));
 
-export type Book = typeof BOOKS[number];
-export type Category = typeof CATEGORIES[number];
-export type RecipeType = typeof RECIPE_TYPES[number];
+export type Book = (typeof BOOKS)[number];
+export type Category = (typeof CATEGORIES)[number];
+export type RecipeType = (typeof RECIPE_TYPES)[number];
 export type Requirement = 1 | 2 | 3;
 
 export type Ingredient = {
