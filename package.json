@@ -61,7 +61,7 @@
     "@storybook/react-webpack5": "^7.0.0-alpha.52",
     "@storybook/testing-library": "^0.2.2",
     "@storybook/theming": "^7.0.0-alpha.52",
-    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/chai": "^4.3.3",
     "@types/greasemonkey": "^4.0.7",
     "@types/lunr": "^2.3.7",
