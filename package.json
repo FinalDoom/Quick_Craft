@@ -50,7 +50,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@storybook/addon-essentials": "^7.0.0-alpha.52",
+    "@storybook/addon-essentials": "^8.1.11",
     "@storybook/addon-interactions": "^7.0.0-alpha.52",
     "@storybook/addon-links": "^7.0.0-alpha.52",
     "@storybook/addons": "^7.6.17",
